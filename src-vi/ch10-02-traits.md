@@ -1,31 +1,32 @@
-## Traits: Defining Shared Behavior
+## Traits: Định nghĩa Hành vi Chung
 
-A *trait* defines functionality a particular type has and can share with other
-types. We can use traits to define shared behavior in an abstract way. We can
-use *trait bounds* to specify that a generic type can be any type that has
-certain behavior.
+Một *trait* định nghĩa các chức năng mà một type cụ thể có và có thể chia sẻ
+với các type khác. Chúng ta có thể sử dụng traits để định nghĩa hành vi
+chung theo cách trừu tượng. Chúng ta có thể dùng *trait bounds* để chỉ định
+rằng một generic type có thể là bất kỳ type nào mà có hành vi nhất định.
 
-> Note: Traits are similar to a feature often called *interfaces* in other
-> languages, although with some differences.
+> Lưu ý: Traits tương tự như một tính năng thường được gọi là *interfaces*
+> trong các ngôn ngữ khác, mặc dù có một số khác biệt.
 
 ### Defining a Trait
 
-A type’s behavior consists of the methods we can call on that type. Different
-types share the same behavior if we can call the same methods on all of those
-types. Trait definitions are a way to group method signatures together to
-define a set of behaviors necessary to accomplish some purpose.
+Hành vi của một type bao gồm các method mà chúng ta có thể gọi trên type đó.
+Các type khác nhau chia sẻ cùng một hành vi nếu chúng ta có thể gọi cùng
+một phương thức trên tất cả các type đó. Định nghĩa trait là một cách để
+nhóm các method signature lại với nhau nhằm xác định một tập hợp hành vi
+cần thiết để thực hiện một mục đích nào đó.
 
-For example, let’s say we have multiple structs that hold various kinds and
-amounts of text: a `NewsArticle` struct that holds a news story filed in a
-particular location and a `Tweet` that can have at most 280 characters along
-with metadata that indicates whether it was a new tweet, a retweet, or a reply
-to another tweet.
+Ví dụ, giả sử chúng ta có nhiều struct lưu trữ các loại và lượng text khác
+nhau: một struct `NewsArticle` chứa một bài báo được lưu trữ ở một địa
+điểm cụ thể, và một `Tweet` có tối đa 280 ký tự cùng với metadata chỉ
+ra đó là tweet mới, retweet, hay trả lời một tweet khác.
 
-We want to make a media aggregator library crate named `aggregator` that can
-display summaries of data that might be stored in a `NewsArticle` or `Tweet`
-instance. To do this, we need a summary from each type, and we’ll request
-that summary by calling a `summarize` method on an instance. Listing 10-12
-shows the definition of a public `Summary` trait that expresses this behavior.
+Chúng ta muốn tạo một media aggregator library crate tên là `aggregator`
+có thể hiển thị tóm tắt dữ liệu có thể được lưu trong một instance của
+`NewsArticle` hoặc `Tweet`. Để làm điều này, chúng ta cần một bản tóm
+tắt từ mỗi type, và chúng ta sẽ yêu cầu bản tóm tắt đó bằng cách gọi
+method `summarize` trên một instance. Listing 10-12 hiển thị định nghĩa
+của một public `Summary` trait biểu thị hành vi này.
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -33,34 +34,34 @@ shows the definition of a public `Summary` trait that expresses this behavior.
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/listing-10-12/src/lib.rs}}
 ```
 
-<span class="caption">Listing 10-12: A `Summary` trait that consists of the
-behavior provided by a `summarize` method</span>
+<span class="caption">Listing 10-12: Một `Summary` trait bao gồm hành vi được
+cung cấp bởi method `summarize`</span>
 
-Here, we declare a trait using the `trait` keyword and then the trait’s name,
-which is `Summary` in this case. We’ve also declared the trait as `pub` so that
-crates depending on this crate can make use of this trait too, as we’ll see in
-a few examples. Inside the curly brackets, we declare the method signatures
-that describe the behaviors of the types that implement this trait, which in
-this case is `fn summarize(&self) -> String`.
+Ở đây, chúng ta khai báo một trait bằng từ khóa `trait` và sau đó là tên
+của trait, trong trường hợp này là `Summary`. Chúng ta cũng khai báo trait
+là `pub` để các crate phụ thuộc vào crate này cũng có thể sử dụng trait,
+như chúng ta sẽ thấy trong một vài ví dụ. Bên trong cặp ngoặc nhọn, chúng
+ta khai báo các method signature mô tả hành vi của các type triển khai trait
+này, trong trường hợp này là `fn summarize(&self) -> String`.
 
-After the method signature, instead of providing an implementation within curly
-brackets, we use a semicolon. Each type implementing this trait must provide
-its own custom behavior for the body of the method. The compiler will enforce
-that any type that has the `Summary` trait will have the method `summarize`
-defined with this signature exactly.
+Sau method signature, thay vì cung cấp phần implementation bên trong cặp
+ngoặc nhọn, chúng ta dùng dấu chấm phẩy. Mỗi type triển khai trait này
+phải cung cấp hành vi riêng cho thân của method. Compiler sẽ đảm bảo rằng
+bất kỳ type nào có trait `Summary` sẽ có method `summarize` được định nghĩa
+với signature chính xác như vậy.
 
-A trait can have multiple methods in its body: the method signatures are listed
-one per line and each line ends in a semicolon.
+Một trait có thể có nhiều method trong thân của nó: các method signature
+được liệt kê từng dòng một và mỗi dòng kết thúc bằng dấu chấm phẩy.
 
-### Implementing a Trait on a Type
+### Triển khai Trait trên một Type
 
-Now that we’ve defined the desired signatures of the `Summary` trait’s methods,
-we can implement it on the types in our media aggregator. Listing 10-13 shows
-an implementation of the `Summary` trait on the `NewsArticle` struct that uses
-the headline, the author, and the location to create the return value of
-`summarize`. For the `Tweet` struct, we define `summarize` as the username
-followed by the entire text of the tweet, assuming that tweet content is
-already limited to 280 characters.
+Bây giờ chúng ta đã định nghĩa các signature mong muốn của các method trong
+trait `Summary`, chúng ta có thể triển khai nó trên các type trong media
+aggregator của mình. Listing 10-13 hiển thị một triển khai của trait
+`Summary` trên struct `NewsArticle` sử dụng headline, author và location
+để tạo giá trị trả về của `summarize`. Đối với struct `Tweet`, chúng ta
+định nghĩa `summarize` là username theo sau là toàn bộ nội dung tweet,
+giả sử nội dung tweet đã bị giới hạn tối đa 280 ký tự.
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -68,61 +69,62 @@ already limited to 280 characters.
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/listing-10-13/src/lib.rs:here}}
 ```
 
-<span class="caption">Listing 10-13: Implementing the `Summary` trait on the
-`NewsArticle` and `Tweet` types</span>
+<span class="caption">Listing 10-13: Triển khai trait `Summary` trên các type
+`NewsArticle` và `Tweet`</span>
 
-Implementing a trait on a type is similar to implementing regular methods. The
-difference is that after `impl`, we put the trait name we want to implement,
-then use the `for` keyword, and then specify the name of the type we want to
-implement the trait for. Within the `impl` block, we put the method signatures
-that the trait definition has defined. Instead of adding a semicolon after each
-signature, we use curly brackets and fill in the method body with the specific
-behavior that we want the methods of the trait to have for the particular type.
+Triển khai một trait trên một type tương tự như triển khai các method
+thường. Sự khác biệt là sau `impl`, chúng ta đặt tên trait muốn triển khai,
+sau đó dùng từ khóa `for`, và rồi chỉ định tên của type mà chúng ta muốn
+triển khai trait cho. Bên trong khối `impl`, chúng ta đặt các method
+signature mà định nghĩa trait đã định nghĩa. Thay vì thêm dấu chấm phẩy
+sau mỗi signature, chúng ta dùng cặp ngoặc nhọn và điền phần thân của
+method với hành vi cụ thể mà chúng ta muốn các method của trait có trên
+type cụ thể đó.
 
-Now that the library has implemented the `Summary` trait on `NewsArticle` and
-`Tweet`, users of the crate can call the trait methods on instances of
-`NewsArticle` and `Tweet` in the same way we call regular methods. The only
-difference is that the user must bring the trait into scope as well as the
-types. Here’s an example of how a binary crate could use our `aggregator`
-library crate:
+Bây giờ khi thư viện đã triển khai trait `Summary` trên `NewsArticle` và
+`Tweet`, người dùng của crate có thể gọi các method của trait trên các
+instance của `NewsArticle` và `Tweet` theo cùng cách chúng ta gọi các
+method thường. Sự khác biệt duy nhất là người dùng phải đưa trait vào
+scope cũng như các type. Dưới đây là ví dụ về cách một binary crate có
+thể sử dụng thư viện `aggregator` của chúng ta:
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-01-calling-trait-method/src/main.rs}}
 ```
 
-This code prints `1 new tweet: horse_ebooks: of course, as you probably already
+Đoạn code này in ra `1 new tweet: horse_ebooks: of course, as you probably already
 know, people`.
 
-Other crates that depend on the `aggregator` crate can also bring the `Summary`
-trait into scope to implement `Summary` on their own types. One restriction to
-note is that we can implement a trait on a type only if at least one of the
-trait or the type is local to our crate. For example, we can implement standard
-library traits like `Display` on a custom type like `Tweet` as part of our
-`aggregator` crate functionality, because the type `Tweet` is local to our
-`aggregator` crate. We can also implement `Summary` on `Vec<T>` in our
-`aggregator` crate, because the trait `Summary` is local to our `aggregator`
-crate.
+Các crate khác phụ thuộc vào crate `aggregator` cũng có thể đưa trait `Summary`
+vào scope để triển khai `Summary` trên các type của riêng họ. Một hạn chế cần
+lưu ý là chúng ta chỉ có thể triển khai một trait trên một type nếu ít nhất
+một trong trait hoặc type là local với crate của chúng ta. Ví dụ, chúng ta
+có thể triển khai các trait trong standard library như `Display` trên một
+type tùy chỉnh như `Tweet` như một phần của chức năng crate `aggregator` của
+chúng ta, vì type `Tweet` là local với crate `aggregator` của chúng ta. Chúng
+ta cũng có thể triển khai `Summary` trên `Vec<T>` trong crate `aggregator` của
+chúng ta, vì trait `Summary` là local với crate `aggregator`.
 
-But we can’t implement external traits on external types. For example, we can’t
-implement the `Display` trait on `Vec<T>` within our `aggregator` crate,
-because `Display` and `Vec<T>` are both defined in the standard library and
-aren’t local to our `aggregator` crate. This restriction is part of a property
-called *coherence*, and more specifically the *orphan rule*, so named because
-the parent type is not present. This rule ensures that other people’s code
-can’t break your code and vice versa. Without the rule, two crates could
-implement the same trait for the same type, and Rust wouldn’t know which
-implementation to use.
+Nhưng chúng ta không thể triển khai các trait bên ngoài trên các type bên ngoài.
+Ví dụ, chúng ta không thể triển khai trait `Display` trên `Vec<T>` trong crate
+`aggregator` của chúng ta, vì `Display` và `Vec<T>` đều được định nghĩa trong
+standard library và không phải là local với crate `aggregator`. Hạn chế này
+là một phần của một đặc tính gọi là *coherence*, và cụ thể hơn là *orphan rule*,
+được gọi như vậy vì type cha không có mặt. Quy tắc này đảm bảo rằng code của
+người khác không thể phá vỡ code của bạn và ngược lại. Nếu không có quy tắc này,
+hai crate có thể triển khai cùng một trait cho cùng một type, và Rust sẽ không
+biết triển khai nào để sử dụng.
 
 ### Default Implementations
 
-Sometimes it’s useful to have default behavior for some or all of the methods
-in a trait instead of requiring implementations for all methods on every type.
-Then, as we implement the trait on a particular type, we can keep or override
-each method’s default behavior.
+Đôi khi sẽ hữu ích khi có hành vi mặc định cho một số hoặc tất cả các method
+trong một trait thay vì yêu cầu phải triển khai tất cả các method trên mọi type.
+Khi đó, khi triển khai trait trên một type cụ thể, chúng ta có thể giữ nguyên
+hoặc ghi đè hành vi mặc định của từng method.
 
-In Listing 10-14 we specify a default string for the `summarize` method of the
-`Summary` trait instead of only defining the method signature, as we did in
-Listing 10-12.
+Trong Listing 10-14, chúng ta xác định một chuỗi mặc định cho method `summarize`
+của trait `Summary` thay vì chỉ định nghĩa chữ ký của method, như chúng ta đã
+làm trong Listing 10-12.
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -130,90 +132,82 @@ Listing 10-12.
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/listing-10-14/src/lib.rs:here}}
 ```
 
-<span class="caption">Listing 10-14: Defining a `Summary` trait with a default
-implementation of the `summarize` method</span>
+<span class="caption">Listing 10-14: Định nghĩa trait `Summary` với
+cài đặt mặc định cho method `summarize`</span>
 
-To use a default implementation to summarize instances of `NewsArticle`, we
-specify an empty `impl` block with `impl Summary for NewsArticle {}`.
+Để sử dụng cài đặt mặc định để tóm tắt các instance của `NewsArticle`, chúng ta
+xác định một `impl` block rỗng với `impl Summary for NewsArticle {}`.
 
-Even though we’re no longer defining the `summarize` method on `NewsArticle`
-directly, we’ve provided a default implementation and specified that
-`NewsArticle` implements the `Summary` trait. As a result, we can still call
-the `summarize` method on an instance of `NewsArticle`, like this:
+Mặc dù bây giờ chúng ta không còn định nghĩa method `summarize` trực tiếp trên
+`NewsArticle`, chúng ta đã cung cấp một cài đặt mặc định và chỉ định rằng
+`NewsArticle` triển khai trait `Summary`. Kết quả là, chúng ta vẫn có thể gọi
+method `summarize` trên một instance của `NewsArticle`, như sau:
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-02-calling-default-impl/src/main.rs:here}}
 ```
 
-This code prints `New article available! (Read more...)`.
+Mã này sẽ in ra `New article available! (Read more...)`.
 
-Creating a default implementation doesn’t require us to change anything about
-the implementation of `Summary` on `Tweet` in Listing 10-13. The reason is that
-the syntax for overriding a default implementation is the same as the syntax
-for implementing a trait method that doesn’t have a default implementation.
+Việc tạo một cài đặt mặc định không yêu cầu chúng ta thay đổi gì về
+cách triển khai trait `Summary` trên `Tweet` trong Listing 10-13. Lý do là cú pháp
+để ghi đè một cài đặt mặc định giống hệt cú pháp để triển khai một method của
+trait mà không có cài đặt mặc định.
 
-Default implementations can call other methods in the same trait, even if those
-other methods don’t have a default implementation. In this way, a trait can
-provide a lot of useful functionality and only require implementors to specify
-a small part of it. For example, we could define the `Summary` trait to have a
-`summarize_author` method whose implementation is required, and then define a
-`summarize` method that has a default implementation that calls the
-`summarize_author` method:
+Các cài đặt mặc định có thể gọi các method khác trong cùng một trait, ngay cả
+khi các method đó không có cài đặt mặc định. Theo cách này, một trait có thể
+cung cấp nhiều chức năng hữu ích và chỉ yêu cầu người triển khai định nghĩa
+một phần nhỏ trong số đó. Ví dụ, chúng ta có thể định nghĩa trait `Summary`
+có một method `summarize_author` mà bắt buộc phải triển khai, rồi sau đó
+định nghĩa method `summarize` có cài đặt mặc định gọi đến `summarize_author`:
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-03-default-impl-calls-other-methods/src/lib.rs:here}}
 ```
 
-To use this version of `Summary`, we only need to define `summarize_author`
-when we implement the trait on a type:
+Để sử dụng phiên bản `Summary` này, chúng ta chỉ cần định nghĩa `summarize_author`
+khi triển khai trait trên một kiểu:
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-03-default-impl-calls-other-methods/src/lib.rs:impl}}
 ```
 
-After we define `summarize_author`, we can call `summarize` on instances of the
-`Tweet` struct, and the default implementation of `summarize` will call the
-definition of `summarize_author` that we’ve provided. Because we’ve implemented
-`summarize_author`, the `Summary` trait has given us the behavior of the
-`summarize` method without requiring us to write any more code.
+Sau khi chúng ta định nghĩa `summarize_author`, 
+chúng ta có thể gọi `summarize` trên các instance của struct `Tweet`, 
+và implementation mặc định của `summarize` sẽ gọi định nghĩa của `summarize_author` mà chúng ta đã cung cấp. 
+Bởi vì chúng ta đã triển khai `summarize_author`, trait `Summary` 
+đã cung cấp cho chúng ta hành vi của phương thức `summarize` mà không yêu cầu phải viết thêm bất kỳ code nào.
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-03-default-impl-calls-other-methods/src/main.rs:here}}
 ```
 
-This code prints `1 new tweet: (Read more from @horse_ebooks...)`.
+Mã này in ra `1 new tweet: (Read more from @horse_ebooks...)`.
 
-Note that it isn’t possible to call the default implementation from an
-overriding implementation of that same method.
+Lưu ý rằng không thể gọi triển khai mặc định từ một triển khai ghi đè của cùng phương thức đó.
 
-### Traits as Parameters
+### Traits như Tham Số
 
-Now that you know how to define and implement traits, we can explore how to use
-traits to define functions that accept many different types. We'll use the
-`Summary` trait we implemented on the `NewsArticle` and `Tweet` types in
-Listing 10-13 to define a `notify` function that calls the `summarize` method
-on its `item` parameter, which is of some type that implements the `Summary`
-trait. To do this, we use the `impl Trait` syntax, like this:
+Bây giờ bạn đã biết cách định nghĩa và triển khai traits, chúng ta có thể khám phá cách sử dụng traits để định nghĩa các hàm nhận nhiều loại khác nhau. Chúng ta sẽ sử dụng trait `Summary` mà chúng ta đã triển khai trên các kiểu `NewsArticle` và `Tweet` trong Listing 10-13 để định nghĩa một hàm `notify` gọi phương thức `summarize` trên tham số `item` của nó, mà là một kiểu nào đó triển khai trait `Summary`. Để làm điều này, chúng ta sử dụng cú pháp `impl Trait`, như sau:
+
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-04-traits-as-parameters/src/lib.rs:here}}
 ```
 
-Instead of a concrete type for the `item` parameter, we specify the `impl`
-keyword and the trait name. This parameter accepts any type that implements the
-specified trait. In the body of `notify`, we can call any methods on `item`
-that come from the `Summary` trait, such as `summarize`. We can call `notify`
-and pass in any instance of `NewsArticle` or `Tweet`. Code that calls the
-function with any other type, such as a `String` or an `i32`, won’t compile
-because those types don’t implement `Summary`.
+Thay vì một kiểu cụ thể cho tham số `item`, chúng ta chỉ định từ khóa `impl` và tên trait.
+ Tham số này chấp nhận bất kỳ kiểu nào triển khai trait được chỉ định. 
+ Trong thân hàm `notify`, chúng ta có thể gọi bất kỳ phương thức nào trên `item` mà đến từ trait `Summary`, 
+ chẳng hạn như `summarize`. Chúng ta có thể gọi `notify` và truyền vào bất kỳ thể hiện nào của `NewsArticle` hoặc `Tweet`. 
+ Mã gọi hàm với bất kỳ kiểu nào khác, chẳng hạn như `String` hoặc `i32`, 
+ sẽ không biên dịch vì các kiểu đó không triển khai `Summary`.
 
 <!-- Old headings. Do not remove or links may break. -->
 <a id="fixing-the-largest-function-with-trait-bounds"></a>
 
-#### Trait Bound Syntax
+#### Cú pháp Trait Bound
 
-The `impl Trait` syntax works for straightforward cases but is actually syntax
-sugar for a longer form known as a *trait bound*; it looks like this:
+Cú pháp `impl Trait` hoạt động cho các trường hợp đơn giản nhưng thực ra là cú pháp ngắn gọn cho một dạng dài hơn được gọi là *trait bound*; nó trông như sau:
 
 ```rust,ignore
 pub fn notify<T: Summary>(item: &T) {
@@ -221,60 +215,48 @@ pub fn notify<T: Summary>(item: &T) {
 }
 ```
 
-This longer form is equivalent to the example in the previous section but is
-more verbose. We place trait bounds with the declaration of the generic type
-parameter after a colon and inside angle brackets.
+Phiên bản dài hơn này tương đương với ví dụ trong phần trước nhưng chi tiết hơn. 
+Chúng ta đặt ràng buộc trait cùng với khai báo của tham số kiểu generic ngay sau dấu hai chấm và bên trong dấu ngoặc nhọn (`<>`).
 
-The `impl Trait` syntax is convenient and makes for more concise code in simple
-cases, while the fuller trait bound syntax can express more complexity in other
-cases. For example, we can have two parameters that implement `Summary`. Doing
-so with the `impl Trait` syntax looks like this:
+
+Cú pháp `impl Trait` tiện lợi và giúp viết code ngắn gọn hơn trong những trường hợp đơn giản, 
+trong khi cú pháp ràng buộc trait đầy đủ có thể diễn đạt sự phức tạp hơn trong các trường hợp khác. 
+Ví dụ, chúng ta có thể có hai tham số thực thi `Summary`. Việc làm này với cú pháp `impl Trait` sẽ trông như sau:
+
 
 ```rust,ignore
 pub fn notify(item1: &impl Summary, item2: &impl Summary) {
 ```
 
-Using `impl Trait` is appropriate if we want this function to allow `item1` and
-`item2` to have different types (as long as both types implement `Summary`). If
-we want to force both parameters to have the same type, however, we must use a
-trait bound, like this:
+Việc sử dụng `impl Trait` là phù hợp nếu chúng ta muốn hàm này cho phép `item1` và
+`item2` có các kiểu khác nhau (miễn là cả hai kiểu đều thực thi `Summary`). Tuy nhiên, nếu
+chúng ta muốn buộc cả hai tham số phải cùng kiểu, thì phải sử dụng trait bound, như sau:
 
 ```rust,ignore
 pub fn notify<T: Summary>(item1: &T, item2: &T) {
 ```
 
-The generic type `T` specified as the type of the `item1` and `item2`
-parameters constrains the function such that the concrete type of the value
-passed as an argument for `item1` and `item2` must be the same.
+Kiểu generic `T` được chỉ định làm kiểu của các tham số `item1` và `item2` giới hạn hàm sao cho kiểu cụ thể của giá trị được truyền vào `item1` và `item2` phải giống nhau.
 
-#### Specifying Multiple Trait Bounds with the `+` Syntax
+#### Chỉ định nhiều ràng buộc trait với cú pháp `+`
 
-We can also specify more than one trait bound. Say we wanted `notify` to use
-display formatting as well as `summarize` on `item`: we specify in the `notify`
-definition that `item` must implement both `Display` and `Summary`. We can do
-so using the `+` syntax:
+Chúng ta cũng có thể chỉ định nhiều hơn một ràng buộc trait. Giả sử chúng ta muốn `notify` sử dụng cả định dạng hiển thị lẫn tóm tắt trên `item`: chúng ta chỉ định trong định nghĩa `notify` rằng `item` phải thực thi cả `Display` và `Summary`. Chúng ta có thể làm điều này bằng cú pháp `+`:
 
 ```rust,ignore
 pub fn notify(item: &(impl Summary + Display)) {
 ```
 
-The `+` syntax is also valid with trait bounds on generic types:
+Cú pháp `+` cũng hợp lệ với các ràng buộc trait trên các kiểu generic:
 
 ```rust,ignore
 pub fn notify<T: Summary + Display>(item: &T) {
 ```
 
-With the two trait bounds specified, the body of `notify` can call `summarize`
-and use `{}` to format `item`.
+Với hai ràng buộc trait được chỉ định, thân của `notify` có thể gọi `summarize` và sử dụng `{}` để định dạng `item`.
 
-#### Clearer Trait Bounds with `where` Clauses
+#### Ràng buộc trait rõ ràng hơn với câu lệnh `where`
 
-Using too many trait bounds has its downsides. Each generic has its own trait
-bounds, so functions with multiple generic type parameters can contain lots of
-trait bound information between the function’s name and its parameter list,
-making the function signature hard to read. For this reason, Rust has alternate
-syntax for specifying trait bounds inside a `where` clause after the function
-signature. So instead of writing this:
+Sử dụng quá nhiều ràng buộc trait cũng có nhược điểm. Mỗi kiểu generic có các ràng buộc trait riêng, vì vậy các hàm với nhiều tham số kiểu generic có thể chứa rất nhiều thông tin ràng buộc trait giữa tên hàm và danh sách tham số, làm cho chữ ký hàm khó đọc. Vì lý do này, Rust có cú pháp thay thế để chỉ định ràng buộc trait bên trong một câu lệnh `where` sau chữ ký hàm. Thay vì viết như sau:
 
 ```rust,ignore
 fn some_function<T: Display + Clone, U: Clone + Debug>(t: &T, u: &U) -> i32 {
@@ -286,57 +268,34 @@ we can use a `where` clause, like this:
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-07-where-clause/src/lib.rs:here}}
 ```
 
-This function’s signature is less cluttered: the function name, parameter list,
-and return type are close together, similar to a function without lots of trait
-bounds.
+Chữ ký của hàm này gọn gàng hơn: tên hàm, danh sách tham số và kiểu trả về được đặt gần nhau, 
+tương tự như một hàm không có nhiều ràng buộc trait.
 
-### Returning Types that Implement Traits
+### Trả về các kiểu thực thi trait
 
-We can also use the `impl Trait` syntax in the return position to return a
-value of some type that implements a trait, as shown here:
+Chúng ta cũng có thể sử dụng cú pháp `impl Trait` ở vị trí trả về để trả về một giá trị của kiểu nào đó thực thi một trait, như minh họa sau:
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-05-returning-impl-trait/src/lib.rs:here}}
 ```
 
-By using `impl Summary` for the return type, we specify that the
-`returns_summarizable` function returns some type that implements the `Summary`
-trait without naming the concrete type. In this case, `returns_summarizable`
-returns a `Tweet`, but the code calling this function doesn’t need to know that.
+Bằng cách sử dụng `impl Summary` cho kiểu trả về, chúng ta chỉ định rằng hàm `returns_summarizable` 
+trả về một kiểu nào đó thực thi trait `Summary` mà không cần đặt tên kiểu cụ thể. Trong trường hợp này, 
+`returns_summarizable` trả về một `Tweet`, nhưng mã gọi hàm này không cần biết điều đó.
 
-The ability to specify a return type only by the trait it implements is
-especially useful in the context of closures and iterators, which we cover in
-Chapter 13. Closures and iterators create types that only the compiler knows or
-types that are very long to specify. The `impl Trait` syntax lets you concisely
-specify that a function returns some type that implements the `Iterator` trait
-without needing to write out a very long type.
+Khả năng chỉ định kiểu trả về chỉ dựa trên trait mà nó thực thi đặc biệt hữu ích trong bối cảnh closures và iterators, được đề cập trong Chương 13. Closures và iterators tạo ra các kiểu mà chỉ trình biên dịch biết hoặc các kiểu rất dài để chỉ định. Cú pháp `impl Trait` cho phép bạn chỉ định một cách ngắn gọn rằng một hàm trả về một kiểu nào đó thực thi trait `Iterator` mà không cần viết ra kiểu rất dài.
 
-However, you can only use `impl Trait` if you’re returning a single type. For
-example, this code that returns either a `NewsArticle` or a `Tweet` with the
-return type specified as `impl Summary` wouldn’t work:
+Tuy nhiên, bạn chỉ có thể sử dụng `impl Trait` nếu trả về một kiểu duy nhất. Ví dụ, đoạn mã này trả về hoặc một `NewsArticle` hoặc một `Tweet` với kiểu trả về được chỉ định là `impl Summary` sẽ không hoạt động:
 
 ```rust,ignore,does_not_compile
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-06-impl-trait-returns-one-type/src/lib.rs:here}}
 ```
 
-Returning either a `NewsArticle` or a `Tweet` isn’t allowed due to restrictions
-around how the `impl Trait` syntax is implemented in the compiler. We’ll cover
-how to write a function with this behavior in the [“Using Trait Objects That
-Allow for Values of Different
-Types”][using-trait-objects-that-allow-for-values-of-different-types]<!--
-ignore --> section of Chapter 17.
+Việc trả về hoặc một `NewsArticle` hoặc một `Tweet` không được phép do các hạn chế liên quan đến cách cú pháp `impl Trait` được triển khai trong trình biên dịch. Chúng ta sẽ đề cập cách viết một hàm với hành vi này trong phần [“Sử dụng Trait Objects cho các giá trị có kiểu khác nhau”][using-trait-objects-that-allow-for-values-of-different-types]<!-- ignore --> của Chương 17.
 
-### Using Trait Bounds to Conditionally Implement Methods
+### Sử dụng ràng buộc trait để triển khai phương thức có điều kiện
 
-By using a trait bound with an `impl` block that uses generic type parameters,
-we can implement methods conditionally for types that implement the specified
-traits. For example, the type `Pair<T>` in Listing 10-15 always implements the
-`new` function to return a new instance of `Pair<T>` (recall from the
-[“Defining Methods”][methods]<!-- ignore --> section of Chapter 5 that `Self`
-is a type alias for the type of the `impl` block, which in this case is
-`Pair<T>`). But in the next `impl` block, `Pair<T>` only implements the
-`cmp_display` method if its inner type `T` implements the `PartialOrd` trait
-that enables comparison *and* the `Display` trait that enables printing.
+Bằng cách sử dụng ràng buộc trait với một khối `impl` sử dụng tham số kiểu generic, chúng ta có thể triển khai phương thức có điều kiện cho các kiểu thực thi các trait đã chỉ định. Ví dụ, kiểu `Pair<T>` trong Listing 10-15 luôn triển khai hàm `new` để trả về một thể hiện mới của `Pair<T>` (nhớ lại từ phần [“Định nghĩa phương thức”][methods]<!-- ignore --> của Chương 5 rằng `Self` là bí danh cho kiểu của khối `impl`, trong trường hợp này là `Pair<T>`). Nhưng trong khối `impl` tiếp theo, `Pair<T>` chỉ triển khai phương thức `cmp_display` nếu kiểu bên trong `T` thực thi trait `PartialOrd` cho phép so sánh *và* trait `Display` cho phép in ra.
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -344,15 +303,9 @@ that enables comparison *and* the `Display` trait that enables printing.
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/listing-10-15/src/lib.rs}}
 ```
 
-<span class="caption">Listing 10-15: Conditionally implementing methods on a
-generic type depending on trait bounds</span>
+<span class="caption">Listing 10-15: Triển khai phương thức có điều kiện trên một kiểu generic tùy thuộc vào ràng buộc trait</span>
 
-We can also conditionally implement a trait for any type that implements
-another trait. Implementations of a trait on any type that satisfies the trait
-bounds are called *blanket implementations* and are extensively used in the
-Rust standard library. For example, the standard library implements the
-`ToString` trait on any type that implements the `Display` trait. The `impl`
-block in the standard library looks similar to this code:
+Chúng ta cũng có thể triển khai một trait có điều kiện cho bất kỳ kiểu nào thực thi một trait khác. Các triển khai của một trait trên bất kỳ kiểu nào thỏa mãn các ràng buộc trait được gọi là *blanket implementations* và được sử dụng rộng rãi trong thư viện chuẩn của Rust. Ví dụ, thư viện chuẩn triển khai trait `ToString` trên bất kỳ kiểu nào thực thi trait `Display`. Khối `impl` trong thư viện chuẩn trông tương tự như đoạn mã này:
 
 ```rust,ignore
 impl<T: Display> ToString for T {
@@ -360,29 +313,15 @@ impl<T: Display> ToString for T {
 }
 ```
 
-Because the standard library has this blanket implementation, we can call the
-`to_string` method defined by the `ToString` trait on any type that implements
-the `Display` trait. For example, we can turn integers into their corresponding
-`String` values like this because integers implement `Display`:
+Vì thư viện chuẩn có triển khai blanket này, chúng ta có thể gọi phương thức `to_string` được định nghĩa bởi trait `ToString` trên bất kỳ kiểu nào thực thi trait `Display`. Ví dụ, chúng ta có thể chuyển các số nguyên thành giá trị `String` tương ứng như sau vì các số nguyên thực thi `Display`:
 
 ```rust
 let s = 3.to_string();
 ```
 
-Blanket implementations appear in the documentation for the trait in the
-“Implementors” section.
+Các triển khai blanket xuất hiện trong tài liệu của trait ở phần “Implementors”.
 
-Traits and trait bounds let us write code that uses generic type parameters to
-reduce duplication but also specify to the compiler that we want the generic
-type to have particular behavior. The compiler can then use the trait bound
-information to check that all the concrete types used with our code provide the
-correct behavior. In dynamically typed languages, we would get an error at
-runtime if we called a method on a type which didn’t define the method. But Rust
-moves these errors to compile time so we’re forced to fix the problems before
-our code is even able to run. Additionally, we don’t have to write code that
-checks for behavior at runtime because we’ve already checked at compile time.
-Doing so improves performance without having to give up the flexibility of
-generics.
+Traits và ràng buộc trait cho phép chúng ta viết code sử dụng tham số kiểu generic để giảm sự trùng lặp, đồng thời chỉ định cho trình biên dịch rằng chúng ta muốn kiểu generic có hành vi cụ thể. Trình biên dịch sau đó có thể sử dụng thông tin ràng buộc trait để kiểm tra rằng tất cả các kiểu cụ thể được sử dụng với code của chúng ta cung cấp hành vi đúng. Trong các ngôn ngữ kiểu động, chúng ta sẽ nhận lỗi tại thời điểm chạy nếu gọi một phương thức trên kiểu không định nghĩa phương thức đó. Nhưng Rust chuyển các lỗi này sang thời điểm biên dịch, buộc chúng ta phải sửa lỗi trước khi code có thể chạy. Thêm vào đó, chúng ta không phải viết code kiểm tra hành vi tại thời điểm chạy vì đã kiểm tra ở thời điểm biên dịch. Việc này cải thiện hiệu năng mà không phải hy sinh tính linh hoạt của generic.
 
 [using-trait-objects-that-allow-for-values-of-different-types]: ch17-02-trait-objects.html#using-trait-objects-that-allow-for-values-of-different-types
 [methods]: ch05-03-method-syntax.html#defining-methods

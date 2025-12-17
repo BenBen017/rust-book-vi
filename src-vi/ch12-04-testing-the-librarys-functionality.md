@@ -1,39 +1,21 @@
-## Developing the Library’s Functionality with Test-Driven Development
+## Phát Triển Chức Năng Của Thư Viện Với Phát Triển Theo Kiểm Tra (TDD)
 
-Now that we’ve extracted the logic into *src/lib.rs* and left the argument
-collecting and error handling in *src/main.rs*, it’s much easier to write tests
-for the core functionality of our code. We can call functions directly with
-various arguments and check return values without having to call our binary
-from the command line.
+Bây giờ chúng ta đã tách logic vào *src/lib.rs* và giữ phần thu thập đối số và xử lý lỗi trong *src/main.rs*, việc viết test cho chức năng cốt lõi của mã trở nên dễ dàng hơn nhiều. Chúng ta có thể gọi trực tiếp các hàm với các đối số khác nhau và kiểm tra giá trị trả về mà không cần phải gọi binary từ dòng lệnh.
 
-In this section, we’ll add the searching logic to the `minigrep` program
-using the test-driven development (TDD) process with the following steps:
+Trong phần này, chúng ta sẽ thêm logic tìm kiếm vào chương trình `minigrep` bằng quy trình phát triển theo kiểm tra (test-driven development, TDD) với các bước sau:
 
-1. Write a test that fails and run it to make sure it fails for the reason you
-   expect.
-2. Write or modify just enough code to make the new test pass.
-3. Refactor the code you just added or changed and make sure the tests
-   continue to pass.
-4. Repeat from step 1!
+1. Viết một test mà sẽ thất bại và chạy nó để đảm bảo nó thất bại vì lý do bạn mong đợi.
+2. Viết hoặc sửa đổi đủ mã để test mới này thành công.
+3. Refactor mã vừa thêm hoặc thay đổi và đảm bảo các test vẫn chạy đúng.
+4. Lặp lại từ bước 1!
 
-Though it’s just one of many ways to write software, TDD can help drive code
-design. Writing the test before you write the code that makes the test pass
-helps to maintain high test coverage throughout the process.
+Mặc dù đây chỉ là một trong nhiều cách viết phần mềm, TDD có thể giúp định hướng thiết kế mã. Viết test trước khi viết mã làm test đó thành công giúp duy trì độ bao phủ test cao trong suốt quá trình.
 
-We’ll test drive the implementation of the functionality that will actually do
-the searching for the query string in the file contents and produce a list of
-lines that match the query. We’ll add this functionality in a function called
-`search`.
+Chúng ta sẽ viết test để điều khiển việc triển khai chức năng thực sự sẽ tìm kiếm chuỗi query trong nội dung file và tạo ra danh sách các dòng khớp với query. Chúng ta sẽ thêm chức năng này trong một hàm có tên `search`.
 
-### Writing a Failing Test
+### Viết Một Test Thất Bại
 
-Because we don’t need them anymore, let’s remove the `println!` statements from
-*src/lib.rs* and *src/main.rs* that we used to check the program’s behavior.
-Then, in *src/lib.rs*, add a `tests` module with a test function, as we did in
-[Chapter 11][ch11-anatomy]<!-- ignore -->. The test function specifies the
-behavior we want the `search` function to have: it will take a query and the
-text to search, and it will return only the lines from the text that contain
-the query. Listing 12-15 shows this test, which won’t compile yet.
+Vì chúng ta không còn cần chúng nữa, hãy loại bỏ các câu lệnh `println!` từ *src/lib.rs* và *src/main.rs* mà chúng ta đã dùng để kiểm tra hành vi của chương trình. Sau đó, trong *src/lib.rs*, thêm một module `tests` với một hàm test, như chúng ta đã làm trong [Chương 11][ch11-anatomy]<!-- ignore -->. Hàm test chỉ định hành vi mà chúng ta muốn hàm `search` có: nó sẽ nhận một query và văn bản cần tìm kiếm, và trả về chỉ các dòng từ văn bản chứa query. Listing 12-15 trình bày test này, mã này hiện chưa biên dịch được.
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -41,22 +23,11 @@ the query. Listing 12-15 shows this test, which won’t compile yet.
 {{#rustdoc_include ../listings/ch12-an-io-project/listing-12-15/src/lib.rs:here}}
 ```
 
-<span class="caption">Listing 12-15: Creating a failing test for the `search`
-function we wish we had</span>
+<span class="caption">Listing 12-15: Tạo một test thất bại cho hàm `search` mà chúng ta mong muốn có</span>
 
-This test searches for the string `"duct"`. The text we’re searching is three
-lines, only one of which contains `"duct"` (Note that the backslash after the
-opening double quote tells Rust not to put a newline character at the beginning
-of the contents of this string literal). We assert that the value returned from
-the `search` function contains only the line we expect.
+Test này tìm kiếm chuỗi `"duct"`. Văn bản mà chúng ta đang tìm kiếm có ba dòng, chỉ có một dòng chứa `"duct"` (Lưu ý rằng dấu gạch chéo ngược `\` sau dấu ngoặc kép mở cho Rust biết không chèn ký tự newline ở đầu nội dung của literal chuỗi này). Chúng ta khẳng định rằng giá trị trả về từ hàm `search` chỉ chứa dòng mà chúng ta mong đợi.
 
-We aren’t yet able to run this test and watch it fail because the test doesn’t
-even compile: the `search` function doesn’t exist yet! In accordance with TDD
-principles, we’ll add just enough code to get the test to compile and run by
-adding a definition of the `search` function that always returns an empty
-vector, as shown in Listing 12-16. Then the test should compile and fail
-because an empty vector doesn’t match a vector containing the line `"safe,
-fast, productive."`
+Hiện tại chúng ta chưa thể chạy test này và xem nó thất bại vì test thậm chí còn chưa biên dịch được: hàm `search` vẫn chưa tồn tại! Theo nguyên tắc TDD, chúng ta sẽ thêm đủ mã để test có thể biên dịch và chạy bằng cách thêm định nghĩa hàm `search` luôn trả về một vector rỗng, như trong Listing 12-16. Khi đó, test sẽ biên dịch nhưng thất bại vì một vector rỗng không khớp với vector chứa dòng `"safe, fast, productive."`
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -64,69 +35,45 @@ fast, productive."`
 {{#rustdoc_include ../listings/ch12-an-io-project/listing-12-16/src/lib.rs:here}}
 ```
 
-<span class="caption">Listing 12-16: Defining just enough of the `search`
-function so our test will compile</span>
+<span class="caption">Listing 12-16: Định nghĩa đủ hàm `search` để test của chúng ta có thể biên dịch</span>
 
-Notice that we need to define an explicit lifetime `'a` in the signature of
-`search` and use that lifetime with the `contents` argument and the return
-value. Recall in [Chapter 10][ch10-lifetimes]<!-- ignore --> that the lifetime
-parameters specify which argument lifetime is connected to the lifetime of the
-return value. In this case, we indicate that the returned vector should contain
-string slices that reference slices of the argument `contents` (rather than the
-argument `query`).
+Lưu ý rằng chúng ta cần định nghĩa một lifetime rõ ràng `'a` trong chữ ký của hàm `search` và sử dụng lifetime đó với tham số `contents` và giá trị trả về. Nhớ lại trong [Chương 10][ch10-lifetimes]<!-- ignore --> rằng các tham số lifetime chỉ ra lifetime của tham số nào được kết nối với lifetime của giá trị trả về. Trong trường hợp này, chúng ta chỉ ra rằng vector trả về nên chứa các string slice tham chiếu đến các slice của tham số `contents` (thay vì tham số `query`).
 
-In other words, we tell Rust that the data returned by the `search` function
-will live as long as the data passed into the `search` function in the
-`contents` argument. This is important! The data referenced *by* a slice needs
-to be valid for the reference to be valid; if the compiler assumes we’re making
-string slices of `query` rather than `contents`, it will do its safety checking
-incorrectly.
+Nói cách khác, chúng ta bảo Rust rằng dữ liệu trả về từ hàm `search` sẽ sống lâu bằng dữ liệu được truyền vào hàm `search` thông qua tham số `contents`. Điều này rất quan trọng! Dữ liệu mà một slice tham chiếu *bởi* nó cần phải hợp lệ để tham chiếu hợp lệ; nếu compiler giả sử chúng ta tạo các string slice từ `query` thay vì `contents`, nó sẽ kiểm tra an toàn sai cách.
 
-If we forget the lifetime annotations and try to compile this function, we’ll
-get this error:
+Nếu chúng ta quên các annotation lifetime và cố biên dịch hàm này, chúng ta sẽ nhận được lỗi sau:
 
 ```console
 {{#include ../listings/ch12-an-io-project/output-only-02-missing-lifetimes/output.txt}}
 ```
 
-Rust can’t possibly know which of the two arguments we need, so we need to tell
-it explicitly. Because `contents` is the argument that contains all of our text
-and we want to return the parts of that text that match, we know `contents` is
-the argument that should be connected to the return value using the lifetime
-syntax.
+Rust không thể biết được chúng ta cần dùng argument nào trong hai argument, vì vậy chúng ta cần chỉ rõ cho nó. Vì `contents` là argument chứa toàn bộ văn bản và chúng ta muốn trả về các phần của văn bản đó mà khớp với query, nên chúng ta biết `contents` là argument cần được kết nối với giá trị trả về bằng cú pháp lifetime.
 
-Other programming languages don’t require you to connect arguments to return
-values in the signature, but this practice will get easier over time. You might
-want to compare this example with the [“Validating References with
-Lifetimes”][validating-references-with-lifetimes]<!-- ignore --> section in
-Chapter 10.
+Các ngôn ngữ lập trình khác không yêu cầu bạn kết nối argument với giá trị trả về trong chữ ký hàm, nhưng thói quen này sẽ trở nên dễ dàng hơn theo thời gian. Bạn có thể so sánh ví dụ này với phần [“Validating References with Lifetimes”][validating-references-with-lifetimes]<!-- ignore --> trong Chương 10.
 
-Now let’s run the test:
+Bây giờ hãy chạy test:
 
 ```console
 {{#include ../listings/ch12-an-io-project/listing-12-16/output.txt}}
 ```
 
-Great, the test fails, exactly as we expected. Let’s get the test to pass!
+Tuyệt! Test thất bại, chính xác như chúng ta mong đợi. Bây giờ hãy viết mã để test thành công!
 
-### Writing Code to Pass the Test
+### Viết Mã Để Test Thành Công
 
-Currently, our test is failing because we always return an empty vector. To fix
-that and implement `search`, our program needs to follow these steps:
+Hiện tại, test của chúng ta thất bại vì chúng ta luôn trả về một vector rỗng. Để sửa lỗi đó và triển khai `search`, chương trình của chúng ta cần thực hiện các bước sau:
 
-* Iterate through each line of the contents.
-* Check whether the line contains our query string.
-* If it does, add it to the list of values we’re returning.
-* If it doesn’t, do nothing.
-* Return the list of results that match.
+* Lặp qua từng dòng của nội dung.
+* Kiểm tra xem dòng đó có chứa chuỗi query không.
+* Nếu có, thêm nó vào danh sách các giá trị sẽ trả về.
+* Nếu không, không làm gì.
+* Trả về danh sách các kết quả khớp.
 
-Let’s work through each step, starting with iterating through lines.
+Hãy thực hiện từng bước, bắt đầu với việc lặp qua các dòng.
 
-#### Iterating Through Lines with the `lines` Method
+#### Lặp Qua Các Dòng Với Phương Thức `lines`
 
-Rust has a helpful method to handle line-by-line iteration of strings,
-conveniently named `lines`, that works as shown in Listing 12-17. Note this
-won’t compile yet.
+Rust có một phương thức hữu ích để lặp từng dòng của chuỗi, tên là `lines`, hoạt động như trong Listing 12-17. Lưu ý rằng mã này chưa biên dịch được.
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -134,20 +81,13 @@ won’t compile yet.
 {{#rustdoc_include ../listings/ch12-an-io-project/listing-12-17/src/lib.rs:here}}
 ```
 
-<span class="caption">Listing 12-17: Iterating through each line in `contents`
-</span>
+<span class="caption">Listing 12-17: Lặp qua từng dòng trong `contents`</span>
 
-The `lines` method returns an iterator. We’ll talk about iterators in depth in
-[Chapter 13][ch13-iterators]<!-- ignore -->, but recall that you saw this way
-of using an iterator in [Listing 3-5][ch3-iter]<!-- ignore -->, where we used a
-`for` loop with an iterator to run some code on each item in a collection.
+Phương thức `lines` trả về một iterator. Chúng ta sẽ bàn kỹ về iterator trong [Chương 13][ch13-iterators]<!-- ignore -->, nhưng hãy nhớ rằng bạn đã thấy cách sử dụng iterator này trong [Listing 3-5][ch3-iter]<!-- ignore -->, nơi chúng ta dùng vòng lặp `for` với iterator để chạy một số mã trên từng phần tử trong một collection.
 
-#### Searching Each Line for the Query
+#### Tìm Kiếm Chuỗi Query Trong Mỗi Dòng
 
-Next, we’ll check whether the current line contains our query string.
-Fortunately, strings have a helpful method named `contains` that does this for
-us! Add a call to the `contains` method in the `search` function, as shown in
-Listing 12-18. Note this still won’t compile yet.
+Tiếp theo, chúng ta sẽ kiểm tra xem dòng hiện tại có chứa chuỗi query không. May mắn là các string có một phương thức hữu ích tên là `contains` làm việc này cho chúng ta! Thêm một lời gọi đến phương thức `contains` trong hàm `search`, như được trình bày trong Listing 12-18. Lưu ý rằng mã này vẫn chưa biên dịch được.
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -155,19 +95,13 @@ Listing 12-18. Note this still won’t compile yet.
 {{#rustdoc_include ../listings/ch12-an-io-project/listing-12-18/src/lib.rs:here}}
 ```
 
-<span class="caption">Listing 12-18: Adding functionality to see whether the
-line contains the string in `query`</span>
+<span class="caption">Listing 12-18: Thêm chức năng kiểm tra xem dòng có chứa chuỗi trong `query` không</span>
 
-At the moment, we’re building up functionality. To get it to compile, we need
-to return a value from the body as we indicated we would in the function
-signature.
+Hiện tại, chúng ta đang xây dựng dần chức năng. Để mã biên dịch được, chúng ta cần trả về một giá trị từ thân hàm như đã chỉ ra trong chữ ký hàm.
 
-#### Storing Matching Lines
+#### Lưu Các Dòng Khớp
 
-To finish this function, we need a way to store the matching lines that we want
-to return. For that, we can make a mutable vector before the `for` loop and
-call the `push` method to store a `line` in the vector. After the `for` loop,
-we return the vector, as shown in Listing 12-19.
+Để hoàn thiện hàm này, chúng ta cần một cách lưu các dòng khớp mà muốn trả về. Để làm điều đó, chúng ta có thể tạo một vector mutable trước vòng lặp `for` và gọi phương thức `push` để lưu một `line` vào vector. Sau vòng lặp `for`, chúng ta trả về vector, như được trình bày trong Listing 12-19.
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -175,31 +109,21 @@ we return the vector, as shown in Listing 12-19.
 {{#rustdoc_include ../listings/ch12-an-io-project/listing-12-19/src/lib.rs:here}}
 ```
 
-<span class="caption">Listing 12-19: Storing the lines that match so we can
-return them</span>
+<span class="caption">Listing 12-19: Lưu các dòng khớp để có thể trả về chúng</span>
 
-Now the `search` function should return only the lines that contain `query`,
-and our test should pass. Let’s run the test:
+Bây giờ, hàm `search` sẽ chỉ trả về những dòng chứa `query`, và test của chúng ta sẽ thành công. Hãy chạy test:
 
 ```console
 {{#include ../listings/ch12-an-io-project/listing-12-19/output.txt}}
 ```
 
-Our test passed, so we know it works!
+Test của chúng ta đã thành công, vì vậy chúng ta biết nó hoạt động!
 
-At this point, we could consider opportunities for refactoring the
-implementation of the search function while keeping the tests passing to
-maintain the same functionality. The code in the search function isn’t too bad,
-but it doesn’t take advantage of some useful features of iterators. We’ll
-return to this example in [Chapter 13][ch13-iterators]<!-- ignore -->, where
-we’ll explore iterators in detail, and look at how to improve it.
+Ở thời điểm này, chúng ta có thể xem xét các cơ hội để refactor việc triển khai hàm search trong khi vẫn giữ các test thành công để duy trì cùng một chức năng. Mã trong hàm search không tệ, nhưng nó chưa tận dụng một số tính năng hữu ích của iterator. Chúng ta sẽ quay lại ví dụ này trong [Chương 13][ch13-iterators]<!-- ignore -->, nơi chúng ta sẽ tìm hiểu chi tiết về iterator và xem cách cải thiện nó.
 
-#### Using the `search` Function in the `run` Function
+#### Sử dụng hàm `search` trong hàm `run`
 
-Now that the `search` function is working and tested, we need to call `search`
-from our `run` function. We need to pass the `config.query` value and the
-`contents` that `run` reads from the file to the `search` function. Then `run`
-will print each line returned from `search`:
+Bây giờ hàm `search` đã hoạt động và được test, chúng ta cần gọi `search` từ hàm `run`. Chúng ta cần truyền giá trị `config.query` và `contents` mà `run` đọc từ file vào hàm `search`. Sau đó, `run` sẽ in từng dòng được trả về từ `search`:
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -207,35 +131,29 @@ will print each line returned from `search`:
 {{#rustdoc_include ../listings/ch12-an-io-project/no-listing-02-using-search-in-run/src/lib.rs:here}}
 ```
 
-We’re still using a `for` loop to return each line from `search` and print it.
+Chúng ta vẫn đang sử dụng một vòng lặp `for` để lấy từng dòng từ `search` và in ra.
 
-Now the entire program should work! Let’s try it out, first with a word that
-should return exactly one line from the Emily Dickinson poem, “frog”:
+Bây giờ toàn bộ chương trình nên hoạt động! Hãy thử nó, trước tiên với một từ mà sẽ trả về chính xác một dòng từ bài thơ của Emily Dickinson, `"frog"`:
 
 ```console
 {{#include ../listings/ch12-an-io-project/no-listing-02-using-search-in-run/output.txt}}
 ```
 
-Cool! Now let’s try a word that will match multiple lines, like “body”:
+Tuyệt! Bây giờ hãy thử một từ sẽ khớp với nhiều dòng, chẳng hạn `"body"`:
 
 ```console
 {{#include ../listings/ch12-an-io-project/output-only-03-multiple-matches/output.txt}}
 ```
 
-And finally, let’s make sure that we don’t get any lines when we search for a
-word that isn’t anywhere in the poem, such as “monomorphization”:
+Và cuối cùng, hãy chắc chắn rằng chúng ta không nhận được dòng nào khi tìm kiếm một từ không xuất hiện trong bài thơ, chẳng hạn `"monomorphization"`:
 
 ```console
 {{#include ../listings/ch12-an-io-project/output-only-04-no-matches/output.txt}}
 ```
 
-Excellent! We’ve built our own mini version of a classic tool and learned a lot
-about how to structure applications. We’ve also learned a bit about file input
-and output, lifetimes, testing, and command line parsing.
+Tuyệt vời! Chúng ta đã xây dựng phiên bản mini của một công cụ cổ điển và học được rất nhiều về cách cấu trúc ứng dụng. Chúng ta cũng đã tìm hiểu một chút về nhập/xuất file, lifetimes, testing và phân tích tham số dòng lệnh.
 
-To round out this project, we’ll briefly demonstrate how to work with
-environment variables and how to print to standard error, both of which are
-useful when you’re writing command line programs.
+Để hoàn thiện dự án này, chúng ta sẽ minh họa ngắn gọn cách làm việc với biến môi trường và cách in ra lỗi chuẩn (standard error), cả hai đều hữu ích khi viết các chương trình dòng lệnh.
 
 [validating-references-with-lifetimes]:
 ch10-03-lifetime-syntax.html#validating-references-with-lifetimes

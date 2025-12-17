@@ -1,24 +1,25 @@
-# Functional Language Features: Iterators and Closures
+# Các Tính Năng Ngôn Ngữ Hàm: Iterators và Closures
 
-Rust’s design has taken inspiration from many existing languages and
-techniques, and one significant influence is *functional programming*.
-Programming in a functional style often includes using functions as values by
-passing them in arguments, returning them from other functions, assigning them
-to variables for later execution, and so forth.
+Thiết kế của Rust đã lấy cảm hứng từ nhiều ngôn ngữ và kỹ thuật hiện
+có, và một ảnh hưởng đáng kể là *lập trình hàm* (functional programming).
+Lập trình theo phong cách hàm thường bao gồm việc sử dụng các hàm như
+giá trị bằng cách truyền chúng vào các đối số, trả về chúng từ các hàm
+khác, gán chúng cho biến để thực thi sau này, và nhiều thao tác khác.
 
-In this chapter, we won’t debate the issue of what functional programming is or
-isn’t but will instead discuss some features of Rust that are similar to
-features in many languages often referred to as functional.
+Trong chương này, chúng ta sẽ không tranh luận về vấn đề lập trình hàm
+là gì hay không phải là gì mà sẽ thay vào đó thảo luận một số tính năng
+của Rust tương tự như các tính năng trong nhiều ngôn ngữ thường được
+gọi là hàm.
 
-More specifically, we’ll cover:
+Cụ thể hơn, chúng ta sẽ tìm hiểu:
 
-* *Closures*, a function-like construct you can store in a variable
-* *Iterators*, a way of processing a series of elements
-* How to use closures and iterators to improve the I/O project in Chapter 12
-* The performance of closures and iterators (Spoiler alert: they’re faster than
-  you might think!)
+* *Closures*, một cấu trúc giống hàm mà bạn có thể lưu vào biến
+* *Iterators*, một cách xử lý một chuỗi các phần tử
+* Cách sử dụng closures và iterators để cải thiện dự án I/O trong Chương 12
+* Hiệu suất của closures và iterators (Cảnh báo: chúng nhanh hơn bạn
+  tưởng!)
 
-We’ve already covered some other Rust features, such as pattern matching and
-enums, that are also influenced by the functional style. Because mastering
-closures and iterators is an important part of writing idiomatic, fast Rust
-code, we’ll devote this entire chapter to them.
+Chúng ta đã tìm hiểu một số tính năng khác của Rust, chẳng hạn như pattern
+matching và enums, cũng chịu ảnh hưởng từ phong cách hàm. Vì việc nắm vững
+closures và iterators là một phần quan trọng để viết code Rust theo phong
+cách idiomatic và nhanh, chúng ta sẽ dành toàn bộ chương này cho chúng.

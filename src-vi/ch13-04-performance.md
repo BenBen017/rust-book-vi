@@ -1,47 +1,28 @@
-## Comparing Performance: Loops vs. Iterators
+## So sánh hiệu năng: Vòng lặp vs. Iterator
 
-To determine whether to use loops or iterators, you need to know which
-implementation is faster: the version of the `search` function with an explicit
-`for` loop or the version with iterators.
+Để quyết định nên dùng vòng lặp hay iterator, bạn cần biết phiên bản nào
+nhanh hơn: phiên bản hàm `search` dùng vòng lặp `for` rõ ràng hay phiên bản
+dùng iterator.
 
-We ran a benchmark by loading the entire contents of *The Adventures of
-Sherlock Holmes* by Sir Arthur Conan Doyle into a `String` and looking for the
-word *the* in the contents. Here are the results of the benchmark on the
-version of `search` using the `for` loop and the version using iterators:
+Chúng tôi đã chạy benchmark bằng cách tải toàn bộ nội dung *The Adventures of
+Sherlock Holmes* của Sir Arthur Conan Doyle vào một `String` và tìm từ *the*
+trong nội dung. Dưới đây là kết quả benchmark cho phiên bản `search` dùng
+vòng lặp `for` và phiên bản dùng iterator:
 
 ```text
 test bench_search_for  ... bench:  19,620,300 ns/iter (+/- 915,700)
 test bench_search_iter ... bench:  19,234,900 ns/iter (+/- 657,200)
 ```
 
-The iterator version was slightly faster! We won’t explain the benchmark code
-here, because the point is not to prove that the two versions are equivalent
-but to get a general sense of how these two implementations compare
-performance-wise.
+Phiên bản dùng iterator nhanh hơn một chút! Chúng tôi sẽ không giải thích chi tiết mã benchmark ở đây, vì mục đích không phải là chứng minh hai phiên bản hoàn toàn tương đương, mà chỉ để có cái nhìn tổng quan về hiệu năng của hai cách triển khai này.
 
-For a more comprehensive benchmark, you should check using various texts of
-various sizes as the `contents`, different words and words of different lengths
-as the `query`, and all kinds of other variations. The point is this:
-iterators, although a high-level abstraction, get compiled down to roughly the
-same code as if you’d written the lower-level code yourself. Iterators are one
-of Rust’s *zero-cost abstractions*, by which we mean using the abstraction
-imposes no additional runtime overhead. This is analogous to how Bjarne
-Stroustrup, the original designer and implementor of C++, defines
-*zero-overhead* in “Foundations of C++” (2012):
+Để benchmark toàn diện hơn, bạn nên thử với nhiều loại văn bản có kích thước khác nhau làm `contents`, các từ khác nhau với độ dài khác nhau làm `query`, và nhiều biến thể khác. Ý chính là: iterator, mặc dù là một trừu tượng cao cấp, được biên dịch xuống gần như cùng một mã máy như nếu bạn tự viết mã cấp thấp. Iterator là một trong những *zero-cost abstractions* của Rust, nghĩa là sử dụng trừu tượng này không gây thêm chi phí runtime. Điều này tương tự cách Bjarne Stroustrup, nhà thiết kế và hiện thực C++ gốc, định nghĩa *zero-overhead* trong “Foundations of C++” (2012):
 
 > In general, C++ implementations obey the zero-overhead principle: What you
 > don’t use, you don’t pay for. And further: What you do use, you couldn’t hand
 > code any better.
 
-As another example, the following code is taken from an audio decoder. The
-decoding algorithm uses the linear prediction mathematical operation to
-estimate future values based on a linear function of the previous samples. This
-code uses an iterator chain to do some math on three variables in scope: a
-`buffer` slice of data, an array of 12 `coefficients`, and an amount by which
-to shift data in `qlp_shift`. We’ve declared the variables within this example
-but not given them any values; although this code doesn’t have much meaning
-outside of its context, it’s still a concise, real-world example of how Rust
-translates high-level ideas to low-level code.
+Một ví dụ khác, đoạn mã sau lấy từ một bộ giải mã audio. Thuật toán giải mã sử dụng phép toán dự đoán tuyến tính để ước lượng các giá trị tương lai dựa trên hàm tuyến tính của các mẫu trước đó. Đoạn mã này sử dụng chuỗi iterator để tính toán trên ba biến trong phạm vi: một slice `buffer` chứa dữ liệu, một mảng 12 phần tử `coefficients`, và một lượng dịch dữ liệu trong `qlp_shift`. Chúng tôi đã khai báo các biến trong ví dụ này nhưng không gán giá trị; mặc dù mã này không có nhiều ý nghĩa ngoài ngữ cảnh của nó, nó vẫn là một ví dụ thực tế, cô đọng về cách Rust chuyển các ý tưởng cao cấp xuống mã cấp thấp.
 
 ```rust,ignore
 let buffer: &mut [i32];
@@ -58,37 +39,14 @@ for i in 12..buffer.len() {
 }
 ```
 
-To calculate the value of `prediction`, this code iterates through each of the
-12 values in `coefficients` and uses the `zip` method to pair the coefficient
-values with the previous 12 values in `buffer`. Then, for each pair, we
-multiply the values together, sum all the results, and shift the bits in the
-sum `qlp_shift` bits to the right.
+Để tính giá trị của `prediction`, đoạn mã này lặp qua từng giá trị trong 12 phần tử của `coefficients` và sử dụng phương thức `zip` để ghép các giá trị hệ số với 12 giá trị trước đó trong `buffer`. Sau đó, với mỗi cặp, chúng ta nhân các giá trị với nhau, cộng tất cả kết quả, và dịch các bit trong tổng lên phải `qlp_shift` bit.
 
-Calculations in applications like audio decoders often prioritize performance
-most highly. Here, we’re creating an iterator, using two adaptors, and then
-consuming the value. What assembly code would this Rust code compile to? Well,
-as of this writing, it compiles down to the same assembly you’d write by hand.
-There’s no loop at all corresponding to the iteration over the values in
-`coefficients`: Rust knows that there are 12 iterations, so it “unrolls” the
-loop. *Unrolling* is an optimization that removes the overhead of the loop
-controlling code and instead generates repetitive code for each iteration of
-the loop.
+Các phép tính trong các ứng dụng như bộ giải mã audio thường ưu tiên hiệu năng hàng đầu. Ở đây, chúng ta tạo một iterator, sử dụng hai adaptor, và sau đó tiêu thụ giá trị. Mã assembly mà Rust biên dịch ra từ đoạn mã này sẽ như thế nào? Tính đến thời điểm hiện tại, nó được biên dịch xuống cùng mã assembly mà bạn có thể viết tay. Không hề có vòng lặp tương ứng với việc lặp qua các giá trị trong `coefficients`: Rust biết có 12 lần lặp, nên nó *“unroll”* vòng lặp. *Unrolling* là một tối ưu loại bỏ chi phí overhead của mã điều khiển vòng lặp và thay vào đó tạo mã lặp lại cho từng lần lặp.
 
-All of the coefficients get stored in registers, which means accessing the
-values is very fast. There are no bounds checks on the array access at runtime.
-All these optimizations that Rust is able to apply make the resulting code
-extremely efficient. Now that you know this, you can use iterators and closures
-without fear! They make code seem like it’s higher level but don’t impose a
-runtime performance penalty for doing so.
+Tất cả các hệ số được lưu trong các thanh ghi, nghĩa là truy cập giá trị rất nhanh. Không có kiểm tra ranh giới mảng tại runtime. Tất cả các tối ưu hóa mà Rust áp dụng giúp mã kết quả cực kỳ hiệu quả. Bây giờ bạn đã hiểu điều này, bạn có thể sử dụng iterators và closures mà không lo lắng! Chúng khiến mã trông cao cấp hơn nhưng không gây ra bất kỳ phạt hiệu năng nào tại runtime.
 
-## Summary
+## Tóm tắt
 
-Closures and iterators are Rust features inspired by functional programming
-language ideas. They contribute to Rust’s capability to clearly express
-high-level ideas at low-level performance. The implementations of closures and
-iterators are such that runtime performance is not affected. This is part of
-Rust’s goal to strive to provide zero-cost abstractions.
+Closures và iterators là các tính năng của Rust được lấy cảm hứng từ các ngôn ngữ lập trình hàm. Chúng giúp Rust thể hiện rõ ràng các ý tưởng cao cấp với hiệu năng cấp thấp. Cách triển khai closures và iterators được thiết kế sao cho hiệu năng runtime không bị ảnh hưởng. Đây là một phần trong mục tiêu của Rust nhằm cung cấp các *zero-cost abstractions*.
 
-Now that we’ve improved the expressiveness of our I/O project, let’s look at
-some more features of `cargo` that will help us share the project with the
-world.
+Bây giờ, sau khi chúng ta đã cải thiện khả năng biểu đạt trong dự án I/O, hãy cùng xem một số tính năng khác của `cargo` sẽ giúp chúng ta chia sẻ dự án với thế giới.

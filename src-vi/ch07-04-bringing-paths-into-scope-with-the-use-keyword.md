@@ -1,4 +1,4 @@
-## Bringing Paths into Scope with the `use` Keyword
+## Đưa Paths vào Scope bằng từ khóa `use`
 
 Phải viết ra đường dẫn để gọi các hàm có thể cảm thấy không tiện lợi và lặp đi
 lặp lại. Trong Listing 7-7, dù chúng ta đã chọn đường dẫn tuyệt đối hay tương
@@ -50,7 +50,7 @@ của nó! Để sửa vấn đề này, di chuyển `use` trong module `custome
 tham chiếu đến đường dẫn tắt trong module cha với `super::hosting` trong module
 con `customer`.
 
-### Creating Idiomatic `use` Paths
+### Tạo các `use` Paths theo phong cách idiomatic
 
 Trong Listing 7-11, bạn có thể đã thắc mắc tại sao chúng ta chỉ định `use
 crate::front_of_house::hosting` và sau đó gọi `hosting::add_to_waitlist` trong
@@ -109,7 +109,7 @@ chúng ta muốn loại nào khi chúng ta sử dụng `Result`.
 
 ---
 
-### Providing New Names with the `as` Keyword
+### Cung cấp tên mới bằng từ khóa `as`
 
 Có một cách khác để giải quyết vấn đề đưa hai loại cùng tên vào cùng một scope
 với `use`: sau đường dẫn, chúng ta có thể chỉ định `as` và một tên cục bộ mới,
@@ -167,7 +167,7 @@ các lập trình viên gọi code của chúng ta. Chúng ta sẽ xem một ví
 `pub use` và cách nó ảnh hưởng đến tài liệu của crate của bạn trong phần
 [“Exporting a Convenient Public API with `pub use`”][ch14-pub-use]<!-- ignore --> của Chapter 14.
 
-### Using External Packages
+### Re-exporting Names với `pub use`
 
 Trong chương 2, chúng ta đã viết một project đoán số sử dụng một package bên
 ngoài gọi là `rand` để lấy ra các số ngẫu nhiên. Để sử dụng `rand` trong
@@ -218,7 +218,7 @@ use std::collections::HashMap;
 
 Đây là một đường dẫn tuyệt đối bắt đầu với `std`, tên của crate thư viện chuẩn.
 
-### Using Nested Paths to Clean Up Large `use` Lists
+### Sử dụng Nested Paths để làm gọn các danh sách `use` lớn
 
 Nếu chúng ta sử dụng nhiều item được định nghĩa trong cùng một crate hoặc cùng
 một module, việc liệt kê mỗi item trên một dòng riêng sẽ chiếm rất nhiều không
@@ -279,7 +279,7 @@ một dòng `use`</span>
 
 Dòng này import `std::io` và `std::io::Write` vào scope.
 
-### The Glob Operator
+### Toán tử Glob
 
 Nếu chúng ta muốn import *tất cả* các mục công khai được định nghĩa trong một
 đường dẫn vào scope, chúng ta có thể chỉ định đường dẫn đó theo sau bởi toán

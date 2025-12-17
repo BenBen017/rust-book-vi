@@ -86,7 +86,7 @@ ta chạy mã này, chúng ta sẽ thấy đầu ra sau từ macro `panic!`:
 
 Như thường lệ, output này cho chúng ta biết chính xác lỗi là gì.
 
-### Matching on Different Errors
+### Sử dụng Matching với các lỗi khác nhau
 
 Code trong Listing 9-4 sẽ `panic!` bất kể lý do nào mà `File::open` thất bại.
 Tuy nhiên, chúng ta muốn thực hiện các hành động khác nhau cho các lý do thất

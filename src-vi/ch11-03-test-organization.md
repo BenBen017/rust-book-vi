@@ -1,39 +1,18 @@
-## Test Organization
+## Tổ chức các hàm kiểm tra
 
-As mentioned at the start of the chapter, testing is a complex discipline, and
-different people use different terminology and organization. The Rust community
-thinks about tests in terms of two main categories: unit tests and integration
-tests. *Unit tests* are small and more focused, testing one module in isolation
-at a time, and can test private interfaces. *Integration tests* are entirely
-external to your library and use your code in the same way any other external
-code would, using only the public interface and potentially exercising multiple
-modules per test.
+Như đã đề cập ở đầu chương, kiểm tra là một lĩnh vực phức tạp, và những người khác nhau sử dụng thuật ngữ và cách tổ chức khác nhau. Cộng đồng Rust chia các hàm kiểm tra thành hai loại chính: unit tests và integration tests. *Unit tests* nhỏ và tập trung hơn, kiểm tra một module riêng lẻ tại một thời điểm và có thể kiểm tra các giao diện private. *Integration tests* hoàn toàn nằm ngoài thư viện của bạn và sử dụng mã của bạn giống như bất kỳ mã bên ngoài nào khác, chỉ sử dụng giao diện public và có thể kiểm tra nhiều module trong một hàm kiểm tra.
 
-Writing both kinds of tests is important to ensure that the pieces of your
-library are doing what you expect them to, separately and together.
+Việc viết cả hai loại kiểm tra là quan trọng để đảm bảo rằng các phần của thư viện hoạt động như bạn mong đợi, riêng lẻ và kết hợp với nhau.
 
 ### Unit Tests
 
-The purpose of unit tests is to test each unit of code in isolation from the
-rest of the code to quickly pinpoint where code is and isn’t working as
-expected. You’ll put unit tests in the *src* directory in each file with the
-code that they’re testing. The convention is to create a module named `tests`
-in each file to contain the test functions and to annotate the module with
-`cfg(test)`.
+Mục đích của unit tests là kiểm tra từng đơn vị mã một cách riêng biệt với phần còn lại của mã để nhanh chóng xác định vị trí mã đang hoạt động hoặc không hoạt động như mong đợi. Bạn sẽ đặt unit tests trong thư mục *src* trong mỗi file chứa mã mà chúng đang kiểm tra. Quy ước là tạo một module có tên `tests` trong mỗi file để chứa các hàm kiểm tra và chú thích module bằng `cfg(test)`.
 
-#### The Tests Module and `#[cfg(test)]`
+#### Module Tests và `#[cfg(test)]`
 
-The `#[cfg(test)]` annotation on the tests module tells Rust to compile and run
-the test code only when you run `cargo test`, not when you run `cargo build`.
-This saves compile time when you only want to build the library and saves space
-in the resulting compiled artifact because the tests are not included. You’ll
-see that because integration tests go in a different directory, they don’t need
-the `#[cfg(test)]` annotation. However, because unit tests go in the same files
-as the code, you’ll use `#[cfg(test)]` to specify that they shouldn’t be
-included in the compiled result.
+Chú thích `#[cfg(test)]` trên module tests thông báo cho Rust chỉ biên dịch và chạy mã kiểm tra khi bạn chạy `cargo test`, không khi chạy `cargo build`. Điều này tiết kiệm thời gian biên dịch khi bạn chỉ muốn build thư viện và tiết kiệm dung lượng trong file nhị phân kết quả vì các hàm kiểm tra không được bao gồm. Bạn sẽ thấy rằng vì các integration tests nằm ở thư mục khác, chúng không cần chú thích `#[cfg(test)]`. Tuy nhiên, vì unit tests nằm trong cùng file với mã, bạn sẽ dùng `#[cfg(test)]` để chỉ định rằng chúng không nên được bao gồm trong kết quả biên dịch.
 
-Recall that when we generated the new `adder` project in the first section of
-this chapter, Cargo generated this code for us:
+Hãy nhớ rằng khi chúng ta tạo dự án mới `adder` trong phần đầu tiên của chương này, Cargo đã tạo ra đoạn mã sau cho chúng ta:
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -41,22 +20,11 @@ this chapter, Cargo generated this code for us:
 {{#rustdoc_include ../listings/ch11-writing-automated-tests/listing-11-01/src/lib.rs}}
 ```
 
-This code is the automatically generated test module. The attribute `cfg`
-stands for *configuration* and tells Rust that the following item should only
-be included given a certain configuration option. In this case, the
-configuration option is `test`, which is provided by Rust for compiling and
-running tests. By using the `cfg` attribute, Cargo compiles our test code only
-if we actively run the tests with `cargo test`. This includes any helper
-functions that might be within this module, in addition to the functions
-annotated with `#[test]`.
+Đoạn mã này là module kiểm tra được tạo tự động. Attribute `cfg` là viết tắt của *configuration* và thông báo cho Rust rằng mục tiếp theo chỉ nên được bao gồm khi có một tùy chọn cấu hình nhất định. Trong trường hợp này, tùy chọn cấu hình là `test`, được Rust cung cấp để biên dịch và chạy các hàm kiểm tra. Bằng cách sử dụng attribute `cfg`, Cargo chỉ biên dịch mã kiểm tra của chúng ta khi chúng ta thực sự chạy các hàm kiểm tra bằng `cargo test`. Điều này bao gồm bất kỳ hàm trợ giúp nào nằm trong module này, cũng như các hàm được chú thích bằng `#[test]`.
 
-#### Testing Private Functions
+#### Kiểm tra các hàm private
 
-There’s debate within the testing community about whether or not private
-functions should be tested directly, and other languages make it difficult or
-impossible to test private functions. Regardless of which testing ideology you
-adhere to, Rust’s privacy rules do allow you to test private functions.
-Consider the code in Listing 11-12 with the private function `internal_adder`.
+Trong cộng đồng kiểm tra, có tranh luận về việc có nên kiểm tra trực tiếp các hàm private hay không, và các ngôn ngữ khác thường khó hoặc không thể kiểm tra các hàm private. Bất kể bạn theo quan điểm kiểm tra nào, quy tắc private của Rust cho phép bạn kiểm tra các hàm private. Hãy xem xét đoạn mã trong Listing 11-12 với hàm private `internal_adder`.
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -64,37 +32,19 @@ Consider the code in Listing 11-12 with the private function `internal_adder`.
 {{#rustdoc_include ../listings/ch11-writing-automated-tests/listing-11-12/src/lib.rs}}
 ```
 
-<span class="caption">Listing 11-12: Testing a private function</span>
+<span class="caption">Listing 11-12: Kiểm tra một hàm private</span>
 
-Note that the `internal_adder` function is not marked as `pub`. Tests are just
-Rust code, and the `tests` module is just another module. As we discussed in
-the [“Paths for Referring to an Item in the Module Tree”][paths]<!-- ignore -->
-section, items in child modules can use the items in their ancestor modules. In
-this test, we bring all of the `test` module’s parent’s items into scope with
-`use super::*`, and then the test can call `internal_adder`. If you don’t think
-private functions should be tested, there’s nothing in Rust that will compel
-you to do so.
+Lưu ý rằng hàm `internal_adder` không được đánh dấu là `pub`. Các hàm kiểm tra chỉ là mã Rust, và module `tests` chỉ là một module khác. Như chúng ta đã thảo luận trong phần [“Paths for Referring to an Item in the Module Tree”][paths]<!-- ignore -->, các phần tử trong module con có thể sử dụng các phần tử trong module cha của chúng. Trong kiểm tra này, chúng ta đưa tất cả các phần tử của module cha vào phạm vi với `use super::*`, và sau đó hàm kiểm tra có thể gọi `internal_adder`. Nếu bạn không cho rằng các hàm private nên được kiểm tra, Rust không ép buộc bạn phải làm điều đó.
 
 ### Integration Tests
 
-In Rust, integration tests are entirely external to your library. They use your
-library in the same way any other code would, which means they can only call
-functions that are part of your library’s public API. Their purpose is to test
-whether many parts of your library work together correctly. Units of code that
-work correctly on their own could have problems when integrated, so test
-coverage of the integrated code is important as well. To create integration
-tests, you first need a *tests* directory.
+Trong Rust, integration tests hoàn toàn nằm ngoài thư viện của bạn. Chúng sử dụng thư viện của bạn giống như bất kỳ mã nào khác, có nghĩa là chúng chỉ có thể gọi các hàm là một phần của API public của thư viện. Mục đích của chúng là kiểm tra xem nhiều phần của thư viện có hoạt động cùng nhau đúng không. Các đơn vị mã hoạt động đúng riêng lẻ có thể gặp vấn đề khi tích hợp, vì vậy việc bao phủ kiểm tra mã tích hợp cũng quan trọng. Để tạo integration tests, trước tiên bạn cần tạo thư mục *tests*.
 
-#### The *tests* Directory
+#### Thư mục *tests*
 
-We create a *tests* directory at the top level of our project directory, next
-to *src*. Cargo knows to look for integration test files in this directory. We
-can then make as many test files as we want, and Cargo will compile each of the
-files as an individual crate.
+Chúng ta tạo thư mục *tests* ở cấp cao nhất của dự án, cạnh thư mục *src*. Cargo biết tìm các file kiểm tra tích hợp trong thư mục này. Chúng ta có thể tạo bao nhiêu file kiểm tra tùy thích, và Cargo sẽ biên dịch từng file như một crate riêng lẻ.
 
-Let’s create an integration test. With the code in Listing 11-12 still in the
-*src/lib.rs* file, make a *tests* directory, and create a new file named
-*tests/integration_test.rs*. Your directory structure should look like this:
+Hãy tạo một integration test. Với mã trong Listing 11-12 vẫn nằm trong file *src/lib.rs*, tạo thư mục *tests* và tạo một file mới tên *tests/integration_test.rs*. Cấu trúc thư mục của bạn sẽ trông như sau:
 
 ```text
 adder
@@ -114,68 +64,37 @@ Enter the code in Listing 11-13 into the *tests/integration_test.rs* file:
 {{#rustdoc_include ../listings/ch11-writing-automated-tests/listing-11-13/tests/integration_test.rs}}
 ```
 
-<span class="caption">Listing 11-13: An integration test of a function in the
-`adder` crate</span>
+<span class="caption">Listing 11-13: Một integration test cho một hàm trong crate `adder`</span>
 
-Each file in the `tests` directory is a separate crate, so we need to bring our
-library into each test crate’s scope. For that reason we add `use adder` at the
-top of the code, which we didn’t need in the unit tests.
+Mỗi file trong thư mục `tests` là một crate riêng biệt, vì vậy chúng ta cần đưa thư viện của mình vào phạm vi của từng test crate. Vì lý do đó, chúng ta thêm `use adder` ở đầu mã, điều mà trong unit tests chúng ta không cần.
 
-We don’t need to annotate any code in *tests/integration_test.rs* with
-`#[cfg(test)]`. Cargo treats the `tests` directory specially and compiles files
-in this directory only when we run `cargo test`. Run `cargo test` now:
+Chúng ta không cần chú thích bất kỳ mã nào trong *tests/integration_test.rs* với `#[cfg(test)]`. Cargo xử lý thư mục `tests` đặc biệt và chỉ biên dịch các file trong thư mục này khi chạy `cargo test`. Bây giờ hãy chạy `cargo test`:
 
 ```console
 {{#include ../listings/ch11-writing-automated-tests/listing-11-13/output.txt}}
 ```
 
-The three sections of output include the unit tests, the integration test, and
-the doc tests. Note that if any test in a section fails, the following sections
-will not be run. For example, if a unit test fails, there won’t be any output
-for integration and doc tests because those tests will only be run if all unit
-tests are passing.
+Ba phần của output bao gồm unit tests, integration test và doc tests. Lưu ý rằng nếu bất kỳ hàm kiểm tra nào trong một phần thất bại, các phần tiếp theo sẽ không được chạy. Ví dụ, nếu một unit test thất bại, sẽ không có output cho integration và doc tests vì các test đó chỉ được chạy nếu tất cả unit tests đều thành công.
 
-The first section for the unit tests is the same as we’ve been seeing: one line
-for each unit test (one named `internal` that we added in Listing 11-12) and
-then a summary line for the unit tests.
+Phần đầu tiên cho unit tests giống như những gì chúng ta đã thấy: một dòng cho mỗi unit test (một test tên là `internal` mà chúng ta đã thêm trong Listing 11-12) và sau đó là một dòng tóm tắt cho các unit tests.
 
-The integration tests section starts with the line `Running
-tests/integration_test.rs`. Next, there is a line for each test function in
-that integration test and a summary line for the results of the integration
-test just before the `Doc-tests adder` section starts.
+Phần integration tests bắt đầu với dòng `Running tests/integration_test.rs`. Tiếp theo, có một dòng cho mỗi hàm kiểm tra trong integration test đó và một dòng tóm tắt kết quả của integration test ngay trước khi phần `Doc-tests adder` bắt đầu.
 
-Each integration test file has its own section, so if we add more files in the
-*tests* directory, there will be more integration test sections.
+Mỗi file integration test có phần riêng của nó, vì vậy nếu chúng ta thêm nhiều file trong thư mục *tests*, sẽ có thêm các phần cho integration tests.
 
-We can still run a particular integration test function by specifying the test
-function’s name as an argument to `cargo test`. To run all the tests in a
-particular integration test file, use the `--test` argument of `cargo test`
-followed by the name of the file:
+Chúng ta vẫn có thể chạy một hàm kiểm tra integration cụ thể bằng cách chỉ định tên hàm kiểm tra làm đối số cho `cargo test`. Để chạy tất cả các test trong một file integration test cụ thể, dùng đối số `--test` của `cargo test` theo sau là tên file:
 
 ```console
 {{#include ../listings/ch11-writing-automated-tests/output-only-05-single-integration/output.txt}}
 ```
 
-This command runs only the tests in the *tests/integration_test.rs* file.
+Lệnh này chỉ chạy các hàm kiểm tra trong file *tests/integration_test.rs*.
 
-#### Submodules in Integration Tests
+#### Submodules trong Integration Tests
 
-As you add more integration tests, you might want to make more files in the
-*tests* directory to help organize them; for example, you can group the test
-functions by the functionality they’re testing. As mentioned earlier, each file
-in the *tests* directory is compiled as its own separate crate, which is useful
-for creating separate scopes to more closely imitate the way end users will be
-using your crate. However, this means files in the *tests* directory don’t
-share the same behavior as files in *src* do, as you learned in Chapter 7
-regarding how to separate code into modules and files.
+Khi bạn thêm nhiều integration tests, bạn có thể muốn tạo thêm các file trong thư mục *tests* để giúp tổ chức chúng; ví dụ, bạn có thể nhóm các hàm kiểm tra theo chức năng mà chúng đang kiểm tra. Như đã đề cập trước đó, mỗi file trong thư mục *tests* được biên dịch như một crate riêng biệt, điều này hữu ích để tạo các phạm vi riêng nhằm mô phỏng gần hơn cách người dùng cuối sẽ sử dụng crate của bạn. Tuy nhiên, điều này có nghĩa là các file trong thư mục *tests* không chia sẻ cùng hành vi như các file trong *src*, như bạn đã học ở Chương 7 về cách tách mã thành các module và file.
 
-The different behavior of *tests* directory files is most noticeable when you
-have a set of helper functions to use in multiple integration test files and
-you try to follow the steps in the [“Separating Modules into Different
-Files”][separating-modules-into-files]<!-- ignore --> section of Chapter 7 to
-extract them into a common module. For example, if we create *tests/common.rs*
-and place a function named `setup` in it, we can add some code to `setup` that
-we want to call from multiple test functions in multiple test files:
+Sự khác biệt trong hành vi của các file trong thư mục *tests* rõ ràng nhất khi bạn có một bộ hàm trợ giúp dùng trong nhiều file integration test và bạn cố gắng theo các bước trong phần [“Separating Modules into Different Files”][separating-modules-into-files]<!-- ignore --> của Chương 7 để trích xuất chúng thành một module chung. Ví dụ, nếu chúng ta tạo file *tests/common.rs* và đặt một hàm tên là `setup` trong đó, chúng ta có thể thêm một số mã vào `setup` mà muốn gọi từ nhiều hàm kiểm tra trong nhiều file test:
 
 <span class="filename">Filename: tests/common.rs</span>
 
@@ -183,21 +102,15 @@ we want to call from multiple test functions in multiple test files:
 {{#rustdoc_include ../listings/ch11-writing-automated-tests/no-listing-12-shared-test-code-problem/tests/common.rs}}
 ```
 
-When we run the tests again, we’ll see a new section in the test output for the
-*common.rs* file, even though this file doesn’t contain any test functions nor
-did we call the `setup` function from anywhere:
+Khi chúng ta chạy lại các hàm kiểm tra, chúng ta sẽ thấy một phần mới trong output cho file *common.rs*, mặc dù file này không chứa bất kỳ hàm kiểm tra nào và chúng ta cũng không gọi hàm `setup` từ đâu cả:
 
 ```console
 {{#include ../listings/ch11-writing-automated-tests/no-listing-12-shared-test-code-problem/output.txt}}
 ```
 
-Having `common` appear in the test results with `running 0 tests` displayed for
-it is not what we wanted. We just wanted to share some code with the other
-integration test files.
+Việc `common` xuất hiện trong kết quả kiểm tra với thông báo `running 0 tests` không phải là điều chúng ta mong muốn. Chúng ta chỉ muốn chia sẻ một số mã với các file integration test khác.
 
-To avoid having `common` appear in the test output, instead of creating
-*tests/common.rs*, we’ll create *tests/common/mod.rs*. The project directory
-now looks like this:
+Để tránh `common` xuất hiện trong output của kiểm tra, thay vì tạo file *tests/common.rs*, chúng ta sẽ tạo *tests/common/mod.rs*. Cấu trúc thư mục dự án bây giờ trông như sau:
 
 ```text
 ├── Cargo.lock
@@ -210,18 +123,9 @@ now looks like this:
     └── integration_test.rs
 ```
 
-This is the older naming convention that Rust also understands that we
-mentioned in the [“Alternate File Paths”][alt-paths]<!-- ignore --> section of
-Chapter 7. Naming the file this way tells Rust not to treat the `common` module
-as an integration test file. When we move the `setup` function code into
-*tests/common/mod.rs* and delete the *tests/common.rs* file, the section in the
-test output will no longer appear. Files in subdirectories of the *tests*
-directory don’t get compiled as separate crates or have sections in the test
-output.
+Đây là quy ước đặt tên cũ mà Rust vẫn hiểu, như chúng ta đã đề cập trong phần [“Alternate File Paths”][alt-paths]<!-- ignore --> của Chương 7. Đặt tên file theo cách này thông báo cho Rust rằng không nên coi module `common` là một file integration test. Khi chúng ta chuyển mã hàm `setup` vào *tests/common/mod.rs* và xóa file *tests/common.rs*, phần hiển thị trong output kiểm tra sẽ không còn xuất hiện. Các file trong các thư mục con của *tests* sẽ không được biên dịch như các crate riêng biệt và cũng không xuất hiện trong output kiểm tra.
 
-After we’ve created *tests/common/mod.rs*, we can use it from any of the
-integration test files as a module. Here’s an example of calling the `setup`
-function from the `it_adds_two` test in *tests/integration_test.rs*:
+Sau khi tạo xong *tests/common/mod.rs*, chúng ta có thể sử dụng nó từ bất kỳ file integration test nào như một module. Dưới đây là ví dụ gọi hàm `setup` từ test `it_adds_two` trong *tests/integration_test.rs*:
 
 <span class="filename">Filename: tests/integration_test.rs</span>
 
@@ -229,39 +133,19 @@ function from the `it_adds_two` test in *tests/integration_test.rs*:
 {{#rustdoc_include ../listings/ch11-writing-automated-tests/no-listing-13-fix-shared-test-code-problem/tests/integration_test.rs}}
 ```
 
-Note that the `mod common;` declaration is the same as the module declaration
-we demonstrated in Listing 7-21. Then in the test function, we can call the
-`common::setup()` function.
+Lưu ý rằng khai báo `mod common;` giống như khai báo module mà chúng ta đã minh họa trong Listing 7-21. Sau đó, trong hàm kiểm tra, chúng ta có thể gọi hàm `common::setup()`.
 
-#### Integration Tests for Binary Crates
+#### Integration Tests cho Binary Crates
 
-If our project is a binary crate that only contains a *src/main.rs* file and
-doesn’t have a *src/lib.rs* file, we can’t create integration tests in the
-*tests* directory and bring functions defined in the *src/main.rs* file into
-scope with a `use` statement. Only library crates expose functions that other
-crates can use; binary crates are meant to be run on their own.
+Nếu dự án của chúng ta là một binary crate chỉ chứa file *src/main.rs* và không có file *src/lib.rs*, chúng ta không thể tạo integration tests trong thư mục *tests* và đưa các hàm được định nghĩa trong file *src/main.rs* vào phạm vi với câu lệnh `use`. Chỉ các library crate mới cung cấp các hàm mà crate khác có thể sử dụng; binary crate được thiết kế để chạy độc lập.
 
-This is one of the reasons Rust projects that provide a binary have a
-straightforward *src/main.rs* file that calls logic that lives in the
-*src/lib.rs* file. Using that structure, integration tests *can* test the
-library crate with `use` to make the important functionality available.
-If the important functionality works, the small amount of code in the
-*src/main.rs* file will work as well, and that small amount of code doesn’t
-need to be tested.
+Đây là một trong những lý do mà các dự án Rust cung cấp binary thường có file *src/main.rs* đơn giản, gọi các logic nằm trong file *src/lib.rs*. Sử dụng cấu trúc đó, integration tests *có thể* kiểm tra library crate với `use` để làm cho các chức năng quan trọng có thể sử dụng được. Nếu các chức năng quan trọng hoạt động, phần mã nhỏ trong file *src/main.rs* cũng sẽ hoạt động, và phần mã nhỏ đó không cần phải kiểm tra.
 
-## Summary
+## Tóm tắt
 
-Rust’s testing features provide a way to specify how code should function to
-ensure it continues to work as you expect, even as you make changes. Unit tests
-exercise different parts of a library separately and can test private
-implementation details. Integration tests check that many parts of the library
-work together correctly, and they use the library’s public API to test the code
-in the same way external code will use it. Even though Rust’s type system and
-ownership rules help prevent some kinds of bugs, tests are still important to
-reduce logic bugs having to do with how your code is expected to behave.
+Các tính năng kiểm tra của Rust cung cấp cách để xác định cách mã nên hoạt động nhằm đảm bảo nó tiếp tục hoạt động như bạn mong đợi, ngay cả khi bạn thực hiện các thay đổi. Unit tests kiểm tra các phần khác nhau của thư viện một cách riêng biệt và có thể kiểm tra các chi tiết triển khai riêng tư. Integration tests kiểm tra rằng nhiều phần của thư viện hoạt động cùng nhau chính xác, và chúng sử dụng API công khai của thư viện để kiểm tra mã giống như cách mã bên ngoài sẽ sử dụng. Mặc dù hệ thống kiểu và quy tắc sở hữu của Rust giúp ngăn ngừa một số loại lỗi, nhưng việc kiểm tra vẫn quan trọng để giảm thiểu các lỗi logic liên quan đến cách mã của bạn được mong đợi hoạt động.
 
-Let’s combine the knowledge you learned in this chapter and in previous
-chapters to work on a project!
+Hãy kết hợp kiến thức bạn học được trong chương này và các chương trước để làm việc trên một dự án!
 
 [paths]: ch07-03-paths-for-referring-to-an-item-in-the-module-tree.html
 [separating-modules-into-files]:

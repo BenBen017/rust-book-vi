@@ -1,39 +1,37 @@
 <!-- Old heading. Do not remove or links may break. -->
 <a id="closures-anonymous-functions-that-can-capture-their-environment"></a>
 
-## Closures: Anonymous Functions that Capture Their Environment
+## Closures: Hàm Ẩn Danh Có Khả Năng Bắt Giá Trị Môi Trường
 
-Rust’s closures are anonymous functions you can save in a variable or pass as
-arguments to other functions. You can create the closure in one place and then
-call the closure elsewhere to evaluate it in a different context. Unlike
-functions, closures can capture values from the scope in which they’re defined.
-We’ll demonstrate how these closure features allow for code reuse and behavior
-customization.
+Closures trong Rust là các hàm ẩn danh mà bạn có thể lưu vào biến hoặc
+truyền làm đối số cho các hàm khác. Bạn có thể định nghĩa closure ở một
+nơi và sau đó gọi nó ở nơi khác để thực thi trong một ngữ cảnh khác.
+Khác với các hàm thông thường, closures có thể “bắt” các giá trị từ phạm
+vi nơi chúng được tạo. Chúng ta sẽ minh họa cách các tính năng này của
+closures giúp tái sử dụng code và tùy chỉnh hành vi chương trình.
 
 <!-- Old headings. Do not remove or links may break. -->
 <a id="creating-an-abstraction-of-behavior-with-closures"></a>
 <a id="refactoring-using-functions"></a>
 <a id="refactoring-with-closures-to-store-code"></a>
 
-### Capturing the Environment with Closures
+### Bắt Giá Trị Môi Trường với Closures
 
-We’ll first examine how we can use closures to capture values from the
-environment they’re defined in for later use. Here’s the scenario: Every so
-often, our t-shirt company gives away an exclusive, limited-edition shirt to
-someone on our mailing list as a promotion. People on the mailing list can
-optionally add their favorite color to their profile. If the person chosen for
-a free shirt has their favorite color set, they get that color shirt. If the
-person hasn’t specified a favorite color, they get whatever color the company
-currently has the most of.
+Trước tiên, chúng ta sẽ xem cách closures có thể “bắt” các giá trị từ môi
+trường nơi chúng được định nghĩa để dùng sau này. Ví dụ sau đây: Thỉnh
+thoảng, công ty áo thun của chúng ta sẽ tặng một chiếc áo phiên bản giới
+hạn cho một người trong danh sách email như một chương trình khuyến mãi.
+Người trong danh sách email có thể tùy chọn thêm màu áo yêu thích vào hồ
+sơ của họ. Nếu người được chọn đã có màu yêu thích, họ sẽ nhận áo màu
+đó. Nếu chưa, họ sẽ nhận màu áo mà công ty đang còn nhiều nhất trong kho.
 
-There are many ways to implement this. For this example, we’re going to use an
-enum called `ShirtColor` that has the variants `Red` and `Blue` (limiting the
-number of colors available for simplicity). We represent the company’s
-inventory with an `Inventory` struct that has a field named `shirts` that
-contains a `Vec<ShirtColor>` representing the shirt colors currently in stock.
-The method `giveaway` defined on `Inventory` gets the optional shirt
-color preference of the free shirt winner, and returns the shirt color the
-person will get. This setup is shown in Listing 13-1:
+Có nhiều cách để triển khai điều này. Trong ví dụ này, chúng ta sẽ dùng
+enum `ShirtColor` với hai biến thể `Red` và `Blue` (giới hạn số màu cho
+đơn giản). Kho hàng được biểu diễn bằng struct `Inventory`, có trường
+`shirts` chứa `Vec<ShirtColor>` đại diện cho các màu áo hiện có trong kho.
+Phương thức `giveaway` của `Inventory` nhận tùy chọn màu áo của người
+thắng cuộc và trả về màu áo mà họ sẽ nhận. Cấu trúc này được minh họa
+trong Listing 13-1:
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -41,69 +39,69 @@ person will get. This setup is shown in Listing 13-1:
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-01/src/main.rs}}
 ```
 
-<span class="caption">Listing 13-1: Shirt company giveaway situation</span>
+<span class="caption">Listing 13-1: Tình huống tặng áo của công ty</span>
 
-The `store` defined in `main` has two blue shirts and one red shirt remaining
-to distribute for this limited-edition promotion. We call the `giveaway` method
-for a user with a preference for a red shirt and a user without any preference.
+`store` được định nghĩa trong `main` còn hai áo màu xanh và một áo màu đỏ
+để phân phát trong chương trình khuyến mãi phiên bản giới hạn này. Chúng
+ta gọi phương thức `giveaway` cho một người dùng có sở thích áo màu đỏ
+và một người không có sở thích nào.
 
-Again, this code could be implemented in many ways, and here, to focus on
-closures, we’ve stuck to concepts you’ve already learned except for the body of
-the `giveaway` method that uses a closure. In the `giveaway` method, we get the
-user preference as a parameter of type `Option<ShirtColor>` and call the
-`unwrap_or_else` method on `user_preference`. The [`unwrap_or_else` method on
-`Option<T>`][unwrap-or-else]<!-- ignore --> is defined by the standard library.
-It takes one argument: a closure without any arguments that returns a value `T`
-(the same type stored in the `Some` variant of the `Option<T>`, in this case
-`ShirtColor`). If the `Option<T>` is the `Some` variant, `unwrap_or_else`
-returns the value from within the `Some`. If the `Option<T>` is the `None`
-variant, `unwrap_or_else` calls the closure and returns the value returned by
-the closure.
+Lại một lần nữa, đoạn code này có thể được triển khai theo nhiều cách,
+và ở đây, để tập trung vào closures, chúng ta chỉ sử dụng những khái niệm
+bạn đã học, ngoại trừ phần thân của phương thức `giveaway` sử dụng closure.
+Trong phương thức `giveaway`, chúng ta nhận sở thích của người dùng dưới
+dạng tham số kiểu `Option<ShirtColor>` và gọi phương thức `unwrap_or_else`
+trên `user_preference`. Phương thức [`unwrap_or_else` trên `Option<T>`][unwrap-or-else]<!-- ignore --> 
+được định nghĩa bởi thư viện chuẩn. Nó nhận một đối số: một closure không
+có tham số và trả về giá trị kiểu `T` (cùng kiểu được lưu trong biến thể
+`Some` của `Option<T>`, trong trường hợp này là `ShirtColor`). Nếu `Option<T>`
+là biến thể `Some`, `unwrap_or_else` trả về giá trị bên trong `Some`. Nếu
+`Option<T>` là biến thể `None`, `unwrap_or_else` sẽ gọi closure và trả về
+giá trị mà closure trả về.
 
-We specify the closure expression `|| self.most_stocked()` as the argument to
-`unwrap_or_else`. This is a closure that takes no parameters itself (if the
-closure had parameters, they would appear between the two vertical bars). The
-body of the closure calls `self.most_stocked()`. We’re defining the closure
-here, and the implementation of `unwrap_or_else` will evaluate the closure
-later if the result is needed.
+Chúng ta chỉ định biểu thức closure `|| self.most_stocked()` làm đối số
+cho `unwrap_or_else`. Đây là một closure không nhận tham số nào (nếu closure
+có tham số, chúng sẽ xuất hiện giữa hai dấu gạch đứng). Thân của closure
+gọi `self.most_stocked()`. Chúng ta định nghĩa closure ở đây, và
+cài đặt của `unwrap_or_else` sẽ thực thi closure sau nếu kết quả được
+cần thiết.
 
-Running this code prints:
+Chạy đoạn code này sẽ in ra:
 
 ```console
 {{#include ../listings/ch13-functional-features/listing-13-01/output.txt}}
 ```
 
-One interesting aspect here is that we’ve passed a closure that calls
-`self.most_stocked()` on the current `Inventory` instance. The standard library
-didn’t need to know anything about the `Inventory` or `ShirtColor` types we
-defined, or the logic we want to use in this scenario. The closure captures an
-immutable reference to the `self` `Inventory` instance and passes it with the
-code we specify to the `unwrap_or_else` method. Functions, on the other hand,
-are not able to capture their environment in this way.
+Một điểm thú vị ở đây là chúng ta đã truyền một closure gọi `self.most_stocked()`
+trên instance `Inventory` hiện tại. Thư viện chuẩn không cần biết gì về các
+kiểu `Inventory` hay `ShirtColor` mà chúng ta định nghĩa, cũng như logic mà
+chúng ta muốn sử dụng trong tình huống này. Closure sẽ bắt một tham chiếu
+bất biến đến instance `self` của `Inventory` và truyền nó cùng với đoạn code
+chúng ta chỉ định đến phương thức `unwrap_or_else`. Ngược lại, các hàm
+thường không thể bắt môi trường của chúng theo cách này.
 
-### Closure Type Inference and Annotation
+### Suy Luận Kiểu và Ghi Chú Kiểu cho Closures
 
-There are more differences between functions and closures. Closures don’t
-usually require you to annotate the types of the parameters or the return value
-like `fn` functions do. Type annotations are required on functions because the
-types are part of an explicit interface exposed to your users. Defining this
-interface rigidly is important for ensuring that everyone agrees on what types
-of values a function uses and returns. Closures, on the other hand, aren’t used
-in an exposed interface like this: they’re stored in variables and used without
-naming them and exposing them to users of our library.
+Còn có nhiều khác biệt giữa hàm và closures. Closures thường không yêu cầu
+bạn phải ghi chú kiểu cho các tham số hoặc giá trị trả về như các hàm `fn`.
+Ghi chú kiểu là cần thiết cho hàm vì các kiểu là một phần của giao diện
+rõ ràng được cung cấp cho người dùng. Định nghĩa giao diện này một cách
+cứng nhắc giúp đảm bảo mọi người đều hiểu các kiểu giá trị mà hàm sử dụng
+và trả về. Closures, ngược lại, không được dùng trong một giao diện lộ ra
+như vậy: chúng được lưu trong biến và sử dụng mà không cần đặt tên hay
+tiếp cận bởi người dùng thư viện.
 
-Closures are typically short and relevant only within a narrow context rather
-than in any arbitrary scenario. Within these limited contexts, the compiler can
-infer the types of the parameters and the return type, similar to how it’s able
-to infer the types of most variables (there are rare cases where the compiler
-needs closure type annotations too).
+Closures thường ngắn gọn và chỉ liên quan trong một ngữ cảnh hẹp, thay vì
+trong bất kỳ tình huống tùy ý nào. Trong những ngữ cảnh hạn chế này,
+compiler có thể suy luận kiểu của các tham số và kiểu trả về, tương tự
+như cách nó suy luận kiểu hầu hết các biến (có những trường hợp hiếm
+rằng compiler cũng cần ghi chú kiểu cho closure).
 
-As with variables, we can add type annotations if we want to increase
-explicitness and clarity at the cost of being more verbose than is strictly
-necessary. Annotating the types for a closure would look like the definition
-shown in Listing 13-2. In this example, we’re defining a closure and storing it
-in a variable rather than defining the closure in the spot we pass it as an
-argument as we did in Listing 13-1.
+Giống như với biến, chúng ta có thể thêm ghi chú kiểu nếu muốn tăng tính
+rõ ràng và minh bạch, mặc dù sẽ làm code dài hơn mức cần thiết. Việc ghi
+chú kiểu cho một closure sẽ trông như định nghĩa trong Listing 13-2. Trong
+ví dụ này, chúng ta định nghĩa một closure và lưu nó vào biến thay vì định
+nghĩa closure ngay tại chỗ truyền làm đối số như trong Listing 13-1.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -111,15 +109,15 @@ argument as we did in Listing 13-1.
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-02/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 13-2: Adding optional type annotations of the
-parameter and return value types in the closure</span>
+<span class="caption">Listing 13-2: Thêm ghi chú kiểu tùy chọn cho các kiểu
+tham số và giá trị trả về trong closure</span>
 
-With type annotations added, the syntax of closures looks more similar to the
-syntax of functions. Here we define a function that adds 1 to its parameter and
-a closure that has the same behavior, for comparison. We’ve added some spaces
-to line up the relevant parts. This illustrates how closure syntax is similar
-to function syntax except for the use of pipes and the amount of syntax that is
-optional:
+Khi thêm ghi chú kiểu, cú pháp của closures trông giống hơn với cú pháp
+của các hàm. Ở đây, chúng ta định nghĩa một hàm cộng 1 vào tham số của
+nó và một closure có cùng hành vi, để so sánh. Chúng ta đã thêm một số
+dấu cách để căn các phần liên quan. Điều này minh họa cách cú pháp
+closure tương tự cú pháp hàm, ngoại trừ việc sử dụng các dấu ống (`| |`)
+và mức độ cú pháp tùy chọn.
 
 ```rust,ignore
 fn  add_one_v1   (x: u32) -> u32 { x + 1 }
@@ -128,24 +126,25 @@ let add_one_v3 = |x|             { x + 1 };
 let add_one_v4 = |x|               x + 1  ;
 ```
 
-The first line shows a function definition, and the second line shows a fully
-annotated closure definition. In the third line, we remove the type annotations
-from the closure definition. In the fourth line, we remove the brackets, which
-are optional because the closure body has only one expression. These are all
-valid definitions that will produce the same behavior when they’re called. The
-`add_one_v3` and `add_one_v4` lines require the closures to be evaluated to be
-able to compile because the types will be inferred from their usage. This is
-similar to `let v = Vec::new();` needing either type annotations or values of
-some type to be inserted into the `Vec` for Rust to be able to infer the type.
+Dòng đầu tiên hiển thị định nghĩa một hàm, và dòng thứ hai hiển thị định
+nghĩa một closure với đầy đủ ghi chú kiểu. Ở dòng thứ ba, chúng ta loại
+bỏ ghi chú kiểu khỏi định nghĩa closure. Ở dòng thứ tư, chúng ta bỏ
+cặp dấu ngoặc nhọn, vốn tùy chọn vì thân closure chỉ có một biểu thức.
+Tất cả các định nghĩa này đều hợp lệ và sẽ cho cùng một hành vi khi
+được gọi. Các dòng `add_one_v3` và `add_one_v4` yêu cầu các closure được
+đánh giá trước khi biên dịch vì các kiểu sẽ được suy luận từ cách chúng
+được sử dụng. Điều này tương tự như `let v = Vec::new();` cần ghi chú
+kiểu hoặc các giá trị của một kiểu nào đó được thêm vào `Vec` để Rust
+có thể suy luận kiểu.
 
-For closure definitions, the compiler will infer one concrete type for each of
-their parameters and for their return value. For instance, Listing 13-3 shows
-the definition of a short closure that just returns the value it receives as a
-parameter. This closure isn’t very useful except for the purposes of this
-example. Note that we haven’t added any type annotations to the definition.
-Because there are no type annotations, we can call the closure with any type,
-which we’ve done here with `String` the first time. If we then try to call
-`example_closure` with an integer, we’ll get an error.
+Đối với định nghĩa closure, compiler sẽ suy luận một kiểu cụ thể cho mỗi
+tham số và cho giá trị trả về của chúng. Ví dụ, Listing 13-3 hiển thị
+định nghĩa một closure ngắn chỉ trả về giá trị mà nó nhận làm tham số.
+Closure này không hữu ích lắm ngoài mục đích minh họa. Lưu ý rằng chúng
+ta không thêm bất kỳ ghi chú kiểu nào cho định nghĩa. Vì không có ghi
+chú kiểu, chúng ta có thể gọi closure với bất kỳ kiểu nào, như lần đầu
+chúng ta gọi với `String`. Nếu sau đó thử gọi `example_closure` với một
+số nguyên, chúng ta sẽ nhận được lỗi.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -153,31 +152,30 @@ which we’ve done here with `String` the first time. If we then try to call
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-03/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 13-3: Attempting to call a closure whose types
-are inferred with two different types</span>
+<span class="caption">Listing 13-3: Thử gọi một closure có kiểu được suy luận
+với hai kiểu khác nhau</span>
 
-The compiler gives us this error:
+Compiler sẽ đưa ra lỗi sau:
 
 ```console
 {{#include ../listings/ch13-functional-features/listing-13-03/output.txt}}
 ```
 
-The first time we call `example_closure` with the `String` value, the compiler
-infers the type of `x` and the return type of the closure to be `String`. Those
-types are then locked into the closure in `example_closure`, and we get a type
-error when we next try to use a different type with the same closure.
+Lần đầu tiên chúng ta gọi `example_closure` với giá trị `String`, compiler
+suy luận kiểu của `x` và kiểu trả về của closure là `String`. Những kiểu
+này sau đó được “khóa” trong closure ở `example_closure`, và chúng ta sẽ
+nhận được lỗi kiểu khi cố gắng sử dụng một kiểu khác với cùng closure.
 
-### Capturing References or Moving Ownership
+### Bắt Tham Chiếu hoặc Chuyển Quyền Sở Hữu
 
-Closures can capture values from their environment in three ways, which
-directly map to the three ways a function can take a parameter: borrowing
-immutably, borrowing mutably, and taking ownership. The closure will decide
-which of these to use based on what the body of the function does with the
-captured values.
+Closures có thể bắt các giá trị từ môi trường của chúng theo ba cách, tương
+ứng trực tiếp với ba cách một hàm có thể nhận tham số: mượn bất biến,
+mượn có thể thay đổi, và nhận quyền sở hữu. Closure sẽ quyết định sử dụng
+cách nào dựa trên những gì thân hàm làm với các giá trị bị bắt.
 
-In Listing 13-4, we define a closure that captures an immutable reference to
-the vector named `list` because it only needs an immutable reference to print
-the value:
+Trong Listing 13-4, chúng ta định nghĩa một closure bắt một tham chiếu
+bất biến đến vector có tên `list` vì nó chỉ cần tham chiếu bất biến để in
+giá trị:
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -185,24 +183,24 @@ the value:
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-04/src/main.rs}}
 ```
 
-<span class="caption">Listing 13-4: Defining and calling a closure that
-captures an immutable reference</span>
+<span class="caption">Listing 13-4: Định nghĩa và gọi một closure bắt tham chiếu bất biến</span>
 
-This example also illustrates that a variable can bind to a closure definition,
-and we can later call the closure by using the variable name and parentheses as
-if the variable name were a function name.
+Ví dụ này cũng minh họa rằng một biến có thể liên kết với một định nghĩa
+closure, và chúng ta có thể gọi closure sau này bằng cách sử dụng tên
+biến và dấu ngoặc, như thể tên biến là tên hàm.
 
-Because we can have multiple immutable references to `list` at the same time,
-`list` is still accessible from the code before the closure definition, after
-the closure definition but before the closure is called, and after the closure
-is called. This code compiles, runs, and prints:
+Vì chúng ta có thể có nhiều tham chiếu bất biến đến `list` cùng lúc,
+`list` vẫn có thể truy cập được từ code trước khi định nghĩa closure,
+sau khi định nghĩa closure nhưng trước khi gọi closure, và sau khi gọi
+closure. Đoạn code này biên dịch được, chạy được và in ra:
 
 ```console
 {{#include ../listings/ch13-functional-features/listing-13-04/output.txt}}
 ```
 
-Next, in Listing 13-5, we change the closure body so that it adds an element to
-the `list` vector. The closure now captures a mutable reference:
+Tiếp theo, trong Listing 13-5, chúng ta thay đổi thân closure sao cho nó
+thêm một phần tử vào vector `list`. Closure bây giờ bắt một tham chiếu
+có thể thay đổi:
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -210,33 +208,34 @@ the `list` vector. The closure now captures a mutable reference:
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-05/src/main.rs}}
 ```
 
-<span class="caption">Listing 13-5: Defining and calling a closure that
-captures a mutable reference</span>
+<span class="caption">Listing 13-5: Định nghĩa và gọi một closure bắt tham chiếu có thể thay đổi</span>
 
-This code compiles, runs, and prints:
+Đoạn code này biên dịch được, chạy được và in ra:
 
 ```console
 {{#include ../listings/ch13-functional-features/listing-13-05/output.txt}}
 ```
 
-Note that there’s no longer a `println!` between the definition and the call of
-the `borrows_mutably` closure: when `borrows_mutably` is defined, it captures a
-mutable reference to `list`. We don’t use the closure again after the closure
-is called, so the mutable borrow ends. Between the closure definition and the
-closure call, an immutable borrow to print isn’t allowed because no other
-borrows are allowed when there’s a mutable borrow. Try adding a `println!`
-there to see what error message you get!
+Lưu ý rằng không còn `println!` nào giữa định nghĩa và gọi closure
+`borrows_mutably`: khi `borrows_mutably` được định nghĩa, nó bắt một
+tham chiếu có thể thay đổi đến `list`. Chúng ta không sử dụng closure
+nữa sau khi gọi, nên việc mượn có thể thay đổi kết thúc. Giữa định
+nghĩa closure và gọi closure, việc mượn bất biến để in ra không được
+cho phép vì khi có một tham chiếu có thể thay đổi, không có mượn nào
+khác được phép. Hãy thử thêm một `println!` vào đó để xem thông báo
+lỗi bạn nhận được!
 
-If you want to force the closure to take ownership of the values it uses in the
-environment even though the body of the closure doesn’t strictly need
-ownership, you can use the `move` keyword before the parameter list.
+Nếu bạn muốn buộc closure nhận quyền sở hữu các giá trị nó sử dụng
+trong môi trường mặc dù thân closure không nhất thiết phải cần quyền
+sở hữu, bạn có thể dùng từ khóa `move` trước danh sách tham số.
 
-This technique is mostly useful when passing a closure to a new thread to move
-the data so that it’s owned by the new thread. We’ll discuss threads and why
-you would want to use them in detail in Chapter 16 when we talk about
-concurrency, but for now, let’s briefly explore spawning a new thread using a
-closure that needs the `move` keyword. Listing 13-6 shows Listing 13-4 modified
-to print the vector in a new thread rather than in the main thread:
+Kỹ thuật này chủ yếu hữu ích khi truyền một closure vào một luồng mới
+để chuyển dữ liệu sao cho nó thuộc sở hữu của luồng mới. Chúng ta sẽ
+thảo luận chi tiết về luồng và lý do muốn dùng chúng trong Chương 16
+khi bàn về concurrency, nhưng bây giờ, hãy cùng khám phá ngắn gọn việc
+khởi tạo một luồng mới sử dụng closure cần từ khóa `move`. Listing 13-6
+hiển thị Listing 13-4 được chỉnh sửa để in vector trong một luồng mới
+thay vì luồng chính:
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -244,61 +243,60 @@ to print the vector in a new thread rather than in the main thread:
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-06/src/main.rs}}
 ```
 
-<span class="caption">Listing 13-6: Using `move` to force the closure for the
-thread to take ownership of `list`</span>
+<span class="caption">Listing 13-6: Sử dụng `move` để buộc closure của luồng mới nhận quyền sở hữu `list`</span>
 
-We spawn a new thread, giving the thread a closure to run as an argument. The
-closure body prints out the list. In Listing 13-4, the closure only captured
-`list` using an immutable reference because that's the least amount of access
-to `list` needed to print it. In this example, even though the closure body
-still only needs an immutable reference, we need to specify that `list` should
-be moved into the closure by putting the `move` keyword at the beginning of the
-closure definition. The new thread might finish before the rest of the main
-thread finishes, or the main thread might finish first. If the main thread
-maintained ownership of `list` but ended before the new thread did and dropped
-`list`, the immutable reference in the thread would be invalid. Therefore, the
-compiler requires that `list` be moved into the closure given to the new thread
-so the reference will be valid. Try removing the `move` keyword or using `list`
-in the main thread after the closure is defined to see what compiler errors you
-get!
+Chúng ta khởi tạo một luồng mới, truyền cho luồng một closure để chạy
+như một đối số. Thân closure in ra `list`. Trong Listing 13-4, closure chỉ
+bắt `list` bằng một tham chiếu bất biến vì đó là mức truy cập tối thiểu
+cần thiết để in. Trong ví dụ này, mặc dù thân closure vẫn chỉ cần
+một tham chiếu bất biến, chúng ta cần chỉ định rằng `list` nên được
+chuyển vào closure bằng cách đặt từ khóa `move` ở đầu định nghĩa closure.
+Luồng mới có thể kết thúc trước khi luồng chính kết thúc, hoặc luồng chính
+có thể kết thúc trước. Nếu luồng chính vẫn giữ quyền sở hữu `list` nhưng
+kết thúc trước luồng mới và hủy `list`, tham chiếu bất biến trong luồng mới
+sẽ không còn hợp lệ. Do đó, compiler yêu cầu `list` phải được chuyển vào
+closure của luồng mới để tham chiếu được hợp lệ. Hãy thử bỏ từ khóa `move`
+hoặc sử dụng `list` trong luồng chính sau khi định nghĩa closure để xem
+các lỗi compiler bạn nhận được!
 
 <!-- Old headings. Do not remove or links may break. -->
 <a id="storing-closures-using-generic-parameters-and-the-fn-traits"></a>
 <a id="limitations-of-the-cacher-implementation"></a>
 <a id="moving-captured-values-out-of-the-closure-and-the-fn-traits"></a>
 
-### Moving Captured Values Out of Closures and the `Fn` Traits
+### Chuyển Giá Trị Bắt Được Ra Khỏi Closures và Các Trait `Fn`
 
-Once a closure has captured a reference or captured ownership of a value from
-the environment where the closure is defined (thus affecting what, if anything,
-is moved *into* the closure), the code in the body of the closure defines what
-happens to the references or values when the closure is evaluated later (thus
-affecting what, if anything, is moved *out of* the closure). A closure body can
-do any of the following: move a captured value out of the closure, mutate the
-captured value, neither move nor mutate the value, or capture nothing from the
-environment to begin with.
+Khi một closure đã bắt một tham chiếu hoặc quyền sở hữu của một giá trị
+từ môi trường nơi closure được định nghĩa (ảnh hưởng đến việc có gì,
+nếu có, được chuyển *vào* closure), thì đoạn code trong thân closure sẽ
+xác định điều gì xảy ra với các tham chiếu hoặc giá trị khi closure được
+thực thi sau này (ảnh hưởng đến việc có gì, nếu có, được chuyển *ra khỏi*
+closure). Thân closure có thể thực hiện bất kỳ điều nào sau đây: chuyển
+giá trị bắt được ra khỏi closure, thay đổi giá trị bắt được, không chuyển
+không thay đổi giá trị, hoặc không bắt gì từ môi trường ngay từ đầu.
 
-The way a closure captures and handles values from the environment affects
-which traits the closure implements, and traits are how functions and structs
-can specify what kinds of closures they can use. Closures will automatically
-implement one, two, or all three of these `Fn` traits, in an additive fashion,
-depending on how the closure’s body handles the values:
+Cách closure bắt và xử lý các giá trị từ môi trường ảnh hưởng đến các trait
+mà closure thực thi, và traits là cách các hàm và struct có thể chỉ định
+loại closures mà chúng có thể sử dụng. Closures sẽ tự động triển khai một,
+hai, hoặc cả ba trait `Fn` này, theo cách cộng dồn, tùy thuộc vào cách thân
+closure xử lý các giá trị:
 
-1. `FnOnce` applies to closures that can be called once. All closures implement
-   at least this trait, because all closures can be called. A closure that
-   moves captured values out of its body will only implement `FnOnce` and none
-   of the other `Fn` traits, because it can only be called once.
-2. `FnMut` applies to closures that don’t move captured values out of their
-   body, but that might mutate the captured values. These closures can be
-   called more than once.
-3. `Fn` applies to closures that don’t move captured values out of their body
-   and that don’t mutate captured values, as well as closures that capture
-   nothing from their environment. These closures can be called more than once
-   without mutating their environment, which is important in cases such as
-   calling a closure multiple times concurrently.
+1. `FnOnce` áp dụng cho các closures chỉ có thể được gọi một lần. Tất cả
+   closures đều triển khai ít nhất trait này, vì tất cả closures có thể được
+   gọi. Một closure mà chuyển các giá trị bắt được ra khỏi thân của nó
+   sẽ chỉ triển khai `FnOnce` và không triển khai các trait `Fn` khác,
+   vì nó chỉ có thể được gọi một lần.
+2. `FnMut` áp dụng cho các closures không chuyển giá trị bắt được ra khỏi
+   thân, nhưng có thể thay đổi các giá trị bắt được. Những closures này
+   có thể được gọi nhiều lần.
+3. `Fn` áp dụng cho các closures không chuyển giá trị bắt được ra khỏi thân
+   và không thay đổi các giá trị bắt được, cũng như các closures không bắt
+   gì từ môi trường. Những closures này có thể được gọi nhiều lần mà không
+   làm thay đổi môi trường, điều này quan trọng trong các trường hợp như
+   gọi closure nhiều lần đồng thời.
 
-Let’s look at the definition of the `unwrap_or_else` method on `Option<T>` that
-we used in Listing 13-1:
+Hãy xem định nghĩa của phương thức `unwrap_or_else` trên `Option<T>` mà
+chúng ta đã sử dụng trong Listing 13-1:
 
 ```rust,ignore
 impl<T> Option<T> {
@@ -314,39 +312,40 @@ impl<T> Option<T> {
 }
 ```
 
-Recall that `T` is the generic type representing the type of the value in the
-`Some` variant of an `Option`. That type `T` is also the return type of the
-`unwrap_or_else` function: code that calls `unwrap_or_else` on an
-`Option<String>`, for example, will get a `String`.
+Nhớ rằng `T` là kiểu tổng quát đại diện cho kiểu giá trị trong biến thể
+`Some` của một `Option`. Kiểu `T` cũng là kiểu trả về của hàm
+`unwrap_or_else`: ví dụ, code gọi `unwrap_or_else` trên một
+`Option<String>` sẽ nhận về một `String`.
 
-Next, notice that the `unwrap_or_else` function has the additional generic type
-parameter `F`. The `F` type is the type of the parameter named `f`, which is
-the closure we provide when calling `unwrap_or_else`.
+Tiếp theo, lưu ý rằng hàm `unwrap_or_else` có thêm tham số kiểu tổng quát
+`F`. Kiểu `F` là kiểu của tham số `f`, chính là closure mà chúng ta cung
+cấp khi gọi `unwrap_or_else`.
 
-The trait bound specified on the generic type `F` is `FnOnce() -> T`, which
-means `F` must be able to be called once, take no arguments, and return a `T`.
-Using `FnOnce` in the trait bound expresses the constraint that
-`unwrap_or_else` is only going to call `f` at most one time. In the body of
-`unwrap_or_else`, we can see that if the `Option` is `Some`, `f` won’t be
-called. If the `Option` is `None`, `f` will be called once. Because all
-closures implement `FnOnce`, `unwrap_or_else` accepts the most different kinds
-of closures and is as flexible as it can be.
+Ràng buộc trait được chỉ định trên kiểu tổng quát `F` là `FnOnce() -> T`,
+có nghĩa `F` phải có thể được gọi một lần, không nhận tham số, và trả
+về một `T`. Việc dùng `FnOnce` trong ràng buộc trait thể hiện hạn chế
+rằng `unwrap_or_else` chỉ gọi `f` tối đa một lần. Trong thân hàm
+`unwrap_or_else`, nếu `Option` là `Some`, `f` sẽ không được gọi.
+Nếu `Option` là `None`, `f` sẽ được gọi một lần. Vì tất cả closures
+triển khai `FnOnce`, `unwrap_or_else` chấp nhận đa dạng nhất các loại
+closures và linh hoạt tối đa.
 
-> Note: Functions can implement all three of the `Fn` traits too. If what we
-> want to do doesn’t require capturing a value from the environment, we can use
-> the name of a function rather than a closure where we need something that
-> implements one of the `Fn` traits. For example, on an `Option<Vec<T>>` value,
-> we could call `unwrap_or_else(Vec::new)` to get a new, empty vector if the
-> value is `None`.
+> Lưu ý: Các hàm cũng có thể triển khai cả ba trait `Fn`. Nếu việc
+> chúng ta muốn làm không yêu cầu bắt giá trị từ môi trường, chúng ta
+> có thể sử dụng tên hàm thay vì closure nơi cần một thứ triển khai
+> một trong các trait `Fn`. Ví dụ, trên một giá trị `Option<Vec<T>>`,
+> ta có thể gọi `unwrap_or_else(Vec::new)` để nhận một vector mới rỗng
+> nếu giá trị là `None`.
 
-Now let’s look at the standard library method `sort_by_key` defined on slices,
-to see how that differs from `unwrap_or_else` and why `sort_by_key` uses
-`FnMut` instead of `FnOnce` for the trait bound. The closure gets one argument
-in the form of a reference to the current item in the slice being considered,
-and returns a value of type `K` that can be ordered. This function is useful
-when you want to sort a slice by a particular attribute of each item. In
-Listing 13-7, we have a list of `Rectangle` instances and we use `sort_by_key`
-to order them by their `width` attribute from low to high:
+Bây giờ, hãy xem phương thức thư viện chuẩn `sort_by_key` định nghĩa
+trên các slices, để thấy sự khác biệt với `unwrap_or_else` và lý do
+tại sao `sort_by_key` dùng `FnMut` thay vì `FnOnce` cho ràng buộc trait.
+Closure nhận một tham số dưới dạng tham chiếu đến phần tử hiện tại
+trong slice đang xét, và trả về một giá trị kiểu `K` có thể sắp xếp.
+Hàm này hữu ích khi muốn sắp xếp slice theo một thuộc tính cụ thể
+của mỗi phần tử. Trong Listing 13-7, chúng ta có một danh sách
+các instance `Rectangle` và dùng `sort_by_key` để sắp xếp theo
+thuộc tính `width` từ nhỏ đến lớn:
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -354,23 +353,22 @@ to order them by their `width` attribute from low to high:
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-07/src/main.rs}}
 ```
 
-<span class="caption">Listing 13-7: Using `sort_by_key` to order rectangles by
-width</span>
+<span class="caption">Listing 13-7: Sử dụng `sort_by_key` để sắp xếp các hình chữ nhật theo chiều rộng</span>
 
-This code prints:
+Đoạn code này in ra:
 
 ```console
 {{#include ../listings/ch13-functional-features/listing-13-07/output.txt}}
 ```
 
-The reason `sort_by_key` is defined to take an `FnMut` closure is that it calls
-the closure multiple times: once for each item in the slice. The closure `|r|
-r.width` doesn’t capture, mutate, or move out anything from its environment, so
-it meets the trait bound requirements.
+Lý do `sort_by_key` được định nghĩa để nhận một closure `FnMut` là vì
+nó gọi closure nhiều lần: một lần cho mỗi phần tử trong slice. Closure
+`|r| r.width` không bắt, thay đổi, hay chuyển ra bất kỳ giá trị nào
+từ môi trường, nên nó thỏa mãn các yêu cầu của ràng buộc trait.
 
-In contrast, Listing 13-8 shows an example of a closure that implements just
-the `FnOnce` trait, because it moves a value out of the environment. The
-compiler won’t let us use this closure with `sort_by_key`:
+Ngược lại, Listing 13-8 cho thấy một ví dụ về closure chỉ triển khai
+trait `FnOnce`, vì nó chuyển một giá trị ra khỏi môi trường. Compiler
+sẽ không cho phép chúng ta sử dụng closure này với `sort_by_key`:
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -378,33 +376,32 @@ compiler won’t let us use this closure with `sort_by_key`:
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-08/src/main.rs}}
 ```
 
-<span class="caption">Listing 13-8: Attempting to use an `FnOnce` closure with
-`sort_by_key`</span>
+<span class="caption">Listing 13-8: Thử sử dụng một closure `FnOnce` với `sort_by_key`</span>
 
-This is a contrived, convoluted way (that doesn’t work) to try and count the
-number of times `sort_by_key` gets called when sorting `list`. This code
-attempts to do this counting by pushing `value`—a `String` from the closure’s
-environment—into the `sort_operations` vector. The closure captures `value`
-then moves `value` out of the closure by transferring ownership of `value` to
-the `sort_operations` vector. This closure can be called once; trying to call
-it a second time wouldn’t work because `value` would no longer be in the
-environment to be pushed into `sort_operations` again! Therefore, this closure
-only implements `FnOnce`. When we try to compile this code, we get this error
-that `value` can’t be moved out of the closure because the closure must
-implement `FnMut`:
+Đây là một cách dựng lên rườm rà và phức tạp (không hoạt động) để cố
+gắng đếm số lần `sort_by_key` được gọi khi sắp xếp `list`. Đoạn code
+này cố gắng đếm bằng cách đẩy `value`—một `String` từ môi trường của
+closure—vào vector `sort_operations`. Closure bắt `value` rồi chuyển
+`value` ra khỏi closure bằng cách chuyển quyền sở hữu của `value` vào
+vector `sort_operations`. Closure này chỉ có thể được gọi một lần;
+nếu cố gọi lần thứ hai sẽ không được vì `value` không còn trong
+môi trường để đẩy vào `sort_operations` nữa! Do đó, closure này chỉ
+triển khai `FnOnce`. Khi cố biên dịch đoạn code này, chúng ta nhận được
+lỗi rằng `value` không thể được chuyển ra khỏi closure vì closure
+phải triển khai `FnMut`:
 
 ```console
 {{#include ../listings/ch13-functional-features/listing-13-08/output.txt}}
 ```
 
-The error points to the line in the closure body that moves `value` out of the
-environment. To fix this, we need to change the closure body so that it doesn’t
-move values out of the environment. To count the number of times `sort_by_key`
-is called, keeping a counter in the environment and incrementing its value in
-the closure body is a more straightforward way to calculate that. The closure
-in Listing 13-9 works with `sort_by_key` because it is only capturing a mutable
-reference to the `num_sort_operations` counter and can therefore be called more
-than once:
+Lỗi này chỉ ra dòng trong thân closure chuyển `value` ra khỏi môi trường.
+Để khắc phục, chúng ta cần thay đổi thân closure sao cho không chuyển
+giá trị ra khỏi môi trường. Để đếm số lần `sort_by_key` được gọi, việc
+giữ một biến đếm trong môi trường và tăng giá trị của nó trong thân
+closure là cách trực quan hơn để tính toán. Closure trong Listing 13-9
+hoạt động với `sort_by_key` vì nó chỉ bắt một tham chiếu có thể thay
+đổi đến biến đếm `num_sort_operations` và do đó có thể được gọi nhiều
+lần:
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -412,12 +409,11 @@ than once:
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-09/src/main.rs}}
 ```
 
-<span class="caption">Listing 13-9: Using an `FnMut` closure with `sort_by_key`
-is allowed</span>
+<span class="caption">Listing 13-9: Sử dụng closure `FnMut` với `sort_by_key` được phép</span>
 
-The `Fn` traits are important when defining or using functions or types that
-make use of closures. In the next section, we’ll discuss iterators. Many
-iterator methods take closure arguments, so keep these closure details in mind
-as we continue!
+Các trait `Fn` rất quan trọng khi định nghĩa hoặc sử dụng các hàm
+hoặc kiểu dữ liệu có dùng closures. Trong phần tiếp theo, chúng ta sẽ
+thảo luận về iterators. Nhiều phương thức của iterator nhận đối số
+là closure, nên hãy nhớ các chi tiết về closure này khi tiếp tục!
 
 [unwrap-or-else]: ../std/option/enum.Option.html#method.unwrap_or_else

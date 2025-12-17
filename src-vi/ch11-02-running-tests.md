@@ -1,62 +1,28 @@
-## Controlling How Tests Are Run
+## Kiểm soát cách chạy các hàm kiểm tra
 
-Just as `cargo run` compiles your code and then runs the resulting binary,
-`cargo test` compiles your code in test mode and runs the resulting test
-binary. The default behavior of the binary produced by `cargo test` is to run
-all the tests in parallel and capture output generated during test runs,
-preventing the output from being displayed and making it easier to read the
-output related to the test results. You can, however, specify command line
-options to change this default behavior.
+Cũng giống như `cargo run` biên dịch mã của bạn và sau đó chạy file nhị phân kết quả, `cargo test` biên dịch mã của bạn ở chế độ kiểm tra và chạy file nhị phân kiểm tra tạo ra. Hành vi mặc định của file nhị phân do `cargo test` tạo ra là chạy tất cả các hàm kiểm tra song song và bắt giữ output được tạo ra trong quá trình chạy kiểm tra, ngăn không cho output hiển thị và giúp dễ đọc các kết quả liên quan đến kiểm tra. Tuy nhiên, bạn có thể chỉ định các tùy chọn dòng lệnh để thay đổi hành vi mặc định này.
 
-Some command line options go to `cargo test`, and some go to the resulting test
-binary. To separate these two types of arguments, you list the arguments that
-go to `cargo test` followed by the separator `--` and then the ones that go to
-the test binary. Running `cargo test --help` displays the options you can use
-with `cargo test`, and running `cargo test -- --help` displays the options you
-can use after the separator.
+Một số tùy chọn dòng lệnh dành cho `cargo test`, và một số dành cho file nhị phân kiểm tra tạo ra. Để tách hai loại đối số này, bạn liệt kê các đối số dành cho `cargo test`, theo sau là dấu phân tách `--`, rồi mới đến các đối số dành cho file nhị phân kiểm tra. Chạy `cargo test --help` sẽ hiển thị các tùy chọn bạn có thể dùng với `cargo test`, và chạy `cargo test -- --help` sẽ hiển thị các tùy chọn bạn có thể dùng sau dấu phân tách.
 
-### Running Tests in Parallel or Consecutively
+### Chạy các hàm kiểm tra song song hoặc tuần tự
 
-When you run multiple tests, by default they run in parallel using threads,
-meaning they finish running faster and you get feedback quicker. Because the
-tests are running at the same time, you must make sure your tests don’t depend
-on each other or on any shared state, including a shared environment, such as
-the current working directory or environment variables.
+Khi bạn chạy nhiều hàm kiểm tra, theo mặc định chúng chạy song song bằng các thread, nghĩa là chúng hoàn thành nhanh hơn và bạn nhận phản hồi nhanh hơn. Vì các hàm kiểm tra chạy cùng lúc, bạn phải đảm bảo rằng các hàm kiểm tra không phụ thuộc vào nhau hoặc vào bất kỳ trạng thái chung nào, bao gồm môi trường chung, chẳng hạn như thư mục làm việc hiện tại hoặc biến môi trường.
 
-For example, say each of your tests runs some code that creates a file on disk
-named *test-output.txt* and writes some data to that file. Then each test reads
-the data in that file and asserts that the file contains a particular value,
-which is different in each test. Because the tests run at the same time, one
-test might overwrite the file in the time between another test writing and
-reading the file. The second test will then fail, not because the code is
-incorrect but because the tests have interfered with each other while running
-in parallel. One solution is to make sure each test writes to a different file;
-another solution is to run the tests one at a time.
+Ví dụ, giả sử mỗi hàm kiểm tra của bạn chạy một đoạn mã tạo một file trên ổ đĩa tên *test-output.txt* và ghi một số dữ liệu vào file đó. Sau đó mỗi hàm kiểm tra đọc dữ liệu trong file và xác nhận rằng file chứa một giá trị nhất định, khác nhau ở mỗi hàm kiểm tra. Vì các hàm kiểm tra chạy cùng lúc, một hàm kiểm tra có thể ghi đè file trong lúc một hàm kiểm tra khác đang ghi và đọc file. Hàm kiểm tra thứ hai sẽ thất bại, không phải vì mã sai mà vì các hàm kiểm tra đã can thiệp lẫn nhau khi chạy song song. Một giải pháp là đảm bảo mỗi hàm kiểm tra ghi vào một file khác; giải pháp khác là chạy các hàm kiểm tra một lần mỗi lần.
 
-If you don’t want to run the tests in parallel or if you want more fine-grained
-control over the number of threads used, you can send the `--test-threads` flag
-and the number of threads you want to use to the test binary. Take a look at
-the following example:
+Nếu bạn không muốn chạy các hàm kiểm tra song song hoặc muốn kiểm soát chi tiết hơn số lượng thread sử dụng, bạn có thể gửi flag `--test-threads` kèm số lượng thread muốn dùng cho file nhị phân kiểm tra. Xem ví dụ sau:
 
 ```console
 $ cargo test -- --test-threads=1
 ```
 
-We set the number of test threads to `1`, telling the program not to use any
-parallelism. Running the tests using one thread will take longer than running
-them in parallel, but the tests won’t interfere with each other if they share
-state.
+Chúng ta đặt số lượng thread kiểm tra là `1`, thông báo cho chương trình không sử dụng song song. Chạy các hàm kiểm tra bằng một thread sẽ mất nhiều thời gian hơn so với chạy song song, nhưng các hàm kiểm tra sẽ không can thiệp lẫn nhau nếu chúng chia sẻ trạng thái.
 
-### Showing Function Output
+### Hiển thị output của hàm
 
-By default, if a test passes, Rust’s test library captures anything printed to
-standard output. For example, if we call `println!` in a test and the test
-passes, we won’t see the `println!` output in the terminal; we’ll see only the
-line that indicates the test passed. If a test fails, we’ll see whatever was
-printed to standard output with the rest of the failure message.
+Theo mặc định, nếu một hàm kiểm tra thành công, thư viện kiểm tra của Rust sẽ bắt giữ mọi thứ in ra standard output. Ví dụ, nếu chúng ta gọi `println!` trong một hàm kiểm tra và hàm kiểm tra thành công, chúng ta sẽ không thấy output của `println!` trên terminal; chúng ta chỉ thấy dòng báo rằng hàm kiểm tra đã thành công. Nếu một hàm kiểm tra thất bại, chúng ta sẽ thấy mọi thứ được in ra standard output kèm với thông báo thất bại.
 
-As an example, Listing 11-10 has a silly function that prints the value of its
-parameter and returns 10, as well as a test that passes and a test that fails.
+Ví dụ, Listing 11-10 có một hàm ngớ ngẩn in giá trị của tham số và trả về 10, cùng với một hàm kiểm tra thành công và một hàm kiểm tra thất bại.
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -64,22 +30,17 @@ parameter and returns 10, as well as a test that passes and a test that fails.
 {{#rustdoc_include ../listings/ch11-writing-automated-tests/listing-11-10/src/lib.rs}}
 ```
 
-<span class="caption">Listing 11-10: Tests for a function that calls
-`println!`</span>
+<span class="caption">Listing 11-10: Các hàm kiểm tra cho một hàm gọi `println!`</span>
 
-When we run these tests with `cargo test`, we’ll see the following output:
+Khi chúng ta chạy các hàm kiểm tra này với `cargo test`, chúng ta sẽ thấy output như sau:
 
 ```console
 {{#include ../listings/ch11-writing-automated-tests/listing-11-10/output.txt}}
 ```
 
-Note that nowhere in this output do we see `I got the value 4`, which is what
-is printed when the test that passes runs. That output has been captured. The
-output from the test that failed, `I got the value 8`, appears in the section
-of the test summary output, which also shows the cause of the test failure.
+Lưu ý rằng ở đâu trong output này chúng ta cũng không thấy `I got the value 4`, đây là giá trị được in ra khi hàm kiểm tra thành công chạy. Output này đã bị bắt giữ. Output từ hàm kiểm tra thất bại, `I got the value 8`, xuất hiện trong phần tóm tắt kết quả kiểm tra, cùng với nguyên nhân thất bại của hàm kiểm tra.
 
-If we want to see printed values for passing tests as well, we can tell Rust
-to also show the output of successful tests with `--show-output`.
+Nếu chúng ta muốn thấy giá trị được in ra của các hàm kiểm tra thành công, chúng ta có thể yêu cầu Rust hiển thị output của các kiểm tra thành công bằng `--show-output`.
 
 ```console
 $ cargo test -- --show-output
@@ -92,15 +53,11 @@ see the following output:
 {{#include ../listings/ch11-writing-automated-tests/output-only-01-show-output/output.txt}}
 ```
 
-### Running a Subset of Tests by Name
+### Chạy một tập con các hàm kiểm tra theo tên
 
-Sometimes, running a full test suite can take a long time. If you’re working on
-code in a particular area, you might want to run only the tests pertaining to
-that code. You can choose which tests to run by passing `cargo test` the name
-or names of the test(s) you want to run as an argument.
+Đôi khi, chạy toàn bộ bộ kiểm tra có thể mất nhiều thời gian. Nếu bạn đang làm việc trên một phần cụ thể của mã, bạn có thể chỉ muốn chạy các hàm kiểm tra liên quan đến phần đó. Bạn có thể chọn các hàm kiểm tra để chạy bằng cách truyền tên hoặc các tên của hàm kiểm tra muốn chạy làm đối số cho `cargo test`.
 
-To demonstrate how to run a subset of tests, we’ll first create three tests for
-our `add_two` function, as shown in Listing 11-11, and choose which ones to run.
+Để minh họa cách chạy một tập con các hàm kiểm tra, trước tiên chúng ta sẽ tạo ba hàm kiểm tra cho hàm `add_two` của mình, như hiển thị trong Listing 11-11, và chọn những hàm nào sẽ chạy.
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -108,53 +65,39 @@ our `add_two` function, as shown in Listing 11-11, and choose which ones to run.
 {{#rustdoc_include ../listings/ch11-writing-automated-tests/listing-11-11/src/lib.rs}}
 ```
 
-<span class="caption">Listing 11-11: Three tests with three different
-names</span>
+<span class="caption">Listing 11-11: Ba hàm kiểm tra với ba tên khác nhau</span>
 
-If we run the tests without passing any arguments, as we saw earlier, all the
-tests will run in parallel:
+Nếu chúng ta chạy các hàm kiểm tra mà không truyền bất kỳ đối số nào, như đã thấy trước đó, tất cả các hàm kiểm tra sẽ chạy song song:
 
 ```console
 {{#include ../listings/ch11-writing-automated-tests/listing-11-11/output.txt}}
 ```
 
-#### Running Single Tests
+#### Chạy một hàm kiểm tra riêng lẻ
 
-We can pass the name of any test function to `cargo test` to run only that test:
+Chúng ta có thể truyền tên bất kỳ hàm kiểm tra nào cho `cargo test` để chỉ chạy hàm kiểm tra đó:
 
 ```console
 {{#include ../listings/ch11-writing-automated-tests/output-only-02-single-test/output.txt}}
 ```
 
-Only the test with the name `one_hundred` ran; the other two tests didn’t match
-that name. The test output lets us know we had more tests that didn’t run by
-displaying `2 filtered out` at the end.
+Chỉ hàm kiểm tra có tên `one_hundred` được chạy; hai hàm kiểm tra còn lại không khớp với tên đó. Output của hàm kiểm tra thông báo cho chúng ta rằng còn nhiều hàm kiểm tra khác không chạy bằng cách hiển thị `2 filtered out` ở cuối.
 
-We can’t specify the names of multiple tests in this way; only the first value
-given to `cargo test` will be used. But there is a way to run multiple tests.
+Chúng ta không thể chỉ định tên nhiều hàm kiểm tra theo cách này; chỉ giá trị đầu tiên truyền cho `cargo test` sẽ được sử dụng. Nhưng vẫn có cách để chạy nhiều hàm kiểm tra.
 
-#### Filtering to Run Multiple Tests
+#### Lọc để chạy nhiều hàm kiểm tra
 
-We can specify part of a test name, and any test whose name matches that value
-will be run. For example, because two of our tests’ names contain `add`, we can
-run those two by running `cargo test add`:
+Chúng ta có thể chỉ định một phần của tên hàm kiểm tra, và bất kỳ hàm kiểm tra nào có tên khớp với giá trị đó sẽ được chạy. Ví dụ, vì hai trong số các hàm kiểm tra của chúng ta có tên chứa `add`, chúng ta có thể chạy hai hàm đó bằng cách chạy `cargo test add`:
 
 ```console
 {{#include ../listings/ch11-writing-automated-tests/output-only-03-multiple-tests/output.txt}}
 ```
 
-This command ran all tests with `add` in the name and filtered out the test
-named `one_hundred`. Also note that the module in which a test appears becomes
-part of the test’s name, so we can run all the tests in a module by filtering
-on the module’s name.
+Lệnh này chạy tất cả các hàm kiểm tra có `add` trong tên và loại bỏ hàm kiểm tra có tên `one_hundred`. Cũng lưu ý rằng module chứa hàm kiểm tra trở thành một phần của tên hàm kiểm tra, vì vậy chúng ta có thể chạy tất cả các hàm kiểm tra trong một module bằng cách lọc theo tên module.
 
-### Ignoring Some Tests Unless Specifically Requested
+### Bỏ qua một số hàm kiểm tra trừ khi được yêu cầu cụ thể
 
-Sometimes a few specific tests can be very time-consuming to execute, so you
-might want to exclude them during most runs of `cargo test`. Rather than
-listing as arguments all tests you do want to run, you can instead annotate the
-time-consuming tests using the `ignore` attribute to exclude them, as shown
-here:
+Đôi khi một vài hàm kiểm tra cụ thể có thể mất nhiều thời gian để thực thi, vì vậy bạn có thể muốn loại chúng ra trong hầu hết các lần chạy `cargo test`. Thay vì liệt kê tất cả các hàm kiểm tra bạn muốn chạy làm đối số, bạn có thể chú thích các hàm kiểm tra tốn thời gian bằng attribute `ignore` để loại chúng ra, như minh họa dưới đây:
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -162,22 +105,16 @@ here:
 {{#rustdoc_include ../listings/ch11-writing-automated-tests/no-listing-11-ignore-a-test/src/lib.rs}}
 ```
 
-After `#[test]` we add the `#[ignore]` line to the test we want to exclude. Now
-when we run our tests, `it_works` runs, but `expensive_test` doesn’t:
+Sau `#[test]`, chúng ta thêm dòng `#[ignore]` vào hàm kiểm tra mà chúng ta muốn loại ra. Bây giờ khi chạy các hàm kiểm tra, `it_works` sẽ chạy, nhưng `expensive_test` thì không:
 
 ```console
 {{#include ../listings/ch11-writing-automated-tests/no-listing-11-ignore-a-test/output.txt}}
 ```
 
-The `expensive_test` function is listed as `ignored`. If we want to run only
-the ignored tests, we can use `cargo test -- --ignored`:
+Hàm `expensive_test` được liệt kê là `ignored`. Nếu chúng ta chỉ muốn chạy các hàm kiểm tra bị bỏ qua, có thể dùng `cargo test -- --ignored`:
 
 ```console
 {{#include ../listings/ch11-writing-automated-tests/output-only-04-running-ignored/output.txt}}
 ```
 
-By controlling which tests run, you can make sure your `cargo test` results
-will be fast. When you’re at a point where it makes sense to check the results
-of the `ignored` tests and you have time to wait for the results, you can run
-`cargo test -- --ignored` instead. If you want to run all tests whether they’re
-ignored or not, you can run `cargo test -- --include-ignored`.
+Bằng cách kiểm soát các hàm kiểm tra được chạy, bạn có thể đảm bảo rằng kết quả `cargo test` sẽ nhanh. Khi đến lúc bạn muốn kiểm tra kết quả của các hàm kiểm tra bị `ignored` và có thời gian chờ kết quả, bạn có thể chạy `cargo test -- --ignored`. Nếu bạn muốn chạy tất cả các hàm kiểm tra, bất kể chúng có bị bỏ qua hay không, bạn có thể chạy `cargo test -- --include-ignored`.

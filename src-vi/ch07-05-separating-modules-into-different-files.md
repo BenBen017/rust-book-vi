@@ -1,4 +1,4 @@
-## Separating Modules into Different Files
+## Tách Modules ra các file khác nhau
 
 Cho đến nay, tất cả các ví dụ trong chương này đều định nghĩa nhiều module
 trong một file. Khi các module trở nên lớn, bạn có thể muốn di chuyển định

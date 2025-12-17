@@ -1,8 +1,8 @@
-## Accepting Command Line Arguments
+## Nhận Tham Số Dòng Lệnh
 
-Let’s create a new project with, as always, `cargo new`. We’ll call our project
-`minigrep` to distinguish it from the `grep` tool that you might already have
-on your system.
+Hãy tạo một dự án mới bằng cách dùng, như thường lệ, `cargo new`. Chúng ta sẽ gọi dự án này là
+`minigrep` để phân biệt với công cụ `grep` mà bạn có thể đã có
+trên hệ thống của mình.
 
 ```console
 $ cargo new minigrep
@@ -10,11 +10,7 @@ $ cargo new minigrep
 $ cd minigrep
 ```
 
-The first task is to make `minigrep` accept its two command line arguments: the
-file path and a string to search for. That is, we want to be able to run our
-program with `cargo run`, two hyphens to indicate the following arguments are
-for our program rather than for `cargo`, a string to search for, and a path to
-a file to search in, like so:
+Nhiệm vụ đầu tiên là làm cho `minigrep` nhận hai tham số dòng lệnh: đường dẫn tệp và một chuỗi để tìm kiếm. Tức là, chúng ta muốn có thể chạy chương trình của mình bằng `cargo run`, với hai dấu gạch ngang để chỉ ra rằng các tham số sau là dành cho chương trình của chúng ta chứ không phải cho `cargo`, một chuỗi để tìm kiếm, và một đường dẫn tới tệp để tìm kiếm, như sau:
 
 ```console
 $ cargo run -- searchstring example-filename.txt
@@ -25,19 +21,11 @@ give it. Some existing libraries on [crates.io](https://crates.io/) can help
 with writing a program that accepts command line arguments, but because you’re
 just learning this concept, let’s implement this capability ourselves.
 
-### Reading the Argument Values
+### Đọc Giá Trị Tham Số
 
-To enable `minigrep` to read the values of command line arguments we pass to
-it, we’ll need the `std::env::args` function provided in Rust’s standard
-library. This function returns an iterator of the command line arguments passed
-to `minigrep`. We’ll cover iterators fully in [Chapter 13][ch13]<!-- ignore
--->. For now, you only need to know two details about iterators: iterators
-produce a series of values, and we can call the `collect` method on an iterator
-to turn it into a collection, such as a vector, that contains all the elements
-the iterator produces.
+Để cho phép `minigrep` đọc các giá trị của tham số dòng lệnh mà chúng ta truyền vào, chúng ta sẽ cần hàm `std::env::args` được cung cấp trong thư viện chuẩn của Rust. Hàm này trả về một iterator của các tham số dòng lệnh được truyền cho `minigrep`. Chúng ta sẽ tìm hiểu kỹ về iterator trong [Chương 13][ch13]<!-- ignore -->. Hiện tại, bạn chỉ cần biết hai chi tiết về iterator: iterator sinh ra một chuỗi các giá trị, và chúng ta có thể gọi phương thức `collect` trên một iterator để biến nó thành một tập hợp, chẳng hạn như vector, chứa tất cả các phần tử mà iterator tạo ra.
 
-The code in Listing 12-1 allows your `minigrep` program to read any command
-line arguments passed to it and then collect the values into a vector.
+Mã trong Listing 12-1 cho phép chương trình `minigrep` của bạn đọc bất kỳ tham số dòng lệnh nào được truyền vào và sau đó thu thập các giá trị đó vào một vector.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -45,38 +33,17 @@ line arguments passed to it and then collect the values into a vector.
 {{#rustdoc_include ../listings/ch12-an-io-project/listing-12-01/src/main.rs}}
 ```
 
-<span class="caption">Listing 12-1: Collecting the command line arguments into
-a vector and printing them</span>
+<span class="caption">Listing 12-1: Thu thập các tham số dòng lệnh vào một vector và in chúng ra</span>
 
-First, we bring the `std::env` module into scope with a `use` statement so we
-can use its `args` function. Notice that the `std::env::args` function is
-nested in two levels of modules. As we discussed in [Chapter
-7][ch7-idiomatic-use]<!-- ignore -->, in cases where the desired function is
-nested in more than one module, we’ve chosen to bring the parent module into
-scope rather than the function. By doing so, we can easily use other functions
-from `std::env`. It’s also less ambiguous than adding `use std::env::args` and
-then calling the function with just `args`, because `args` might easily be
-mistaken for a function that’s defined in the current module.
+Trước tiên, chúng ta đưa module `std::env` vào phạm vi với câu lệnh `use` để có thể sử dụng hàm `args` của nó. Lưu ý rằng hàm `std::env::args` được lồng trong hai cấp module. Như chúng ta đã thảo luận trong [Chương 7][ch7-idiomatic-use]<!-- ignore -->, trong những trường hợp hàm cần dùng được lồng trong nhiều module, chúng ta chọn cách đưa module cha vào phạm vi thay vì đưa trực tiếp hàm. Bằng cách này, chúng ta có thể dễ dàng sử dụng các hàm khác từ `std::env`. Cách này cũng ít gây nhầm lẫn hơn so với việc thêm `use std::env::args` và sau đó gọi hàm chỉ với `args`, vì `args` có thể dễ bị nhầm với một hàm được định nghĩa trong module hiện tại.
 
-> ### The `args` Function and Invalid Unicode
+> ### Hàm `args` và Unicode không hợp lệ
 >
-> Note that `std::env::args` will panic if any argument contains invalid
-> Unicode. If your program needs to accept arguments containing invalid
-> Unicode, use `std::env::args_os` instead. That function returns an iterator
-> that produces `OsString` values instead of `String` values. We’ve chosen to
-> use `std::env::args` here for simplicity, because `OsString` values differ
-> per platform and are more complex to work with than `String` values.
+> Lưu ý rằng `std::env::args` sẽ gây panic nếu bất kỳ tham số nào chứa Unicode không hợp lệ. Nếu chương trình của bạn cần chấp nhận các tham số chứa Unicode không hợp lệ, hãy dùng `std::env::args_os` thay thế. Hàm này trả về một iterator tạo ra các giá trị `OsString` thay vì `String`. Ở đây, chúng ta chọn sử dụng `std::env::args` để đơn giản, vì các giá trị `OsString` khác nhau tùy theo nền tảng và phức tạp hơn khi làm việc so với `String`.
 
-On the first line of `main`, we call `env::args`, and we immediately use
-`collect` to turn the iterator into a vector containing all the values produced
-by the iterator. We can use the `collect` function to create many kinds of
-collections, so we explicitly annotate the type of `args` to specify that we
-want a vector of strings. Although we very rarely need to annotate types in
-Rust, `collect` is one function you do often need to annotate because Rust
-isn’t able to infer the kind of collection you want.
+Ở dòng đầu tiên của `main`, chúng ta gọi `env::args`, và ngay lập tức dùng `collect` để biến iterator thành một vector chứa tất cả các giá trị mà iterator sinh ra. Chúng ta có thể dùng hàm `collect` để tạo nhiều loại tập hợp khác nhau, vì vậy chúng ta chú thích rõ kiểu của `args` để chỉ ra rằng chúng ta muốn một vector các chuỗi. Mặc dù hiếm khi cần chú thích kiểu trong Rust, `collect` là một trong những hàm mà bạn thường phải chú thích, vì Rust không thể suy ra loại tập hợp bạn muốn.
 
-Finally, we print the vector using the debug macro. Let’s try running the code
-first with no arguments and then with two arguments:
+Cuối cùng, chúng ta in vector ra bằng macro debug. Hãy thử chạy mã trước tiên không có tham số, rồi sau đó với hai tham số:
 
 ```console
 {{#include ../listings/ch12-an-io-project/listing-12-01/output.txt}}
@@ -86,20 +53,11 @@ first with no arguments and then with two arguments:
 {{#include ../listings/ch12-an-io-project/output-only-01-with-args/output.txt}}
 ```
 
-Notice that the first value in the vector is `"target/debug/minigrep"`, which
-is the name of our binary. This matches the behavior of the arguments list in
-C, letting programs use the name by which they were invoked in their execution.
-It’s often convenient to have access to the program name in case you want to
-print it in messages or change behavior of the program based on what command
-line alias was used to invoke the program. But for the purposes of this
-chapter, we’ll ignore it and save only the two arguments we need.
+Lưu ý rằng giá trị đầu tiên trong vector là `"target/debug/minigrep"`, chính là tên của file nhị phân của chúng ta. Điều này khớp với hành vi của danh sách tham số trong C, cho phép chương trình sử dụng tên mà chúng được gọi khi thực thi. Thường thì việc có quyền truy cập vào tên chương trình rất tiện lợi nếu bạn muốn in nó trong các thông báo hoặc thay đổi hành vi của chương trình dựa trên alias dòng lệnh được dùng để gọi chương trình. Nhưng trong chương này, chúng ta sẽ bỏ qua giá trị này và chỉ lưu hai tham số mà chúng ta cần.
 
-### Saving the Argument Values in Variables
+### Lưu Giá Trị Tham Số vào Biến
 
-The program is currently able to access the values specified as command line
-arguments. Now we need to save the values of the two arguments in variables so
-we can use the values throughout the rest of the program. We do that in Listing
-12-2.
+Chương trình hiện tại đã có thể truy cập các giá trị được chỉ định dưới dạng tham số dòng lệnh. Bây giờ chúng ta cần lưu giá trị của hai tham số vào các biến để có thể sử dụng chúng trong suốt phần còn lại của chương trình. Chúng ta thực hiện việc này trong Listing 12-2.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -107,29 +65,17 @@ we can use the values throughout the rest of the program. We do that in Listing
 {{#rustdoc_include ../listings/ch12-an-io-project/listing-12-02/src/main.rs}}
 ```
 
-<span class="caption">Listing 12-2: Creating variables to hold the query
-argument and file path argument</span>
+<span class="caption">Listing 12-2: Tạo các biến để lưu tham số truy vấn và tham số đường dẫn tệp</span>
 
-As we saw when we printed the vector, the program’s name takes up the first
-value in the vector at `args[0]`, so we’re starting arguments at index `1`. The
-first argument `minigrep` takes is the string we’re searching for, so we put a
-reference to the first argument in the variable `query`. The second argument
-will be the file path, so we put a reference to the second argument in the
-variable `file_path`.
+Như chúng ta đã thấy khi in vector, tên chương trình chiếm giá trị đầu tiên trong vector tại `args[0]`, vì vậy chúng ta bắt đầu các tham số từ chỉ số `1`. Tham số đầu tiên mà `minigrep` nhận là chuỗi mà chúng ta muốn tìm kiếm, vì vậy chúng ta đặt một tham chiếu tới tham số đầu tiên vào biến `query`. Tham số thứ hai sẽ là đường dẫn tệp, nên chúng ta đặt một tham chiếu tới tham số thứ hai vào biến `file_path`.
 
-We temporarily print the values of these variables to prove that the code is
-working as we intend. Let’s run this program again with the arguments `test`
-and `sample.txt`:
+Chúng ta tạm thời in các giá trị của những biến này để chứng minh rằng mã hoạt động như mong muốn. Hãy chạy lại chương trình này với các tham số `test` và `sample.txt`:
 
 ```console
 {{#include ../listings/ch12-an-io-project/listing-12-02/output.txt}}
 ```
 
-Great, the program is working! The values of the arguments we need are being
-saved into the right variables. Later we’ll add some error handling to deal
-with certain potential erroneous situations, such as when the user provides no
-arguments; for now, we’ll ignore that situation and work on adding file-reading
-capabilities instead.
+Tuyệt vời, chương trình hoạt động rồi! Các giá trị của các tham số mà chúng ta cần đang được lưu vào các biến đúng. Sau này chúng ta sẽ thêm một số xử lý lỗi để đối phó với một số tình huống có thể xảy ra, chẳng hạn như khi người dùng không cung cấp tham số; hiện tại, chúng ta sẽ bỏ qua tình huống đó và tập trung vào việc thêm khả năng đọc tệp.
 
 [ch13]: ch13-00-functional-features.html
 [ch7-idiomatic-use]: ch07-04-bringing-paths-into-scope-with-the-use-keyword.html#creating-idiomatic-use-paths

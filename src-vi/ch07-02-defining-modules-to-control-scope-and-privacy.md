@@ -1,4 +1,4 @@
-## Defining Modules to Control Scope and Privacy
+## Định nghĩa Modules để kiểm soát phạm vi (scope) và quyền riêng tư (privacy)
 
 Trong phần này, chúng ta sẽ nói về các module và các phần khác của module
 system, đặc biệt là *paths* nó cho phép bạn đặt tên các items; từ khóa `use` để
@@ -92,7 +92,7 @@ cũng được bao gồm. Code đó là:
 
 Bây giờ hãy đi vào chi tiết của các quy tắc này và minh họa chúng trong thực tế!
 
-### Grouping Related Code in Modules
+### Nhóm các đoạn code liên quan vào Modules
 
 *Modules* cho phép chúng ta tổ chức code trong một crate để dễ đọc và tái sử
 dụng. Modules cũng cho phép chúng ta kiểm soát *bí mật* của các item, vì code

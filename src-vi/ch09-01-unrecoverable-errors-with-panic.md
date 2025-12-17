@@ -1,4 +1,4 @@
-## Unrecoverable Errors with `panic!`
+## Các lỗi không thể khôi phục với `panic!`
 
 Thỉnh thoảng, những điều tồi tệ xảy ra trong code của bạn, và không có gì bạn
 có thể làm với nó. Trong những trường hợp này, Rust có macro `panic!`. Trong
@@ -10,7 +10,7 @@ báo lỗi, unwind, dọn dẹp stack, và thoát. Bằng một biến môi trư
 thể cho Rust hiển thị call stack khi một panic xảy ra để dễ dàng theo dõi nguồn
 gốc của panic.
 
-> ### Unwinding the Stack or Aborting in Response to a Panic
+> ### Unwinding Stack hoặc Aborting để phản hồi một Panic
 >
 > Mặc định, khi một panic xảy ra, chương trình bắt đầu *unwinding*, nghĩa là
 > Rust đi lên stack và dọn dẹp dữ liệu từ mỗi hàm nó gặp. Tuy nhiên, đi ngược

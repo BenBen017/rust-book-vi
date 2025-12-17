@@ -1,4 +1,4 @@
-## Paths for Referring to an Item in the Module Tree
+## Paths để tham chiếu đến một item trong cây Module
 
 Để chỉ cho Rust biết nơi tìm thấy một item trong cây module, chúng ta sử dụng
 một đường dẫn (path) tương tự như chúng ta sử dụng một đường dẫn trong một hệ
@@ -96,7 +96,7 @@ nhiên, Rust cũng cho phép bạn lựa chọn để tiết lộ các phần b�
 con đến các module cha bên ngoài bằng cách sử dụng từ khóa `pub` để tạo một
 item public.
 
-### Exposing Paths with the `pub` Keyword
+### Exposing Paths với từ khóa `pub`
 
 Cùng trở lại lỗi trong Listing 7-4 mà nói cho chúng ta rằng module `hosting`
 là private. Chúng ta muốn hàm `eat_at_restaurant` trong module cha có thể

@@ -1,11 +1,6 @@
-## Reading a File
+## Đọc Tệp
 
-Now we’ll add functionality to read the file specified in the `file_path`
-argument. First, we need a sample file to test it with: we’ll use a file with a
-small amount of text over multiple lines with some repeated words. Listing 12-3
-has an Emily Dickinson poem that will work well! Create a file called
-*poem.txt* at the root level of your project, and enter the poem “I’m Nobody!
-Who are you?”
+Bây giờ chúng ta sẽ thêm chức năng để đọc tệp được chỉ định trong tham số `file_path`. Trước tiên, chúng ta cần một tệp mẫu để thử: chúng ta sẽ dùng một tệp có một lượng nhỏ văn bản trên nhiều dòng với một số từ lặp lại. Listing 12-3 có một bài thơ của Emily Dickinson rất phù hợp! Hãy tạo một tệp có tên *poem.txt* ở cấp gốc của dự án, và nhập bài thơ “I’m Nobody! Who are you?” vào.
 
 <span class="filename">Filename: poem.txt</span>
 
@@ -13,11 +8,9 @@ Who are you?”
 {{#include ../listings/ch12-an-io-project/listing-12-03/poem.txt}}
 ```
 
-<span class="caption">Listing 12-3: A poem by Emily Dickinson makes a good test
-case</span>
+<span class="caption">Listing 12-3: Một bài thơ của Emily Dickinson là ví dụ thử nghiệm tốt</span>
 
-With the text in place, edit *src/main.rs* and add code to read the file, as
-shown in Listing 12-4.
+Khi văn bản đã sẵn sàng, hãy chỉnh sửa *src/main.rs* và thêm mã để đọc tệp, như được trình bày trong Listing 12-4.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -25,33 +18,18 @@ shown in Listing 12-4.
 {{#rustdoc_include ../listings/ch12-an-io-project/listing-12-04/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 12-4: Reading the contents of the file specified
-by the second argument</span>
+<span class="caption">Listing 12-4: Đọc nội dung của tệp được chỉ định bởi tham số thứ hai</span>
 
-First, we bring in a relevant part of the standard library with a `use`
-statement: we need `std::fs` to handle files.
+Trước tiên, chúng ta đưa vào phần liên quan của thư viện chuẩn bằng câu lệnh `use`: chúng ta cần `std::fs` để xử lý tệp.
 
-In `main`, the new statement `fs::read_to_string` takes the `file_path`, opens
-that file, and returns a `std::io::Result<String>` of the file’s contents.
+Trong `main`, câu lệnh mới `fs::read_to_string` nhận `file_path`, mở tệp đó, và trả về một `std::io::Result<String>` chứa nội dung của tệp.
 
-After that, we again add a temporary `println!` statement that prints the value
-of `contents` after the file is read, so we can check that the program is
-working so far.
+Sau đó, chúng ta lại thêm một câu lệnh tạm thời `println!` in giá trị của `contents` sau khi tệp được đọc, để kiểm tra xem chương trình hoạt động đến đâu.
 
-Let’s run this code with any string as the first command line argument (because
-we haven’t implemented the searching part yet) and the *poem.txt* file as the
-second argument:
+Hãy chạy mã này với bất kỳ chuỗi nào làm tham số dòng lệnh đầu tiên (vì chúng ta chưa triển khai phần tìm kiếm) và tệp *poem.txt* làm tham số thứ hai:
 
 ```console
 {{#rustdoc_include ../listings/ch12-an-io-project/listing-12-04/output.txt}}
 ```
 
-Great! The code read and then printed the contents of the file. But the code
-has a few flaws. At the moment, the `main` function has multiple
-responsibilities: generally, functions are clearer and easier to maintain if
-each function is responsible for only one idea. The other problem is that we’re
-not handling errors as well as we could. The program is still small, so these
-flaws aren’t a big problem, but as the program grows, it will be harder to fix
-them cleanly. It’s good practice to begin refactoring early on when developing
-a program, because it’s much easier to refactor smaller amounts of code. We’ll
-do that next.
+Tuyệt vời! Mã đã đọc và in ra nội dung của tệp. Nhưng mã này còn một vài điểm chưa tốt. Hiện tại, hàm `main` đảm nhận nhiều trách nhiệm: nhìn chung, các hàm sẽ rõ ràng và dễ bảo trì hơn nếu mỗi hàm chỉ chịu trách nhiệm cho một ý tưởng duy nhất. Vấn đề khác là chúng ta chưa xử lý lỗi tốt nhất có thể. Chương trình vẫn còn nhỏ, nên những điểm này chưa phải là vấn đề lớn, nhưng khi chương trình phát triển, việc sửa chúng sẽ khó khăn hơn. Thực hành tốt là bắt đầu tái cấu trúc (refactor) sớm khi phát triển chương trình, vì việc refactor một lượng mã nhỏ dễ dàng hơn nhiều. Chúng ta sẽ làm việc đó ngay sau đây.

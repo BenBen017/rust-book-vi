@@ -1,54 +1,56 @@
-## Processing a Series of Items with Iterators
+## Xử Lý Một Chuỗi Phần Tử với Iterators
 
-The iterator pattern allows you to perform some task on a sequence of items in
-turn. An iterator is responsible for the logic of iterating over each item and
-determining when the sequence has finished. When you use iterators, you don’t
-have to reimplement that logic yourself.
+Mẫu iterator cho phép bạn thực hiện một tác vụ nào đó trên một chuỗi
+các phần tử lần lượt. Một iterator chịu trách nhiệm về logic lặp qua
+từng phần tử và xác định khi nào chuỗi kết thúc. Khi sử dụng iterators,
+bạn không cần tự triển khai lại logic đó.
 
-In Rust, iterators are *lazy*, meaning they have no effect until you call
-methods that consume the iterator to use it up. For example, the code in
-Listing 13-10 creates an iterator over the items in the vector `v1` by calling
-the `iter` method defined on `Vec<T>`. This code by itself doesn’t do anything
-useful.
+Trong Rust, iterators là *lazy*, nghĩa là chúng không có tác dụng gì
+cho đến khi bạn gọi các phương thức tiêu thụ iterator để dùng hết nó.
+Ví dụ, đoạn code trong Listing 13-10 tạo một iterator trên các phần
+tử trong vector `v1` bằng cách gọi phương thức `iter` định nghĩa
+trên `Vec<T>`. Đoạn code này tự nó không làm gì hữu ích.
 
 ```rust
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-10/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 13-10: Creating an iterator</span>
+<span class="caption">Listing 13-10: Tạo một iterator</span>
 
-The iterator is stored in the `v1_iter` variable. Once we’ve created an
-iterator, we can use it in a variety of ways. In Listing 3-5 in Chapter 3, we
-iterated over an array using a `for` loop to execute some code on each of its
-items. Under the hood this implicitly created and then consumed an iterator,
-but we glossed over how exactly that works until now.
+Iterator được lưu trong biến `v1_iter`. Khi đã tạo một iterator, chúng
+ta có thể sử dụng nó theo nhiều cách khác nhau. Trong Listing 3-5 ở
+Chương 3, chúng ta đã lặp qua một mảng bằng vòng lặp `for` để thực
+hiện một số code trên từng phần tử. Ngầm định, điều này đã tạo và
+sau đó tiêu thụ một iterator, nhưng chúng ta đã bỏ qua cách thức
+hoạt động chính xác của nó cho đến bây giờ.
 
-In the example in Listing 13-11, we separate the creation of the iterator from
-the use of the iterator in the `for` loop. When the `for` loop is called using
-the iterator in `v1_iter`, each element in the iterator is used in one
-iteration of the loop, which prints out each value.
+Trong ví dụ ở Listing 13-11, chúng ta tách việc tạo iterator ra khỏi
+việc sử dụng iterator trong vòng lặp `for`. Khi vòng lặp `for` được
+gọi với iterator trong `v1_iter`, mỗi phần tử trong iterator được
+sử dụng trong một lần lặp của vòng lặp, in ra từng giá trị.
 
 ```rust
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-11/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 13-11: Using an iterator in a `for` loop</span>
+<span class="caption">Listing 13-11: Sử dụng iterator trong vòng lặp `for`</span>
 
-In languages that don’t have iterators provided by their standard libraries,
-you would likely write this same functionality by starting a variable at index
-0, using that variable to index into the vector to get a value, and
-incrementing the variable value in a loop until it reached the total number of
-items in the vector.
+Trong các ngôn ngữ không có iterator được cung cấp bởi thư viện chuẩn,
+bạn có thể viết chức năng tương tự bằng cách khởi tạo một biến ở
+chỉ số 0, dùng biến đó để truy cập vào vector lấy giá trị, và tăng
+giá trị biến trong một vòng lặp cho đến khi đạt tổng số phần tử
+trong vector.
 
-Iterators handle all that logic for you, cutting down on repetitive code you
-could potentially mess up. Iterators give you more flexibility to use the same
-logic with many different kinds of sequences, not just data structures you can
-index into, like vectors. Let’s examine how iterators do that.
+Iterators xử lý tất cả logic đó cho bạn, giảm bớt code lặp đi lặp
+lại mà bạn có thể vô tình làm sai. Iterators cung cấp nhiều sự linh
+hoạt hơn để sử dụng cùng một logic với nhiều loại chuỗi khác nhau,
+không chỉ những cấu trúc dữ liệu có thể truy cập theo chỉ số như
+vector. Hãy xem cách iterators thực hiện điều đó.
 
-### The `Iterator` Trait and the `next` Method
+### Trait `Iterator` và Phương Thức `next`
 
-All iterators implement a trait named `Iterator` that is defined in the
-standard library. The definition of the trait looks like this:
+Tất cả iterators triển khai một trait có tên `Iterator` được định
+nghĩa trong thư viện chuẩn. Định nghĩa của trait trông như sau:
 
 ```rust
 pub trait Iterator {
@@ -60,21 +62,21 @@ pub trait Iterator {
 }
 ```
 
-Notice this definition uses some new syntax: `type Item` and `Self::Item`,
-which are defining an *associated type* with this trait. We’ll talk about
-associated types in depth in Chapter 19. For now, all you need to know is that
-this code says implementing the `Iterator` trait requires that you also define
-an `Item` type, and this `Item` type is used in the return type of the `next`
-method. In other words, the `Item` type will be the type returned from the
-iterator.
+Lưu ý rằng định nghĩa này sử dụng một số cú pháp mới: `type Item` và
+`Self::Item`, định nghĩa một *associated type* với trait này. Chúng ta
+sẽ bàn kỹ về associated types trong Chương 19. Hiện tại, bạn chỉ cần
+biết rằng đoạn code này nói rằng việc triển khai trait `Iterator` yêu
+cầu bạn cũng phải định nghĩa một kiểu `Item`, và kiểu `Item` này được
+sử dụng trong kiểu trả về của phương thức `next`. Nói cách khác, kiểu
+`Item` sẽ là kiểu được trả về từ iterator.
 
-The `Iterator` trait only requires implementors to define one method: the
-`next` method, which returns one item of the iterator at a time wrapped in
-`Some` and, when iteration is over, returns `None`.
+Trait `Iterator` chỉ yêu cầu người triển khai định nghĩa một phương
+thức: phương thức `next`, trả về từng phần tử của iterator một lần,
+bao bọc trong `Some` và, khi kết thúc iteration, trả về `None`.
 
-We can call the `next` method on iterators directly; Listing 13-12 demonstrates
-what values are returned from repeated calls to `next` on the iterator created
-from the vector.
+Chúng ta có thể gọi trực tiếp phương thức `next` trên iterators; Listing
+13-12 minh họa các giá trị được trả về từ các lần gọi lặp đi lặp lại
+`next` trên iterator được tạo từ vector.
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -82,38 +84,38 @@ from the vector.
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-12/src/lib.rs:here}}
 ```
 
-<span class="caption">Listing 13-12: Calling the `next` method on an
-iterator</span>
+<span class="caption">Listing 13-12: Gọi phương thức `next` trên một iterator</span>
 
-Note that we needed to make `v1_iter` mutable: calling the `next` method on an
-iterator changes internal state that the iterator uses to keep track of where
-it is in the sequence. In other words, this code *consumes*, or uses up, the
-iterator. Each call to `next` eats up an item from the iterator. We didn’t need
-to make `v1_iter` mutable when we used a `for` loop because the loop took
-ownership of `v1_iter` and made it mutable behind the scenes.
+Lưu ý rằng chúng ta cần làm cho `v1_iter` có thể thay đổi (mutable):
+gọi phương thức `next` trên một iterator thay đổi trạng thái nội bộ mà
+iterator sử dụng để theo dõi vị trí hiện tại trong chuỗi. Nói cách
+khác, đoạn code này *tiêu thụ*, hay dùng hết, iterator. Mỗi lần gọi
+`next` lấy đi một phần tử từ iterator. Chúng ta không cần làm cho
+`v1_iter` mutable khi sử dụng vòng lặp `for` vì vòng lặp lấy quyền
+sở hữu của `v1_iter` và làm cho nó mutable ngầm.
 
-Also note that the values we get from the calls to `next` are immutable
-references to the values in the vector. The `iter` method produces an iterator
-over immutable references. If we want to create an iterator that takes
-ownership of `v1` and returns owned values, we can call `into_iter` instead of
-`iter`. Similarly, if we want to iterate over mutable references, we can call
-`iter_mut` instead of `iter`.
+Cũng lưu ý rằng các giá trị nhận được từ các lần gọi `next` là các
+tham chiếu bất biến (immutable references) đến các giá trị trong
+vector. Phương thức `iter` tạo ra một iterator trên các tham chiếu
+bất biến. Nếu muốn tạo một iterator lấy quyền sở hữu của `v1` và
+trả về các giá trị sở hữu, ta có thể gọi `into_iter` thay vì `iter`.
+Tương tự, nếu muốn lặp qua các tham chiếu có thể thay đổi, ta có thể
+gọi `iter_mut` thay vì `iter`.
 
-### Methods that Consume the Iterator
+### Các phương thức tiêu thụ iterator
 
-The `Iterator` trait has a number of different methods with default
-implementations provided by the standard library; you can find out about these
-methods by looking in the standard library API documentation for the `Iterator`
-trait. Some of these methods call the `next` method in their definition, which
-is why you’re required to implement the `next` method when implementing the
-`Iterator` trait.
+Trait `Iterator` có một số phương thức khác nhau với triển khai mặc
+định do thư viện chuẩn cung cấp; bạn có thể tìm hiểu về các phương
+thức này bằng cách xem tài liệu API của trait `Iterator`. Một số phương
+thức này gọi phương thức `next` trong định nghĩa của chúng, đó là lý
+do bạn phải triển khai `next` khi implement trait `Iterator`.
 
-Methods that call `next` are called *consuming adaptors*, because calling them
-uses up the iterator. One example is the `sum` method, which takes ownership of
-the iterator and iterates through the items by repeatedly calling `next`, thus
-consuming the iterator. As it iterates through, it adds each item to a running
-total and returns the total when iteration is complete. Listing 13-13 has a
-test illustrating a use of the `sum` method:
+Các phương thức gọi `next` được gọi là *consuming adaptors*, vì gọi
+chúng sẽ tiêu thụ iterator. Một ví dụ là phương thức `sum`, nó
+lấy quyền sở hữu iterator và lặp qua các phần tử bằng cách gọi
+`next` liên tục, do đó tiêu thụ iterator. Khi lặp qua, nó cộng
+mỗi phần tử vào tổng dồn và trả về tổng khi kết thúc iteration.
+Listing 13-13 có một ví dụ minh họa việc sử dụng phương thức `sum`:
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -121,23 +123,23 @@ test illustrating a use of the `sum` method:
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-13/src/lib.rs:here}}
 ```
 
-<span class="caption">Listing 13-13: Calling the `sum` method to get the total
-of all items in the iterator</span>
+<span class="caption">Listing 13-13: Gọi phương thức `sum` để lấy tổng
+tất cả các phần tử trong iterator</span>
 
-We aren’t allowed to use `v1_iter` after the call to `sum` because `sum` takes
-ownership of the iterator we call it on.
+Chúng ta không được phép sử dụng `v1_iter` sau khi gọi `sum` vì `sum`
+lấy quyền sở hữu của iterator mà chúng ta gọi nó trên đó.
 
-### Methods that Produce Other Iterators
+### Các phương thức tạo ra iterator khác
 
-*Iterator adaptors* are methods defined on the `Iterator` trait that don’t
-consume the iterator. Instead, they produce different iterators by changing
-some aspect of the original iterator.
+*Iterator adaptors* là các phương thức định nghĩa trên trait `Iterator`
+không tiêu thụ iterator. Thay vào đó, chúng tạo ra các iterator khác
+bằng cách thay đổi một số khía cạnh của iterator gốc.
 
-Listing 13-14 shows an example of calling the iterator adaptor method `map`,
-which takes a closure to call on each item as the items are iterated through.
-The `map` method returns a new iterator that produces the modified items. The
-closure here creates a new iterator in which each item from the vector will be
-incremented by 1:
+Listing 13-14 minh họa việc gọi phương thức iterator adaptor `map`,
+nó nhận một closure để gọi trên từng phần tử khi các phần tử được
+lặp qua. Phương thức `map` trả về một iterator mới tạo ra các phần
+tử đã được sửa đổi. Closure ở đây tạo ra một iterator mới mà mỗi
+phần tử từ vector sẽ được tăng thêm 1:
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -145,27 +147,28 @@ incremented by 1:
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-14/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 13-14: Calling the iterator adaptor `map` to
-create a new iterator</span>
+<span class="caption">Listing 13-14: Gọi iterator adaptor `map` để
+tạo một iterator mới</span>
 
-However, this code produces a warning:
+Tuy nhiên, đoạn code này sinh ra một cảnh báo:
 
 ```console
 {{#include ../listings/ch13-functional-features/listing-13-14/output.txt}}
 ```
 
-The code in Listing 13-14 doesn’t do anything; the closure we’ve specified
-never gets called. The warning reminds us why: iterator adaptors are lazy, and
-we need to consume the iterator here.
+Đoạn code trong Listing 13-14 không làm gì cả; closure mà chúng
+ta đã chỉ định chưa bao giờ được gọi. Cảnh báo nhắc nhở chúng
+ta lý do: các iterator adaptors là lazy, và chúng ta cần tiêu
+thụ iterator ở đây.
 
-To fix this warning and consume the iterator, we’ll use the `collect` method,
-which we used in Chapter 12 with `env::args` in Listing 12-1. This method
-consumes the iterator and collects the resulting values into a collection data
-type.
+Để sửa cảnh báo này và tiêu thụ iterator, chúng ta sẽ sử dụng
+phương thức `collect`, mà chúng ta đã dùng trong Chương 12 với
+`env::args` trong Listing 12-1. Phương thức này tiêu thụ iterator
+và thu thập các giá trị kết quả vào một kiểu dữ liệu collection.
 
-In Listing 13-15, we collect the results of iterating over the iterator that’s
-returned from the call to `map` into a vector. This vector will end up
-containing each item from the original vector incremented by 1.
+Trong Listing 13-15, chúng ta thu thập kết quả của việc lặp qua
+iterator được trả về từ cuộc gọi `map` vào một vector. Vector
+này sẽ chứa từng phần tử từ vector gốc tăng thêm 1.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -173,33 +176,36 @@ containing each item from the original vector incremented by 1.
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-15/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 13-15: Calling the `map` method to create a new
-iterator and then calling the `collect` method to consume the new iterator and
-create a vector</span>
+<span class="caption">Listing 13-15: Gọi phương thức `map` để tạo một
+iterator mới và sau đó gọi phương thức `collect` để tiêu thụ iterator
+mới và tạo ra một vector</span>
 
-Because `map` takes a closure, we can specify any operation we want to perform
-on each item. This is a great example of how closures let you customize some
-behavior while reusing the iteration behavior that the `Iterator` trait
-provides.
+Vì `map` nhận một closure, chúng ta có thể chỉ định bất kỳ thao tác
+nào muốn thực hiện trên từng phần tử. Đây là một ví dụ tuyệt vời
+về cách closures cho phép bạn tùy chỉnh hành vi trong khi tái sử dụng
+hành vi lặp mà trait `Iterator` cung cấp.
 
-You can chain multiple calls to iterator adaptors to perform complex actions in
-a readable way. But because all iterators are lazy, you have to call one of the
-consuming adaptor methods to get results from calls to iterator adaptors.
+Bạn có thể xâu chuỗi nhiều lần gọi các iterator adaptor để thực
+hiện các hành động phức tạp một cách dễ đọc. Nhưng vì tất cả các
+iterator là lazy, bạn phải gọi một trong các phương thức consuming
+adaptor để nhận kết quả từ các cuộc gọi đến iterator adaptor.
 
-### Using Closures that Capture Their Environment
+### Sử dụng Closures capture environment
 
-Many iterator adapters take closures as arguments, and commonly the closures
-we’ll specify as arguments to iterator adapters will be closures that capture
-their environment.
+Nhiều iterator adaptor nhận closures làm tham số, và thường
+các closures chúng ta chỉ định làm tham số cho iterator adaptor
+sẽ là các closures capture environment của chúng.
 
-For this example, we’ll use the `filter` method that takes a closure. The
-closure gets an item from the iterator and returns a `bool`. If the closure
-returns `true`, the value will be included in the iteration produced by
-`filter`. If the closure returns `false`, the value won’t be included.
+Trong ví dụ này, chúng ta sẽ sử dụng phương thức `filter` nhận
+một closure. Closure nhận một phần tử từ iterator và trả về
+`bool`. Nếu closure trả về `true`, giá trị sẽ được bao gồm
+trong iteration do `filter` tạo ra. Nếu closure trả về `false`,
+giá trị sẽ không được bao gồm.
 
-In Listing 13-16, we use `filter` with a closure that captures the `shoe_size`
-variable from its environment to iterate over a collection of `Shoe` struct
-instances. It will return only shoes that are the specified size.
+Trong Listing 13-16, chúng ta sử dụng `filter` với một closure
+capture biến `shoe_size` từ môi trường của nó để lặp qua
+một tập hợp các instance của struct `Shoe`. Nó chỉ trả về
+những đôi giày có kích thước đã chỉ định.
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -207,22 +213,22 @@ instances. It will return only shoes that are the specified size.
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-16/src/lib.rs}}
 ```
 
-<span class="caption">Listing 13-16: Using the `filter` method with a closure
-that captures `shoe_size`</span>
+<span class="caption">Listing 13-16: Sử dụng phương thức `filter` với một
+closure capture `shoe_size`</span>
 
-The `shoes_in_size` function takes ownership of a vector of shoes and a shoe
-size as parameters. It returns a vector containing only shoes of the specified
-size.
+Hàm `shoes_in_size` nhận quyền sở hữu một vector các đôi giày và một
+kích thước giày làm tham số. Nó trả về một vector chỉ chứa các đôi
+giày có kích thước đã chỉ định.
 
-In the body of `shoes_in_size`, we call `into_iter` to create an iterator
-that takes ownership of the vector. Then we call `filter` to adapt that
-iterator into a new iterator that only contains elements for which the closure
-returns `true`.
+Trong thân hàm `shoes_in_size`, chúng ta gọi `into_iter` để tạo một
+iterator lấy quyền sở hữu của vector. Sau đó, chúng ta gọi `filter`
+để biến đổi iterator đó thành một iterator mới chỉ chứa các phần tử
+mà closure trả về `true`.
 
-The closure captures the `shoe_size` parameter from the environment and
-compares the value with each shoe’s size, keeping only shoes of the size
-specified. Finally, calling `collect` gathers the values returned by the
-adapted iterator into a vector that’s returned by the function.
+Closure capture tham số `shoe_size` từ môi trường và so sánh giá trị
+với kích thước của từng đôi giày, chỉ giữ lại những đôi có kích thước
+được chỉ định. Cuối cùng, gọi `collect` thu thập các giá trị trả về
+từ iterator đã được biến đổi vào một vector được hàm trả về.
 
-The test shows that when we call `shoes_in_size`, we get back only shoes
-that have the same size as the value we specified.
+Bài test cho thấy khi gọi `shoes_in_size`, chúng ta chỉ nhận lại
+những đôi giày có cùng kích thước với giá trị đã chỉ định.

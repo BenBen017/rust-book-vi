@@ -1,4 +1,4 @@
-# Managing Growing Projects with Packages, Crates, and Modules
+# Quản lý các dự án ngày càng lớn với Packages, Crates, và Modules
 
 Khi bạn viết các chương trình lớn, việc tổ chức code của bạn sẽ trở nên càng
 quan trọng hơn. Bằng cách nhóm các tính năng liên quan và tách code với các
