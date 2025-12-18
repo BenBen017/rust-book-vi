@@ -1,0 +1,9 @@
+D:\rust-project\rust-book-vi\packages\mdbook-trpl\target\release\deps\libpulldown_cmark_to_cmark-9e1d011301cb71d3.rmeta: C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\pulldown-cmark-to-cmark-19.0.0\src\lib.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\pulldown-cmark-to-cmark-19.0.0\src\source_range.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\pulldown-cmark-to-cmark-19.0.0\src\text_modifications.rs
+
+D:\rust-project\rust-book-vi\packages\mdbook-trpl\target\release\deps\libpulldown_cmark_to_cmark-9e1d011301cb71d3.rlib: C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\pulldown-cmark-to-cmark-19.0.0\src\lib.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\pulldown-cmark-to-cmark-19.0.0\src\source_range.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\pulldown-cmark-to-cmark-19.0.0\src\text_modifications.rs
+
+D:\rust-project\rust-book-vi\packages\mdbook-trpl\target\release\deps\pulldown_cmark_to_cmark-9e1d011301cb71d3.d: C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\pulldown-cmark-to-cmark-19.0.0\src\lib.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\pulldown-cmark-to-cmark-19.0.0\src\source_range.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\pulldown-cmark-to-cmark-19.0.0\src\text_modifications.rs
+
+C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\pulldown-cmark-to-cmark-19.0.0\src\lib.rs:
+C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\pulldown-cmark-to-cmark-19.0.0\src\source_range.rs:
+C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\pulldown-cmark-to-cmark-19.0.0\src\text_modifications.rs:

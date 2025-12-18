@@ -1,0 +1,593 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Tham chiếu (reference) và mượn (borrowing) - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <p><a id="references-and-borrowing"></a></p>
+<h2 id="references-and-borrowing-tham-chiếu-và-mượn"><a class="header" href="#references-and-borrowing-tham-chiếu-và-mượn">References and Borrowing (tham chiếu và mượn)</a></h2>
+<p>Vấn đề với tuple code trong Liệt kê 4-5 là chúng ta phải trả về
+<code>String</code> cho hàm gọi để vẫn có thể sử dụng <code>String</code> sau khi gọi
+tới <code>calculate_length</code>, vì <code>String</code> đã được chuyển vào
+<code>calculate_length</code>. Để làm điều đó, chúng ta có thể cung cấp một reference (tham chiếu)
+đến giá trị <code>String</code>.
+Một <em>tham chiếu</em> giống như một con trỏ ở chỗ nó là một địa chỉ mà chúng ta có thể theo dõi để truy cập
+dữ liệu được lưu trữ tại địa chỉ đó; dữ liệu đó được sở hữu bởi một số biến khác.
+Nhưng không giống con trỏ, một reference được đảm bảo trỏ đến một giá trị hợp lệ của một
+kiểu cụ thể trong suốt vòng đời của reference đó.</p>
+<p>Đây là cách bạn định nghĩa và sử dụng hàm <code>calculate_length</code> để
+có tham chiếu đến một đối tượng dưới dạng tham số thay vì lấy ownership của đối tượng
+sở hữu giá trị:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">fn main() {
+    let s1 = String::from("hello");
+
+    let len = calculate_length(&amp;s1);
+
+    println!("The length of '{s1}' is {len}.");
+}
+
+fn calculate_length(s: &amp;String) -&gt; usize {
+    s.len()
+}</code></pre></pre>
+<p>Đầu tiên, lưu ý rằng tất cả tuple code trong khai báo biến và
+giá trị trả về của hàm đã biến mất. Thứ hai, lưu ý rằng chúng ta chuyển <code>&amp;s1</code> vào
+<code>calculate_length</code> và, theo định nghĩa của nó, chúng ta lấy <code>&amp;String</code> thay vì
+<code>String</code>. Các dấu &amp; này đại diện cho <em>reference</em> và chúng cho phép bạn tham chiếu
+đến một giá trị nào đó mà không sở hữu nó. Hình 4-5 mô tả khái niệm này.</p>
+<img alt="&amp;Chuỗi s chỉ vào Chuỗi s1" src="img/trpl04-05.svg" class="center" />
+<p><span class="caption">Hình 4-5: Sơ đồ <code>&amp;String s</code> chỉ vào <code>String s1</code></span></p>
+<blockquote>
+<p>Lưu ý: Ngược lại với reference bằng cách sử dụng <code>&amp;</code> là <em>dereferencing</em>, bằng cách
+dùng toán tử <code>*</code>. Chúng ta sẽ thấy một số công dụng của
+toán tử dereference trong Chương 8 và thảo luận chi tiết về dereference trong
+Chương 15.</p>
+</blockquote>
+<p>Hãy cùng xem kỹ hơn về lệnh gọi hàm ở đây:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">fn main() {
+</span>    let s1 = String::from("hello");
+
+    let len = calculate_length(&amp;s1);
+<span class="boring">
+</span><span class="boring">    println!("The length of '{s1}' is {len}.");
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn calculate_length(s: &amp;String) -&gt; usize {
+</span><span class="boring">    s.len()
+</span><span class="boring">}</span></code></pre></pre>
+<p>Cú pháp <code>&amp;s1</code> cho phép chúng ta tạo một reference <em>tham chiếu</em> đến giá trị của <code>s1</code>
+nhưng không sở hữu nó. Vì không sở hữu nó, giá trị mà nó trỏ tới sẽ
+không bị drop khi tham chiếu ngừng được sử dụng.</p>
+<p>Tương tự như vậy, chữ ký của hàm sử dụng <code>&amp;</code> để chỉ ra rằng kiểu của
+tham số <code>s</code> là một tham chiếu. Hãy thêm một số annotation:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">fn main() {
+</span><span class="boring">    let s1 = String::from("hello");
+</span><span class="boring">
+</span><span class="boring">    let len = calculate_length(&amp;s1);
+</span><span class="boring">
+</span><span class="boring">    println!("The length of '{s1}' is {len}.");
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn calculate_length(s: &amp;String) -&gt; usize { // s is a reference to a String
+    s.len()
+} // Here, s goes out of scope. But because s does not have ownership of what
+  // it refers to, the String is not dropped.</code></pre></pre>
+<p>Phạm vi (scope) mà biến <code>s</code> hợp lệ giống như bất kỳ phạm vi của tham số nào,
+nhưng giá trị được trỏ đến bởi tham chiếu không bị drop khi <code>s</code> ngừng được sử dụng
+vì <code>s</code> không có ownership. Khi hàm sử dụng tham số dưới dạng tham chiếu thay vì
+biến thực, chúng ta sẽ không cần trả lại các giá trị để trả lại ownership, vì chúng ta
+chưa bao giờ sở hữu chúng.</p>
+<p>Chúng ta gọi hành động tạo một reference là <em>borrowing</em> (mượn). Giống như
+trong cuộc sống thực, nếu một người sở hữu một cái gì đó, bạn có thể mượn nó từ họ.
+Khi bạn hoàn thành, bạn có để trả lại. Bạn không sở hữu nó.</p>
+<p>Vậy điều gì sẽ xảy ra nếu chúng ta cố gắng sửa đổi thứ gì đó mà chúng ta đang mượn?
+Hãy thử mã trong Liệt kê 4-6.</p>
+<p>Spoiler alert: nó không hoạt động!</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile">fn main() {
+    let s = String::from("hello");
+
+    change(&amp;s);
+}
+
+fn change(some_string: &amp;String) {
+    some_string.push_str(", world");
+}</code></pre>
+<p><span class="caption">Listing 4-6: Cố gắng sửa đổi một giá trị được borrow</span></p>
+<p>Đây là lỗi:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling ownership v0.1.0 (file:///projects/ownership)
+error[E0596]: cannot borrow `*some_string` as mutable, as it is behind a `&amp;` reference
+ --&gt; src/main.rs:8:5
+  |
+8 |     some_string.push_str(", world");
+  |     ^^^^^^^^^^^ `some_string` is a `&amp;` reference, so the data it refers to cannot be borrowed as mutable
+  |
+help: consider changing this to be a mutable reference
+  |
+7 | fn change(some_string: &amp;mut String) {
+  |                         +++
+
+For more information about this error, try `rustc --explain E0596`.
+error: could not compile `ownership` (bin "ownership") due to 1 previous error
+</code></pre>
+<p>Giống như các biến là bất biến theo mặc định, các tham chiếu cũng vậy. Ta không
+được phép sửa đổi thứ gì mà ta có một reference đến.</p>
+<h3 id="mutable-references-các-tham-chiếu-có-thể-thay-đổi"><a class="header" href="#mutable-references-các-tham-chiếu-có-thể-thay-đổi">Mutable References (Các tham chiếu có thể thay đổi)</a></h3>
+<p>Chúng tôi có thể sửa code từ Liệt kê 4-6 để cho phép sửa đổi giá trị được mượn,
+chỉ với một vài điều chỉnh nhỏ sử dụng * mutable reference *:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">fn main() {
+    let mut s = String::from("hello");
+
+    change(&amp;mut s);
+}
+
+fn change(some_string: &amp;mut String) {
+    some_string.push_str(", world");
+}</code></pre></pre>
+<p>Đầu tiên, chúng ta đổi <code>s</code> thành <code>mut</code>. Sau đó, chúng ta tạo một * mutable reference *
+với <code>&amp;mut s</code> nơi ta gọi hàm <code>change</code> và cập nhật function để chấp nhận mutable reference
+với <code>some_string: &amp;mut String</code>. Điều này giúp chỉ ra rõ ràng rằng hàm <code>change</code> sẽ thay đổi
+giá trị mà nó mượn.</p>
+<p>Các mutable reference có một hạn chế lớn: nếu bạn có một mutable reference tới
+một giá trị, bạn không thể có thêm reference nào khác đến giá trị đó. Đoạn code này
+dùng để nỗ lực tạo hai tham chiếu có thể thay đổi đến <code>s</code> sẽ không thành công:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile"><span class="boring">fn main() {
+</span>    let mut s = String::from("hello");
+
+    let r1 = &amp;mut s;
+    let r2 = &amp;mut s;
+
+    println!("{r1}, {r2}");
+<span class="boring">}</span></code></pre>
+<p>Và đây là lỗi:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling ownership v0.1.0 (file:///projects/ownership)
+error[E0499]: cannot borrow `s` as mutable more than once at a time
+ --&gt; src/main.rs:5:14
+  |
+4 |     let r1 = &amp;mut s;
+  |              ------ first mutable borrow occurs here
+5 |     let r2 = &amp;mut s;
+  |              ^^^^^^ second mutable borrow occurs here
+6 |
+7 |     println!("{r1}, {r2}");
+  |               ---- first borrow later used here
+
+For more information about this error, try `rustc --explain E0499`.
+error: could not compile `ownership` (bin "ownership") due to 1 previous error
+</code></pre>
+<p>Lỗi này nói rằng code không hợp lệ vì chúng ta không thể mượn (borrow) <code>s</code> như
+một mutable references nhiều hơn một lần tại một thời điểm. Mutable reference đầu tiên
+nằm trong <code>r1</code> và phải kéo dài cho đến khi nó được sử dụng trong <code>println!</code>,
+nhưng giữa việc tạo ra mutable reference và cách sử dụng nó, chúng ta đã cố gắng tạo một
+mutable reference khác trong <code>r2</code> và mượn cùng dữ liệu với <code>r1</code>.</p>
+<p>Hạn chế ngăn nhiều tham chiếu có thể thay đổi đến cùng một dữ liệu tại
+đồng thời cho phép thay nhưng theo một cách có kiểm soát. Đó có thể là thứ
+mà những Rustacean mới cảm thấy khó khăn, vì hầu hết các ngôn ngữ cho phép bạn
+thay đổi dữ liệu bất cứ khi nào bạn muốn. Lợi ích của việc hạn chế này là Rust
+có thể ngăn chặn các <em>data race</em> tại thời gian biên dịch. Một <em>data race</em>
+tương tự như một race condition và xảy ra khi ba hành vi này xảy ra:</p>
+<ul>
+<li>Hai hoặc nhiều con trỏ truy cập cùng một dữ liệu tại cùng một thời điểm.</li>
+<li>Ít nhất một trong các con trỏ đang được sử dụng để ghi vào dữ liệu.</li>
+<li>Không có cơ chế nào được sử dụng để đồng bộ hóa quyền truy cập vào dữ liệu.</li>
+</ul>
+<p>Các data race gây ra hành vi không xác định và có thể khó chẩn đoán cũng như khắc phục
+khi bạn đang cố theo dõi chúng khi chạy chương trình; Rust ngăn chặn vấn đề này
+bằng cách từ chối biên dịch mã với các data race!</p>
+<p>Như mọi khi, ta có thể sử dụng dấu ngoặc nhọn để tạo một scope mới, cho phép
+nhiều tham chiếu có thể thay đổi, chỉ là không phải <em>đồng thời</em>:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">fn main() {
+</span>    let mut s = String::from("hello");
+
+    {
+        let r1 = &amp;mut s;
+    } // r1 goes out of scope here, so we can make a new reference with no problems.
+
+    let r2 = &amp;mut s;
+<span class="boring">}</span></code></pre></pre>
+<p>Rust thực thi một quy tắc tương tự cho việc kết hợp các mutable reference
+và immutable reference.
+Mã này dẫn đến một lỗi:</p>
+<pre><code class="language-rust ignore does_not_compile"><span class="boring">fn main() {
+</span>    let mut s = String::from("hello");
+
+    let r1 = &amp;s; // no problem
+    let r2 = &amp;s; // no problem
+    let r3 = &amp;mut s; // BIG PROBLEM
+
+    println!("{r1}, {r2}, and {r3}");
+<span class="boring">}</span></code></pre>
+<p>Đây là lỗi:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling ownership v0.1.0 (file:///projects/ownership)
+error[E0502]: cannot borrow `s` as mutable because it is also borrowed as immutable
+ --&gt; src/main.rs:6:14
+  |
+4 |     let r1 = &amp;s; // no problem
+  |              -- immutable borrow occurs here
+5 |     let r2 = &amp;s; // no problem
+6 |     let r3 = &amp;mut s; // BIG PROBLEM
+  |              ^^^^^^ mutable borrow occurs here
+7 |
+8 |     println!("{r1}, {r2}, and {r3}");
+  |               ---- immutable borrow later used here
+
+For more information about this error, try `rustc --explain E0502`.
+error: could not compile `ownership` (bin "ownership") due to 1 previous error
+</code></pre>
+<p>Whew! Chúng ta <em>cũng</em> không thể có một mutable reference trong khi có một
+immutable reference chỉ đến cùng giá trị.</p>
+<p>Người dùng của một immutable reference không mong đợi giá trị đột ngột thay đổi
+từ đâu đó bên dưới! Tuy nhiên, nhiều immutable reference được cho phép vì
+mọi người chỉ đang đọc dữ liệu và không ai có khả năng ảnh hưởng đến bất kỳ ai khác.</p>
+<p>Lưu ý rằng phạm vi của tham chiếu bắt đầu từ nơi nó được giới thiệu và tiếp tục
+cho đến lần cuối cùng tham chiếu đó được sử dụng. Ví dụ, mã này sẽ
+biên dịch bởi vì lần sử dụng cuối cùng của immutable reference, <code>println!</code>,
+xảy ra trước khi mutable reference được giới thiệu:</p>
+<pre><pre class="playground"><code class="language-rust edition2021"><span class="boring">fn main() {
+</span>    let mut s = String::from("hello");
+
+    let r1 = &amp;s; // no problem
+    let r2 = &amp;s; // no problem
+    println!("{r1} and {r2}");
+    // Variables r1 and r2 will not be used after this point.
+
+    let r3 = &amp;mut s; // no problem
+    println!("{r3}");
+<span class="boring">}</span></code></pre></pre>
+<p>Phạm vi của các tham chiếu bất biến (mutable reference) <code>r1</code> và <code>r2</code> kết thúc sau <code>println!</code>
+nơi chúng được sử dụng lần cuối, trước mutable reference <code>r3</code> được tạo.
+Các phạm vi này không trùng nhau, vì vậy code này được phép. khả năng của
+trình biên dịch để báo rằng một tham chiếu không còn được sử dụng tại một thời điểm trước
+khi kết thúc scope được gọi là <em>Non-Lexical Lifetimes</em> (viết tắt là NLL) và bạn
+có thể đọc thêm về nó trong <a href="https://doc.rust-lang.org/edition-guide/rust-2018/ownership-and-lifetimes/non-lexical-lifetimes.html">The Edition Guide</a>.</p>
+<p>Mặc dù đôi khi lỗi borrow có thể gây khó chịu, hãy nhớ rằng đó là
+trình biên dịch Rust đã sớm chỉ ra một lỗi tiềm ẩn (tại thời điểm biên dịch
+so với thời gian chạy) và cho bạn biết chính xác vấn đề nằm ở đâu. Sau đó, bạn không
+phải tìm ra lý do tại sao dữ liệu của bạn không giống như bạn nghĩ.</p>
+<h3 id="dangling-references"><a class="header" href="#dangling-references">Dangling References</a></h3>
+<p>Trong các ngôn ngữ có con trỏ, rất dễ tạo nhầm <em>dangling pointer</em>–con trỏ
+tham chiếu đến một vị trí trong bộ nhớ có thể đã được được cấp cho một code
+khác–bằng cách giải phóng bộ nhớ trong khi vẫn giữ một con trỏ tới
+phần bộ nhớ đó. Ngược lại, trong Rust, trình biên dịch đảm bảo rằng các tham chiếu sẽ
+không bao giờ là dangling reference: nếu bạn có một reference đến một dữ liệu,
+trình biên dịch sẽ đảm bảo rằng dữ liệu sẽ không đi ra khỏi scope trước reference đó.</p>
+<p>Hãy thử tạo một dangling reference để xem cách Rust ngăn chặn chúng bằng một
+lỗi biên dịch:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile">fn main() {
+    let reference_to_nothing = dangle();
+}
+
+fn dangle() -&gt; &amp;String {
+    let s = String::from("hello");
+
+    &amp;s
+}</code></pre>
+<p>Đây là lỗi:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling ownership v0.1.0 (file:///projects/ownership)
+error[E0106]: missing lifetime specifier
+ --&gt; src/main.rs:5:16
+  |
+5 | fn dangle() -&gt; &amp;String {
+  |                ^ expected named lifetime parameter
+  |
+  = help: this function's return type contains a borrowed value, but there is no value for it to be borrowed from
+help: consider using the `'static` lifetime, but this is uncommon unless you're returning a borrowed value from a `const` or a `static`
+  |
+5 | fn dangle() -&gt; &amp;'static String {
+  |                 +++++++
+help: instead, you are more likely to want to return an owned value
+  |
+5 - fn dangle() -&gt; &amp;String {
+5 + fn dangle() -&gt; String {
+  |
+
+error[E0515]: cannot return reference to local variable `s`
+ --&gt; src/main.rs:8:5
+  |
+8 |     &amp;s
+  |     ^^ returns a reference to data owned by the current function
+
+Some errors have detailed explanations: E0106, E0515.
+For more information about an error, try `rustc --explain E0106`.
+error: could not compile `ownership` (bin "ownership") due to 2 previous errors
+</code></pre>
+<p>Thông báo lỗi này đề cập đến một tính năng mà chúng ta chưa đề cập đến: lifetime
+(thời gian sống). Ta sẽ thảo luận chi tiết về lifetime trong Chương 10.
+Nhưng, nếu bạn bỏ qua các phần về lifetime, thông báo chứa chìa khóa giải
+thích tại sao mã này lại có vấn đề:</p>
+<pre><code class="language-text">this function's return type contains a borrowed value, but there is no value
+for it to be borrowed from
+</code></pre>
+<p>Chúng ta hãy xem xét kỹ hơn chính xác những gì đang xảy ra vào mỗi bước trong
+code <code>dangle</code> của chúng ta:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile"><span class="boring">fn main() {
+</span><span class="boring">    let reference_to_nothing = dangle();
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn dangle() -&gt; &amp;String { // dangle returns a reference to a String
+
+    let s = String::from("hello"); // s is a new String
+
+    &amp;s // we return a reference to the String, s
+} // Here, s goes out of scope and is dropped, so its memory goes away.
+  // Danger!</code></pre>
+<p>Vì <code>s</code> được tạo bên trong <code>dangle</code>, khi code của <code>dangle</code> kết thúc,
+<code>s</code> sẽ được giải phóng. Nhưng chúng ta đã cố gắng trả lại một tham chiếu đến nó.
+Điều đó có nghĩa là tham chiếu này sẽ trỏ đến một <code>String</code> không hợp lệ.
+Điều đó hoàn toàn không tốt! Rust sẽ không cho phép chúng ta làm điều này.</p>
+<p>Giải pháp ở đây là trả về <code>String</code> trực tiếp:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">fn main() {
+</span><span class="boring">    let string = no_dangle();
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn no_dangle() -&gt; String {
+    let s = String::from("hello");
+
+    s
+}</code></pre></pre>
+<p>Điều này hoạt động mà không có bất kỳ vấn đề gì. Ownership được chuyển ra ngoài, và
+không có biến nào được giải phóng.</p>
+<h3 id="các-quy-tắc-về-tham-chiếu"><a class="header" href="#các-quy-tắc-về-tham-chiếu">Các quy tắc về tham chiếu</a></h3>
+<p>Hãy tóm tắt lại những gì chúng ta đã thảo luận về tham chiếu:</p>
+<ul>
+<li>Tại bất kỳ thời điểm nào, bạn có thể có <em>hoặc</em> chỉ một mutable reference <em>hoặc</em>
+nhiều mutable reference.</li>
+<li>Reference phải luôn hợp lệ.</li>
+</ul>
+<p>Tiếp theo, chúng ta sẽ xem xét một loại tham chiếu khác: slice.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch04-01-what-is-ownership.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch04-03-slices.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch04-01-what-is-ownership.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch04-03-slices.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

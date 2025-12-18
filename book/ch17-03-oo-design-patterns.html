@@ -1,0 +1,648 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Implementing an Object-Oriented Design Pattern - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="implementing-an-object-oriented-design-pattern"><a class="header" href="#implementing-an-object-oriented-design-pattern">Implementing an Object-Oriented Design Pattern</a></h2>
+<p><em>State pattern</em> là một mẫu thiết kế hướng đối tượng (object-oriented design
+pattern). Cốt lõi của mẫu thiết kế này là chúng ta định nghĩa một tập hợp
+các trạng thái mà một giá trị có thể có bên trong. Các trạng thái được
+biểu diễn bằng một tập hợp các <em>state objects</em>, và hành vi của giá trị thay
+đổi dựa trên trạng thái của nó. Chúng ta sẽ làm ví dụ với một struct
+blog post có một field để giữ trạng thái, đây sẽ là một state object từ
+tập hợp “draft”, “review” hoặc “published”.</p>
+<p>Các state object chia sẻ chức năng: trong Rust, tất nhiên, chúng ta sử dụng
+struct và trait thay vì objects và inheritance. Mỗi state object chịu trách
+nhiệm cho hành vi riêng của nó và quyết định khi nào nó nên chuyển sang
+trạng thái khác. Giá trị giữ state object không biết gì về các hành vi
+khác nhau của các trạng thái hoặc khi nào cần chuyển đổi giữa các trạng thái.</p>
+<p>Ưu điểm của việc sử dụng state pattern là, khi yêu cầu nghiệp vụ của chương
+trình thay đổi, chúng ta sẽ không cần thay đổi mã của giá trị giữ trạng
+thái hoặc mã sử dụng giá trị đó. Chúng ta chỉ cần cập nhật mã bên trong
+một state object để thay đổi quy tắc của nó hoặc thêm nhiều state object
+mới.</p>
+<p>Đầu tiên, chúng ta sẽ triển khai state pattern theo cách hướng đối tượng
+truyền thống hơn, sau đó sẽ dùng cách tiếp cận tự nhiên hơn trong Rust.
+Hãy cùng thực hiện dần dần workflow cho blog post sử dụng state pattern.</p>
+<p>Chức năng cuối cùng sẽ trông như sau:</p>
+<ol>
+<li>Một blog post bắt đầu như một draft rỗng.</li>
+<li>Khi draft hoàn tất, yêu cầu review bài post.</li>
+<li>Khi bài post được phê duyệt, nó sẽ được xuất bản (published).</li>
+<li>Chỉ các blog post đã published mới trả về nội dung để in, nên các post
+chưa được phê duyệt không thể vô tình được xuất bản.</li>
+</ol>
+<p>Bất kỳ thay đổi nào khác trên một post cũng không có hiệu lực. Ví dụ, nếu
+chúng ta cố gắng approve một draft blog post trước khi yêu cầu review, post
+sẽ vẫn là một draft chưa được published.</p>
+<p>Listing 17-11 minh họa workflow này dưới dạng code: đây là ví dụ cách sử
+dụng API mà chúng ta sẽ triển khai trong một library crate tên là <code>blog</code>.
+Mã này sẽ chưa compile vì chúng ta chưa triển khai crate <code>blog</code>.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile">{{#rustdoc_include ../listings/ch17-oop/listing-17-11/src/main.rs:all}}</code></pre>
+<p><span class="caption">Listing 17-11: Code that demonstrates the desired
+behavior we want our <code>blog</code> crate to have</span></p>
+<p>Chúng ta muốn cho phép người dùng tạo một draft blog post mới bằng
+<code>Post::new</code>. Chúng ta muốn cho phép thêm văn bản vào blog post. Nếu cố
+gắng lấy nội dung của post ngay lập tức, trước khi được approval, chúng
+ta sẽ không nhận được bất kỳ văn bản nào vì post vẫn còn là draft. Chúng
+ta đã thêm <code>assert_eq!</code> trong code nhằm mục đích minh họa. Một unit test
+tuyệt vời cho trường hợp này là assert rằng một draft blog post trả về
+chuỗi rỗng từ phương thức <code>content</code>, nhưng chúng ta sẽ không viết test
+cho ví dụ này.</p>
+<p>Tiếp theo, chúng ta muốn cho phép yêu cầu review cho post, và muốn
+<code>content</code> trả về chuỗi rỗng trong khi đang chờ review. Khi post được
+approval, nó sẽ được published, nghĩa là văn bản của post sẽ được trả
+về khi gọi <code>content</code>.</p>
+<p>Chú ý rằng kiểu duy nhất chúng ta tương tác từ crate là <code>Post</code>. Kiểu
+này sẽ sử dụng state pattern và sẽ giữ một giá trị là một trong ba state
+object đại diện cho các trạng thái khác nhau mà post có thể ở — draft,
+waiting for review hoặc published. Việc thay đổi từ trạng thái này sang
+trạng thái khác sẽ được quản lý nội bộ trong kiểu <code>Post</code>. Các state thay
+đổi dựa trên các phương thức mà người dùng thư viện gọi trên instance
+của <code>Post</code>, nhưng họ không cần quản lý trực tiếp việc thay đổi state.
+Ngoài ra, người dùng cũng không thể mắc lỗi với các state, ví dụ như
+xuất bản post trước khi được review.</p>
+<h3 id="defining-post-and-creating-a-new-instance-in-the-draft-state"><a class="header" href="#defining-post-and-creating-a-new-instance-in-the-draft-state">Defining <code>Post</code> and Creating a New Instance in the Draft State</a></h3>
+<p>Hãy bắt đầu với việc triển khai thư viện! Chúng ta biết cần một struct
+<code>Post</code> public để giữ nội dung, nên sẽ bắt đầu với định nghĩa struct và
+một hàm public <code>new</code> liên kết để tạo một instance của <code>Post</code>, như được
+minh họa trong Listing 17-12. Chúng ta cũng sẽ tạo một trait <code>State</code>
+private để định nghĩa hành vi mà tất cả state object của <code>Post</code> phải có.</p>
+<p>Sau đó, <code>Post</code> sẽ giữ một trait object `Bo</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch17-oop/listing-17-12/src/lib.rs}}</code></pre>
+<p><span class="caption">Listing 17-12: Definition of a <code>Post</code> struct and a <code>new</code>
+function that creates a new <code>Post</code> instance, a <code>State</code> trait, and a <code>Draft</code>
+struct</span></p>
+<p>Trait <code>State</code> định nghĩa hành vi được chia sẻ bởi các trạng thái khác nhau của post.
+Các state object là <code>Draft</code>, <code>PendingReview</code> và <code>Published</code>, tất cả sẽ triển khai
+trait <code>State</code>. Hiện tại, trait chưa có phương thức nào, và chúng ta sẽ bắt đầu
+bằng việc định nghĩa trạng thái <code>Draft</code> vì đây là trạng thái mà post sẽ bắt đầu.</p>
+<p>Khi tạo một <code>Post</code> mới, chúng ta gán field <code>state</code> với giá trị <code>Some</code> chứa một
+<code>Box</code>. <code>Box</code> này trỏ tới một instance mới của struct <code>Draft</code>. Điều này đảm bảo
+mỗi khi tạo một <code>Post</code> mới, nó sẽ bắt đầu ở trạng thái draft. Vì field <code>state</code>
+của <code>Post</code> là private, không có cách nào tạo một <code>Post</code> ở trạng thái khác! Trong
+hàm <code>Post::new</code>, chúng ta gán field <code>content</code> là một <code>String</code> mới rỗng.</p>
+<h3 id="storing-the-text-of-the-post-content"><a class="header" href="#storing-the-text-of-the-post-content">Storing the Text of the Post Content</a></h3>
+<p>Chúng ta đã thấy trong Listing 17-11 rằng chúng ta muốn gọi một phương thức
+có tên <code>add_text</code> và truyền vào một <code>&amp;str</code>, nội dung này sẽ được thêm làm
+text content của blog post. Chúng ta triển khai phương thức này thay vì để
+field <code>content</code> là <code>pub</code>, để sau này có thể cài đặt một phương thức kiểm soát
+cách dữ liệu của field <code>content</code> được đọc. Phương thức <code>add_text</code> khá đơn
+giản, nên chúng ta sẽ thêm phần cài đặt trong Listing 17-13 vào khối <code>impl Post</code>:</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch17-oop/listing-17-13/src/lib.rs:here}}</code></pre>
+<p><span class="caption">Listing 17-13: Implementing the <code>add_text</code> method to add
+text to a post’s <code>content</code></span></p>
+<p>Phương thức <code>add_text</code> nhận một tham chiếu mutable tới <code>self</code>, vì chúng ta
+thay đổi instance của <code>Post</code> mà chúng ta gọi <code>add_text</code> trên đó. Sau đó,
+chúng ta gọi <code>push_str</code> trên <code>String</code> trong <code>content</code> và truyền đối số
+<code>text</code> để thêm vào <code>content</code> đã lưu. Hành vi này không phụ thuộc vào trạng
+thái hiện tại của post, nên nó không thuộc về state pattern. Phương thức
+<code>add_text</code> không tương tác với field <code>state</code> chút nào, nhưng nó là một
+phần của hành vi mà chúng ta muốn hỗ trợ.</p>
+<h3 id="ensuring-the-content-of-a-draft-post-is-empty"><a class="header" href="#ensuring-the-content-of-a-draft-post-is-empty">Ensuring the Content of a Draft Post Is Empty</a></h3>
+<p>Ngay cả khi chúng ta đã gọi <code>add_text</code> và thêm một số nội dung vào post,
+chúng ta vẫn muốn phương thức <code>content</code> trả về một chuỗi rỗng vì post
+vẫn đang ở trạng thái draft, như được minh họa ở dòng 7 của Listing 17-11.
+Hiện tại, chúng ta sẽ triển khai phương thức <code>content</code> với cách đơn giản
+nhất để đáp ứng yêu cầu này: luôn trả về một chuỗi rỗng. Chúng ta sẽ
+thay đổi sau khi triển khai khả năng thay đổi trạng thái của post để nó
+có thể được published. Cho đến nay, post chỉ có thể ở trạng thái draft,
+nên nội dung post luôn phải trống. Listing 17-14 minh họa phần cài đặt
+placeholder này:</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch17-oop/listing-17-14/src/lib.rs:here}}</code></pre>
+<p><span class="caption">Listing 17-14: Adding a placeholder implementation for
+the <code>content</code> method on <code>Post</code> that always returns an empty string slice</span></p>
+<p>Với phương thức <code>content</code> được thêm này, mọi thứ trong Listing 17-11 đến
+dòng 7 hoạt động như mong muốn.</p>
+<h3 id="requesting-a-review-of-the-post-changes-its-state"><a class="header" href="#requesting-a-review-of-the-post-changes-its-state">Requesting a Review of the Post Changes Its State</a></h3>
+<p>Tiếp theo, chúng ta cần thêm chức năng để yêu cầu review cho một post,
+điều này sẽ thay đổi trạng thái của nó từ <code>Draft</code> sang <code>PendingReview</code>.
+Listing 17-15 minh họa đoạn code này:</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch17-oop/listing-17-15/src/lib.rs:here}}</code></pre>
+<p><span class="caption">Listing 17-15: Implementing <code>request_review</code> methods on
+<code>Post</code> and the <code>State</code> trait</span></p>
+<p>Chúng ta tạo cho <code>Post</code> một phương thức public tên là <code>request_review</code> nhận
+một tham chiếu mutable tới <code>self</code>. Sau đó chúng ta gọi phương thức
+<code>request_review</code> nội bộ trên trạng thái hiện tại của <code>Post</code>, và phương thức
+<code>request_review</code> thứ hai này sẽ tiêu thụ trạng thái hiện tại và trả về trạng
+thái mới.</p>
+<p>Chúng ta thêm phương thức <code>request_review</code> vào trait <code>State</code>; tất cả các
+kiểu triển khai trait này giờ đây phải triển khai phương thức
+<code>request_review</code>. Lưu ý rằng thay vì có <code>self</code>, <code>&amp;self</code> hoặc <code>&amp;mut self</code>
+làm tham số đầu tiên, chúng ta có <code>self: Box&lt;Self&gt;</code>. Cú pháp này nghĩa là
+phương thức chỉ hợp lệ khi được gọi trên một <code>Box</code> chứa kiểu đó. Cú pháp
+này nhận quyền sở hữu của <code>Box&lt;Self&gt;</code>, làm vô hiệu hóa trạng thái cũ để
+giá trị trạng thái của <code>Post</code> có thể biến đổi thành trạng thái mới.</p>
+<p>Để tiêu thụ trạng thái cũ, phương thức <code>request_review</code> cần nhận quyền sở
+hữu của giá trị trạng thái. Đây là lý do <code>Option</code> trong field <code>state</code> của
+<code>Post</code> xuất hiện: chúng ta gọi phương thức <code>take</code> để lấy giá trị <code>Some</code>
+ra khỏi field <code>state</code> và để lại <code>None</code> tại chỗ, vì Rust không cho phép
+có các field chưa được gán trong struct. Điều này cho phép chúng ta di
+chuyển giá trị <code>state</code> ra khỏi <code>Post</code> thay vì chỉ mượn. Sau đó, chúng ta
+gán giá trị <code>state</code> của post bằng kết quả của thao tác này.</p>
+<p>Chúng ta cần gán tạm <code>state</code> là <code>None</code> thay vì gán trực tiếp với code như
+<code>self.state = self.state.request_review();</code> để có quyền sở hữu giá trị
+<code>state</code>. Điều này đảm bảo <code>Post</code> không thể dùng giá trị <code>state</code> cũ sau
+khi chúng ta đã biến đổi nó thành trạng thái mới.</p>
+<p>Phương thức <code>request_review</code> trên <code>Draft</code> trả về một instance mới, được
+box của struct <code>PendingReview</code>, đại diện cho trạng thái khi một post đang
+chờ review. Struct <code>PendingReview</code> cũng triển khai phương thức
+<code>request_review</code> nhưng không thực hiện biến đổi nào. Thay vào đó, nó trả
+về chính nó, vì khi yêu cầu review trên một post đã ở trạng thái
+<code>PendingReview</code>, nó vẫn giữ trạng thái <code>PendingReview</code>.</p>
+<p>Giờ đây chúng ta bắt đầu thấy được lợi ích của state pattern: phương thức
+<code>request_review</code> trên <code>Post</code> giống nhau bất kể giá trị <code>state</code> là gì.
+Mỗi state chịu trách nhiệm cho các quy tắc riêng của nó.</p>
+<p>Chúng ta sẽ giữ nguyên phương thức <code>content</code> trên <code>Post</code>, trả về chuỗi
+rỗng. Giờ đây chúng ta có thể có một <code>Post</code> ở trạng thái <code>PendingReview</code>
+cũng như <code>Draft</code>, nhưng chúng ta muốn hành vi giống nhau trong trạng
+thái <code>PendingReview</code>. Listing 17-11 giờ hoạt động đến dòng 10!</p>
+<!-- Old headings. Do not remove or links may break. -->
+<p><a id="adding-the-approve-method-that-changes-the-behavior-of-content"></a></p>
+<h3 id="adding-approve-to-change-the-behavior-of-content"><a class="header" href="#adding-approve-to-change-the-behavior-of-content">Adding <code>approve</code> to Change the Behavior of <code>content</code></a></h3>
+<p>Phương thức <code>approve</code> sẽ tương tự như phương thức <code>request_review</code>: nó sẽ
+gán field <code>state</code> thành giá trị mà trạng thái hiện tại xác định khi trạng
+thái đó được approve, như minh họa trong Listing 17-16:</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch17-oop/listing-17-16/src/lib.rs:here}}</code></pre>
+<p><span class="caption">Listing 17-16: Implementing the <code>approve</code> method on
+<code>Post</code> and the <code>State</code> trait</span></p>
+<p>Chúng ta thêm phương thức <code>approve</code> vào trait <code>State</code> và thêm một struct mới
+triển khai <code>State</code>, đó là trạng thái <code>Published</code>.</p>
+<p>Tương tự như cách <code>request_review</code> trên <code>PendingReview</code> hoạt động, nếu chúng
+ta gọi phương thức <code>approve</code> trên <code>Draft</code>, sẽ không có hiệu lực vì <code>approve</code>
+trả về chính <code>self</code>. Khi gọi <code>approve</code> trên <code>PendingReview</code>, nó trả về một
+instance mới được box của struct <code>Published</code>. Struct <code>Published</code> triển khai
+trait <code>State</code>, và cả phương thức <code>request_review</code> lẫn <code>approve</code> đều trả về
+chính nó, vì trong các trường hợp này post nên giữ trạng thái
+<code>Published</code>.</p>
+<p>Bây giờ chúng ta cần cập nhật phương thức <code>content</code> trên <code>Post</code>. Chúng ta
+muốn giá trị trả về từ <code>content</code> phụ thuộc vào trạng thái hiện tại của
+<code>Post</code>, nên chúng ta sẽ để <code>Post</code> ủy quyền cho một phương thức <code>content</code>
+được định nghĩa trên field <code>state</code> của nó, như minh họa trong Listing 17-17:</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile">{{#rustdoc_include ../listings/ch17-oop/listing-17-17/src/lib.rs:here}}</code></pre>
+<p><span class="caption">Listing 17-17: Updating the <code>content</code> method on <code>Post</code> to
+delegate to a <code>content</code> method on <code>State</code></span></p>
+<p>Vì mục tiêu là giữ tất cả các quy tắc này bên trong các struct triển khai
+<code>State</code>, chúng ta gọi phương thức <code>content</code> trên giá trị trong <code>state</code> và
+truyền instance của post (tức là <code>self</code>) làm đối số. Sau đó, chúng ta trả
+về giá trị được trả từ việc sử dụng phương thức <code>content</code> trên giá trị
+<code>state</code>.</p>
+<p>Chúng ta gọi phương thức <code>as_ref</code> trên <code>Option</code> vì muốn một tham chiếu tới
+giá trị bên trong <code>Option</code> thay vì quyền sở hữu giá trị. Vì <code>state</code> là
+<code>Option&lt;Box&lt;dyn State&gt;&gt;</code>, khi gọi <code>as_ref</code>, chúng ta nhận được
+<code>Option&lt;&amp;Box&lt;dyn State&gt;&gt;</code>. Nếu không gọi <code>as_ref</code>, chúng ta sẽ gặp lỗi
+vì không thể di chuyển <code>state</code> ra khỏi <code>&amp;self</code> được mượn của tham số
+hàm.</p>
+<p>Sau đó, chúng ta gọi phương thức <code>unwrap</code>, mà chúng ta biết sẽ không bao
+giờ panic, vì các phương thức trên <code>Post</code> đảm bảo rằng <code>state</code> luôn chứa
+giá trị <code>Some</code> khi các phương thức đó hoàn thành. Đây là một trong những
+trường hợp đã bàn trong phần <a href="ch09-03-to-panic-or-not-to-panic.html#cases-in-which-you-have-more-information-than-the-compiler">“Cases In Which You Have More Information Than the
+Compiler”</a><!-- ignore --> của Chương 9, khi chúng ta biết
+giá trị <code>None</code> là không thể xảy ra, mặc dù compiler không hiểu được điều đó.</p>
+<p>Tại thời điểm này, khi gọi <code>content</code> trên <code>&amp;Box&lt;dyn State&gt;</code>, deref coercion
+sẽ có hiệu lực trên <code>&amp;</code> và <code>Box</code> nên phương thức <code>content</code> cuối cùng sẽ
+được gọi trên kiểu triển khai trait <code>State</code>. Điều đó có nghĩa là chúng ta
+cần thêm <code>content</code> vào định nghĩa trait <code>State</code>, và đó là nơi chúng ta sẽ
+đặt logic cho nội dung trả về tùy thuộc vào trạng thái hiện tại, như minh
+họa trong Listing 17-18:</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch17-oop/listing-17-18/src/lib.rs:here}}</code></pre>
+<p><span class="caption">Listing 17-18: Adding the <code>content</code> method to the <code>State</code>
+trait</span></p>
+<p>Chúng ta thêm một triển khai mặc định cho phương thức <code>content</code> trả về một
+chuỗi rỗng. Điều này có nghĩa là chúng ta không cần triển khai <code>content</code>
+trên các struct <code>Draft</code> và <code>PendingReview</code>. Struct <code>Published</code> sẽ override
+phương thức <code>content</code> và trả về giá trị trong <code>post.content</code>.</p>
+<p>Lưu ý rằng chúng ta cần chú thích lifetime cho phương thức này, như đã
+bàn trong Chương 10. Chúng ta đang lấy một tham chiếu tới <code>post</code> làm
+đối số và trả về một tham chiếu tới một phần của <code>post</code>, nên lifetime của
+tham chiếu trả về liên quan tới lifetime của tham số <code>post</code>.</p>
+<p>Và xong—tất cả Listing 17-11 giờ hoạt động! Chúng ta đã triển khai state
+pattern với các quy tắc của workflow blog post. Logic liên quan tới các
+quy tắc nằm trong các state object thay vì rải rác trong <code>Post</code>.</p>
+<section class="note" aria-role="note">
+<h4 id="why-not-an-enum"><a class="header" href="#why-not-an-enum">Why Not An Enum?</a></h4>
+<p>Bạn có thể thắc mắc tại sao chúng ta không dùng một <code>enum</code> với các trạng thái
+post khác nhau làm các variant. Đây chắc chắn là một giải pháp khả thi, hãy
+thử và so sánh kết quả cuối cùng để xem bạn thích cách nào! Một nhược điểm
+khi dùng enum là mọi nơi kiểm tra giá trị enum sẽ cần một biểu thức <code>match</code>
+hoặc tương tự để xử lý tất cả các variant có thể. Điều này có thể trở nên
+lặp đi lặp lại nhiều hơn so với giải pháp trait object này.</p>
+</section>
+<h3 id="trade-offs-of-the-state-pattern"><a class="header" href="#trade-offs-of-the-state-pattern">Trade-offs of the State Pattern</a></h3>
+<p>Chúng ta đã thấy rằng Rust có khả năng triển khai state pattern theo hướng
+object-oriented để đóng gói các kiểu hành vi khác nhau mà một post có thể
+có trong từng trạng thái. Các phương thức trên <code>Post</code> không biết gì về
+các hành vi khác nhau. Với cách chúng ta tổ chức code, chỉ cần nhìn vào
+một nơi để biết các cách mà một post đã được publish có thể hành xử: đó
+là phần triển khai trait <code>State</code> trên struct <code>Published</code>.</p>
+<p>Nếu tạo một triển khai thay thế không dùng state pattern, chúng ta có thể
+dùng biểu thức <code>match</code> trong các phương thức của <code>Post</code> hoặc thậm chí trong
+code <code>main</code> để kiểm tra trạng thái của post và thay đổi hành vi ở những nơi
+đó. Điều này có nghĩa là chúng ta phải xem ở nhiều nơi để hiểu tất cả
+các tác động khi post ở trạng thái published! Số lượng chỗ phải xem sẽ
+tăng lên khi thêm nhiều trạng thái: mỗi biểu thức <code>match</code> đó cần thêm
+một nhánh mới.</p>
+<p>Với state pattern, các phương thức <code>Post</code> và nơi sử dụng <code>Post</code> không cần
+biểu thức <code>match</code>, và để thêm trạng thái mới, chỉ cần thêm một struct mới
+và triển khai các phương thức trait trên struct đó.</p>
+<p>Triển khai theo state pattern dễ dàng mở rộng để thêm nhiều chức năng hơn.
+Để thấy sự đơn giản khi bảo trì code dùng state pattern, thử một số gợi ý:</p>
+<ul>
+<li>Thêm phương thức <code>reject</code> thay đổi trạng thái post từ <code>PendingReview</code>
+về <code>Draft</code>.</li>
+<li>Yêu cầu hai lần gọi <code>approve</code> trước khi trạng thái được chuyển sang
+<code>Published</code>.</li>
+<li>Cho phép người dùng thêm nội dung text chỉ khi post ở trạng thái
+<code>Draft</code>. Gợi ý: để state object chịu trách nhiệm với những gì có thể
+thay đổi về content nhưng không chịu trách nhiệm sửa đổi <code>Post</code>.</li>
+</ul>
+<p>Một nhược điểm của state pattern là, vì các state triển khai các chuyển
+đổi giữa các state, một số state bị coupling với nhau. Nếu thêm một state
+giữa <code>PendingReview</code> và <code>Published</code>, như <code>Scheduled</code>, chúng ta sẽ phải
+thay đổi code trong <code>PendingReview</code> để chuyển sang <code>Scheduled</code>. Sẽ bớt
+công sức hơn nếu <code>PendingReview</code> không cần thay đổi khi thêm trạng thái
+mới, nhưng điều đó đồng nghĩa phải chuyển sang một design pattern khác.</p>
+<p>Một nhược điểm khác là chúng ta đã lặp lại một số logic. Để loại bỏ một
+số trùng lặp, có thể thử tạo triển khai mặc định cho các phương thức
+<code>request_review</code> và <code>approve</code> trên trait <code>State</code> trả về <code>self</code>; tuy nhiên,
+điều này vi phạm object safety, vì trait không biết chính xác <code>self</code> cụ thể
+sẽ là gì. Chúng ta muốn dùng <code>State</code> như một trait object, nên các phương
+thức cần object safe.</p>
+<p>Các trùng lặp khác gồm các triển khai tương tự của <code>request_review</code> và
+<code>approve</code> trên <code>Post</code>. Cả hai phương thức đều ủy quyền cho triển khai
+của cùng phương thức trên giá trị trong field <code>state</code> của <code>Option</code> và
+gán giá trị mới của field <code>state</code> bằng kết quả trả về. Nếu có nhiều
+phương thức trên <code>Post</code> theo mẫu này, có thể cân nhắc định nghĩa một macro
+để loại bỏ sự lặp lại (xem phần <a href="ch19-06-macros.html#macros">“Macros”</a><!-- ignore --> trong
+Chương 19).</p>
+<p>Bằng việc triển khai state pattern chính xác như định nghĩa cho các ngôn
+ngữ hướng đối tượng, chúng ta chưa tận dụng hết sức mạnh của Rust. Hãy xem
+một số thay đổi có thể thực hiện trên crate <code>blog</code> để biến các trạng thái
+và chuyển đổi không hợp lệ thành lỗi biên dịch.</p>
+<h4 id="encoding-states-and-behavior-as-types"><a class="header" href="#encoding-states-and-behavior-as-types">Encoding States and Behavior as Types</a></h4>
+<p>Chúng ta sẽ minh họa cách suy nghĩ lại state pattern để nhận được một bộ
+trade-off khác. Thay vì đóng gói hoàn toàn các state và chuyển đổi sao cho
+code bên ngoài không biết gì về chúng, chúng ta sẽ mã hóa các state thành
+các kiểu khác nhau. Do đó, hệ thống kiểm tra kiểu của Rust sẽ ngăn việc
+sử dụng các post đang ở trạng thái draft ở những nơi chỉ cho phép post
+đã publish bằng cách phát sinh lỗi biên dịch.</p>
+<p>Hãy xem xét phần đầu của <code>main</code> trong Listing 17-11:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore">{{#rustdoc_include ../listings/ch17-oop/listing-17-11/src/main.rs:here}}</code></pre>
+<p>Chúng ta vẫn cho phép tạo các post mới ở trạng thái draft bằng <code>Post::new</code>
+và thêm text vào nội dung của post. Nhưng thay vì có một phương thức <code>content</code>
+trên post draft trả về chuỗi rỗng, chúng ta sẽ làm sao để post draft hoàn
+toàn không có phương thức <code>content</code>. Như vậy, nếu cố gắng lấy nội dung
+của post draft, trình biên dịch sẽ báo lỗi rằng phương thức không tồn tại.
+Kết quả là, sẽ không thể vô tình hiển thị nội dung post draft trong
+môi trường production, vì code đó thậm chí sẽ không compile được. Listing
+17-19 trình bày định nghĩa của struct <code>Post</code> và struct <code>DraftPost</code>, cũng
+như các phương thức trên mỗi struct:</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch17-oop/listing-17-19/src/lib.rs}}</code></pre>
+<p><span class="caption">Listing 17-19: A <code>Post</code> with a <code>content</code> method and a
+<code>DraftPost</code> without a <code>content</code> method</span></p>
+<p>Cả hai struct <code>Post</code> và <code>DraftPost</code> đều có một field <code>content</code> private
+lưu trữ nội dung blog post. Các struct không còn field <code>state</code> vì chúng
+ta đang chuyển việc mã hóa trạng thái sang các kiểu của struct. Struct
+<code>Post</code> sẽ đại diện cho một post đã publish, và nó có phương thức <code>content</code>
+trả về giá trị của <code>content</code>.</p>
+<p>Chúng ta vẫn có một hàm <code>Post::new</code>, nhưng thay vì trả về một instance
+của <code>Post</code>, nó trả về một instance của <code>DraftPost</code>. Vì <code>content</code> là private
+và không có hàm nào trả về <code>Post</code>, hiện tại không thể tạo một instance
+của <code>Post</code>.</p>
+<p>Struct <code>DraftPost</code> có phương thức <code>add_text</code>, nên chúng ta có thể thêm text
+vào <code>content</code> như trước, nhưng lưu ý rằng <code>DraftPost</code> không có phương thức
+<code>content</code> được định nghĩa! Vì vậy chương trình đảm bảo tất cả các post
+bắt đầu là draft, và post draft không có nội dung sẵn sàng để hiển thị.
+Bất kỳ cố gắng vượt qua các giới hạn này sẽ dẫn đến lỗi biên dịch.</p>
+<h4 id="implementing-transitions-as-transformations-into-different-types"><a class="header" href="#implementing-transitions-as-transformations-into-different-types">Implementing Transitions as Transformations into Different Types</a></h4>
+<p>Vậy làm sao để có một post đã publish? Chúng ta muốn đảm bảo quy tắc
+rằng một post draft phải được review và approve trước khi publish. Một
+post ở trạng thái pending review vẫn không được hiển thị nội dung. Hãy
+triển khai các giới hạn này bằng cách thêm một struct khác là
+<code>PendingReviewPost</code>, định nghĩa phương thức <code>request_review</code> trên
+<code>DraftPost</code> trả về <code>PendingReviewPost</code>, và định nghĩa phương thức <code>approve</code>
+trên <code>PendingReviewPost</code> trả về một <code>Post</code>, như minh họa trong Listing 17-20:</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch17-oop/listing-17-20/src/lib.rs:here}}</code></pre>
+<p><span class="caption">Listing 17-20: A <code>PendingReviewPost</code> that gets created by
+calling <code>request_review</code> on <code>DraftPost</code> and an <code>approve</code> method that turns a
+<code>PendingReviewPost</code> into a published <code>Post</code></span></p>
+<p>Các phương thức <code>request_review</code> và <code>approve</code> nhận quyền sở hữu của <code>self</code>,
+do đó tiêu thụ các instance <code>DraftPost</code> và <code>PendingReviewPost</code> và biến
+chúng thành <code>PendingReviewPost</code> và <code>Post</code> đã publish, tương ứng. Như vậy,
+sau khi gọi <code>request_review</code> trên một post draft, sẽ không còn tồn tại
+instance <code>DraftPost</code> nào, và tương tự cho các trạng thái khác. Struct
+<code>PendingReviewPost</code> không có phương thức <code>content</code> được định nghĩa, vì
+vậy cố gắng đọc nội dung của nó sẽ dẫn đến lỗi biên dịch, tương tự như
+<code>DraftPost</code>. Vì cách duy nhất để có một instance <code>Post</code> đã publish có
+phương thức <code>content</code> là gọi <code>approve</code> trên <code>PendingReviewPost</code>, và cách
+duy nhất để có một <code>PendingReviewPost</code> là gọi <code>request_review</code> trên
+<code>DraftPost</code>, chúng ta đã mã hóa workflow của blog post vào hệ thống kiểu.</p>
+<p>Nhưng chúng ta cũng phải thực hiện một số thay đổi nhỏ cho <code>main</code>. Các
+phương thức <code>request_review</code> và <code>approve</code> trả về các instance mới thay vì
+sửa đổi struct hiện tại, vì vậy chúng ta cần thêm các gán <code>let post =</code>
+shadowing để lưu các instance trả về. Chúng ta cũng không thể giữ các
+assertion về nội dung của draft và pending review posts là chuỗi rỗng,
+và cũng không cần chúng nữa: code cố gắng sử dụng content của các post
+trong những trạng thái đó sẽ không compile được. Code cập nhật trong <code>main</code>
+được trình bày trong Listing 17-21:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore">{{#rustdoc_include ../listings/ch17-oop/listing-17-21/src/main.rs}}</code></pre>
+<p><span class="caption">Listing 17-21: Modifications to <code>main</code> to use the new
+implementation of the blog post workflow</span></p>
+<p>Những thay đổi cần thiết để gán lại <code>post</code> trong <code>main</code> nghĩa là
+implementation này không hoàn toàn tuân theo state pattern hướng đối
+tượng nữa: các chuyển đổi giữa các trạng thái không còn được
+encapsulate hoàn toàn bên trong <code>Post</code>. Tuy nhiên, điểm lợi là các
+trạng thái không hợp lệ giờ đã không thể xảy ra nhờ hệ thống kiểu và
+việc kiểm tra kiểu diễn ra tại thời điểm biên dịch! Điều này đảm bảo
+một số lỗi, chẳng hạn như hiển thị nội dung của post chưa publish, sẽ
+được phát hiện trước khi vào production.</p>
+<p>Hãy thử thực hiện các tác vụ gợi ý ở đầu phần này trên crate <code>blog</code>
+sau Listing 17-21 để xem bạn đánh giá thế nào về thiết kế phiên bản
+mã nguồn này. Lưu ý rằng một số tác vụ có thể đã được hoàn thành
+trong thiết kế này.</p>
+<p>Chúng ta thấy rằng mặc dù Rust có thể triển khai các pattern hướng
+đối tượng, các pattern khác, chẳng hạn như mã hóa trạng thái vào
+hệ thống kiểu, cũng có sẵn trong Rust. Các pattern này có các
+trade-offs khác nhau. Mặc dù bạn có thể rất quen thuộc với các
+pattern hướng đối tượng, suy nghĩ lại vấn đề để tận dụng các
+tính năng của Rust có thể mang lại lợi ích, chẳng hạn như ngăn
+một số lỗi ngay từ thời điểm biên dịch. Pattern hướng đối tượng
+không phải lúc nào cũng là giải pháp tốt nhất trong Rust do một
+số đặc điểm, như ownership, mà các ngôn ngữ hướng đối tượng không
+có.</p>
+<h2 id="tóm-tắt"><a class="header" href="#tóm-tắt">Tóm tắt</a></h2>
+<p>Dù bạn có coi Rust là ngôn ngữ hướng đối tượng hay không sau khi
+đọc chương này, bạn đã biết rằng có thể sử dụng trait object để
+có một số tính năng hướng đối tượng trong Rust. Dynamic dispatch
+có thể mang lại cho code của bạn một số tính linh hoạt đổi lấy
+một chút chi phí runtime. Bạn có thể dùng linh hoạt này để triển
+khai các pattern hướng đối tượng giúp maintainability của code tốt
+hơn. Rust cũng có các tính năng khác, như ownership, mà các ngôn
+ngữ hướng đối tượng không có. Một pattern hướng đối tượng sẽ
+không phải lúc nào cũng là cách tốt nhất để tận dụng sức mạnh
+của Rust, nhưng là một lựa chọn khả thi.</p>
+<p>Tiếp theo, chúng ta sẽ xem các pattern, là một trong những tính
+năng của Rust cho phép nhiều linh hoạt. Chúng ta đã xem qua chúng
+ngắn gọn trong suốt cuốn sách nhưng chưa thấy đầy đủ khả năng của
+chúng. Hãy tiếp tục!</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch17-02-trait-objects.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch18-00-patterns.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch17-02-trait-objects.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch18-00-patterns.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,756 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Turning Our Single-Threaded Server into a Multithreaded Server - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="biến-server-chạy-một-luồng-thành-server-nhiều-luồng"><a class="header" href="#biến-server-chạy-một-luồng-thành-server-nhiều-luồng">Biến Server Chạy Một Luồng Thành Server Nhiều Luồng</a></h2>
+<p>Hiện tại, server sẽ xử lý từng yêu cầu theo lượt, nghĩa là nó sẽ không xử lý
+kết nối thứ hai cho đến khi yêu cầu đầu tiên hoàn tất. Nếu server nhận được
+ngày càng nhiều yêu cầu, việc thực thi tuần tự này sẽ càng kém hiệu quả.
+Nếu server nhận được một yêu cầu mất nhiều thời gian để xử lý, các yêu cầu
+sau sẽ phải chờ cho đến khi yêu cầu lâu hoàn tất, ngay cả khi các yêu cầu
+mới có thể xử lý nhanh. Chúng ta sẽ cần khắc phục điều này, nhưng trước
+hết, hãy xem vấn đề này trong thực tế.</p>
+<h3 id="mô-phỏng-một-yêu-cầu-chậm-trong-cài-Đặt-server-hiện-tại"><a class="header" href="#mô-phỏng-một-yêu-cầu-chậm-trong-cài-Đặt-server-hiện-tại">Mô phỏng Một Yêu Cầu Chậm Trong Cài Đặt Server Hiện Tại</a></h3>
+<p>Chúng ta sẽ xem cách một yêu cầu xử lý chậm có thể ảnh hưởng đến các yêu cầu
+khác gửi đến server hiện tại. Listing 20-10 triển khai xử lý yêu cầu tới
+<em>/sleep</em> với phản hồi giả lập chậm, khiến server ngủ 5 giây trước khi
+phản hồi.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust no_run edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch20-web-server/listing-20-10/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 20-10: Mô phỏng một yêu cầu chậm bằng cách
+ngủ 5 giây</span></p>
+<p>Chúng ta chuyển từ <code>if</code> sang <code>match</code> vì bây giờ có ba trường hợp. Chúng ta
+cần match rõ ràng trên một slice của <code>request_line</code> để so khớp với các
+giá trị literal của chuỗi; <code>match</code> không tự động tham chiếu và giải tham
+chiếu như phương thức so sánh bằng (<code>==</code>) làm.</p>
+<p>Nhánh đầu tiên giống như khối <code>if</code> trong Listing 20-9. Nhánh thứ hai match
+với yêu cầu tới <em>/sleep</em>. Khi nhận được yêu cầu đó, server sẽ ngủ 5 giây
+trước khi hiển thị trang HTML thành công. Nhánh thứ ba giống như khối <code>else</code>
+trong Listing 20-9.</p>
+<p>Bạn có thể thấy server của chúng ta còn rất thô sơ: các thư viện thực tế sẽ
+xử lý nhận diện nhiều yêu cầu một cách ít tốn lời hơn nhiều!</p>
+<p>Khởi động server bằng <code>cargo run</code>. Sau đó mở hai cửa sổ trình duyệt: một cho
+<em>http://127.0.0.1:7878/</em> và một cho <em>http://127.0.0.1:7878/sleep</em>. Nếu bạn
+nhập URI <em>/</em> vài lần, như trước, bạn sẽ thấy phản hồi nhanh. Nhưng nếu
+nhập <em>/sleep</em> rồi load <em>/</em>, bạn sẽ thấy <em>/</em> phải chờ cho đến khi <code>sleep</code>
+ngủ đủ 5 giây mới tải xong.</p>
+<p>Có nhiều kỹ thuật để tránh các yêu cầu bị kẹt phía sau một yêu cầu chậm; kỹ
+thuật chúng ta sẽ triển khai là thread pool.</p>
+<h3 id="cải-thiện-throughput-với-thread-pool"><a class="header" href="#cải-thiện-throughput-với-thread-pool">Cải thiện Throughput với Thread Pool</a></h3>
+<p>Một <em>thread pool</em> là một nhóm các thread đã được sinh ra, đang chờ và sẵn sàng
+xử lý một nhiệm vụ. Khi chương trình nhận một nhiệm vụ mới, nó sẽ gán một
+thread trong pool cho nhiệm vụ đó, và thread đó sẽ xử lý nhiệm vụ. Các
+thread còn lại trong pool sẽ sẵn sàng xử lý các nhiệm vụ khác đến trong
+khi thread đầu tiên đang xử lý. Khi thread đầu tiên hoàn tất nhiệm vụ của
+nó, nó được trả lại pool của các thread rỗi, sẵn sàng xử lý nhiệm vụ mới.
+Thread pool cho phép bạn xử lý các kết nối đồng thời, tăng throughput của
+server.</p>
+<p>Chúng ta sẽ giới hạn số lượng thread trong pool ở một con số nhỏ để bảo
+vệ khỏi các cuộc tấn công Denial of Service (DoS); nếu chương trình tạo một
+thread mới cho mỗi yêu cầu khi nó đến, một người gửi 10 triệu yêu cầu
+tới server của chúng ta có thể gây hỗn loạn bằng cách sử dụng hết tất cả
+tài nguyên server và làm tắc nghẽn xử lý yêu cầu.</p>
+<p>Thay vì sinh ra số lượng thread không giới hạn, chúng ta sẽ có một số
+thread cố định chờ trong pool. Các yêu cầu đến được gửi vào pool để xử lý.
+Pool sẽ duy trì một hàng đợi các yêu cầu đến. Mỗi thread trong pool sẽ lấy
+một yêu cầu từ hàng đợi này, xử lý yêu cầu, và sau đó yêu cầu một yêu cầu
+khác từ hàng đợi. Với thiết kế này, chúng ta có thể xử lý đồng thời tối đa
+<code>N</code> yêu cầu, trong đó <code>N</code> là số lượng thread. Nếu mỗi thread đang phản hồi
+một yêu cầu chạy lâu, các yêu cầu tiếp theo vẫn có thể xếp vào hàng đợi,
+nhưng chúng ta đã tăng số lượng yêu cầu chạy lâu có thể xử lý trước khi
+đạt đến điểm đó.</p>
+<p>Kỹ thuật này chỉ là một trong nhiều cách để cải thiện throughput của
+web server. Các lựa chọn khác bạn có thể khám phá là <em>fork/join model</em>,
+<em>mô hình async I/O đơn luồng</em>, hoặc <em>mô hình async I/O đa luồng</em>. Nếu bạn
+quan tâm đến chủ đề này, bạn có thể đọc thêm về các giải pháp khác và thử
+triển khai; với một ngôn ngữ mức thấp như Rust, tất cả các lựa chọn này
+đều khả thi.</p>
+<p>Trước khi bắt đầu triển khai thread pool, hãy bàn về cách sử dụng pool
+nên trông như thế nào. Khi thiết kế code, viết trước giao diện client có
+thể giúp hướng dẫn thiết kế. Viết API của code sao cho cấu trúc phù hợp
+với cách bạn muốn gọi nó; sau đó triển khai chức năng bên trong cấu trúc
+đó thay vì triển khai chức năng trước rồi mới thiết kế API công khai.</p>
+<p>Tương tự như cách chúng ta sử dụng phát triển hướng kiểm thử (TDD) trong
+dự án ở Chương 12, ở đây chúng ta sẽ sử dụng phát triển dựa trên compiler.
+Chúng ta sẽ viết code gọi các hàm muốn dùng, và sau đó xem lỗi từ compiler
+để xác định điều gì cần thay đổi tiếp theo để code hoạt động. Tuy nhiên,
+trước khi làm điều đó, chúng ta sẽ khám phá kỹ thuật mà chúng ta sẽ không
+dùng làm điểm khởi đầu.</p>
+<!-- Old headings. Do not remove or links may break. -->
+<p><a id="code-structure-if-we-could-spawn-a-thread-for-each-request"></a></p>
+<h4 id="sinh-một-thread-cho-mỗi-yêu-cầu"><a class="header" href="#sinh-một-thread-cho-mỗi-yêu-cầu">Sinh Một Thread Cho Mỗi Yêu Cầu</a></h4>
+<p>Trước hết, hãy xem code của chúng ta sẽ trông như thế nào nếu tạo một thread
+mới cho mỗi kết nối. Như đã đề cập trước đó, đây không phải là kế hoạch
+cuối cùng của chúng ta do các vấn đề có thể phát sinh từ việc sinh số lượng
+thread không giới hạn, nhưng đây là điểm khởi đầu để có một server đa luồng
+hoạt động. Sau đó chúng ta sẽ thêm thread pool như một cải tiến, và so sánh
+hai giải pháp sẽ dễ hơn. Listing 20-11 cho thấy những thay đổi cần thực hiện
+trong <code>main</code> để sinh một thread mới xử lý mỗi stream trong vòng lặp <code>for</code>.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust no_run edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch20-web-server/listing-20-11/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 20-11: Sinh một thread mới cho mỗi stream</span></p>
+<p>Như bạn đã học trong Chương 16, <code>thread::spawn</code> sẽ tạo một thread mới và
+chạy code trong closure trên thread mới đó. Nếu bạn chạy code này và load
+<em>/sleep</em> trong trình duyệt, rồi <em>/</em> trong hai tab trình duyệt khác, bạn sẽ
+thấy rằng các yêu cầu tới <em>/</em> không phải chờ <em>/sleep</em> hoàn tất. Tuy nhiên,
+như đã đề cập, điều này cuối cùng sẽ làm quá tải hệ thống vì bạn đang tạo
+các thread mới mà không giới hạn.</p>
+<!-- Old headings. Do not remove or links may break. -->
+<p><a id="creating-a-similar-interface-for-a-finite-number-of-threads"></a></p>
+<h4 id="tạo-một-số-lượng-thread-hạn-chế"><a class="header" href="#tạo-một-số-lượng-thread-hạn-chế">Tạo Một Số Lượng Thread Hạn Chế</a></h4>
+<p>Chúng ta muốn thread pool hoạt động theo cách tương tự và quen thuộc để
+việc chuyển từ threads sang thread pool không yêu cầu thay đổi lớn trong
+code sử dụng API của chúng ta. Listing 20-12 cho thấy giao diện giả định
+cho struct <code>ThreadPool</code> mà chúng ta muốn dùng thay vì <code>thread::spawn</code>.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile">{{#rustdoc_include ../listings/ch20-web-server/listing-20-12/src/main.rs:here}}</code></pre>
+<p><span class="caption">Listing 20-12: Giao diện <code>ThreadPool</code> lý tưởng của chúng ta</span></p>
+<p>Chúng ta dùng <code>ThreadPool::new</code> để tạo một thread pool mới với số lượng
+thread có thể cấu hình, trong trường hợp này là bốn. Sau đó, trong vòng
+lặp <code>for</code>, <code>pool.execute</code> có giao diện tương tự như <code>thread::spawn</code> ở chỗ
+nó nhận một closure mà pool sẽ chạy cho mỗi stream. Chúng ta cần triển khai
+<code>pool.execute</code> sao cho nó nhận closure và giao nó cho một thread trong pool
+để chạy. Code này chưa thể biên dịch ngay, nhưng chúng ta sẽ thử để compiler
+hướng dẫn cách sửa.</p>
+<!-- Old headings. Do not remove or links may break. -->
+<p><a id="building-the-threadpool-struct-using-compiler-driven-development"></a></p>
+<h4 id="xây-dựng-threadpool-sử-dụng-phát-triển-dựa-trên-compiler"><a class="header" href="#xây-dựng-threadpool-sử-dụng-phát-triển-dựa-trên-compiler">Xây dựng <code>ThreadPool</code> Sử Dụng Phát Triển Dựa Trên Compiler</a></h4>
+<p>Thực hiện các thay đổi trong Listing 20-12 vào <em>src/main.rs</em>, và sau đó
+sử dụng các lỗi từ <code>cargo check</code> để hướng dẫn quá trình phát triển. Đây là
+lỗi đầu tiên mà chúng ta nhận được:</p>
+<pre><code class="language-console">{{#include ../listings/ch20-web-server/listing-20-12/output.txt}}
+</code></pre>
+<p>Tuyệt vời! Lỗi này cho chúng ta biết cần có một kiểu hoặc module <code>ThreadPool</code>,
+vì vậy chúng ta sẽ xây dựng một cái ngay bây giờ. Việc triển khai <code>ThreadPool</code>
+sẽ độc lập với loại công việc mà web server của chúng ta đang thực hiện. Vì
+vậy, hãy chuyển crate <code>hello</code> từ binary crate sang library crate để chứa
+việc triển khai <code>ThreadPool</code>. Sau khi chuyển sang library crate, chúng ta
+cũng có thể sử dụng thư viện thread pool riêng cho bất kỳ công việc nào
+muốn làm với thread pool, không chỉ giới hạn cho việc phục vụ các yêu cầu
+web.</p>
+<p>Tạo một file <em>src/lib.rs</em> chứa nội dung sau, đây là định nghĩa đơn giản nhất
+của struct <code>ThreadPool</code> mà chúng ta có thể có hiện tại:</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch20-web-server/no-listing-01-define-threadpool-struct/src/lib.rs}}</code></pre>
+<p>Sau đó, chỉnh sửa file <em>main.rs</em> để đưa <code>ThreadPool</code> vào phạm vi sử dụng từ
+library crate bằng cách thêm đoạn code sau lên đầu <em>src/main.rs</em>:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore">{{#rustdoc_include ../listings/ch20-web-server/no-listing-01-define-threadpool-struct/src/main.rs:here}}</code></pre>
+<p>Code này vẫn chưa hoạt động, nhưng hãy kiểm tra lại để nhận lỗi tiếp theo
+mà chúng ta cần xử lý:</p>
+<pre><code class="language-console">{{#include ../listings/ch20-web-server/no-listing-01-define-threadpool-struct/output.txt}}
+</code></pre>
+<p>Lỗi này cho thấy bước tiếp theo là chúng ta cần tạo một hàm liên kết (associated
+function) tên là <code>new</code> cho <code>ThreadPool</code>. Chúng ta cũng biết rằng <code>new</code> cần
+một tham số có thể nhận <code>4</code> làm đối số và nên trả về một instance của
+<code>ThreadPool</code>. Hãy triển khai hàm <code>new</code> đơn giản nhất có các đặc điểm đó:</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch20-web-server/no-listing-02-impl-threadpool-new/src/lib.rs}}</code></pre>
+<p>Chúng ta chọn <code>usize</code> làm kiểu của tham số <code>size</code>, vì một số lượng thread
+âm là vô nghĩa. Chúng ta cũng biết rằng chúng ta sẽ dùng số 4 này làm số
+lượng phần tử trong một tập hợp các thread, và đó là mục đích của kiểu
+<code>usize</code>, như đã thảo luận trong phần <a href="ch03-02-data-types.html#integer-types">“Integer Types”</a><!--
+ignore --> của Chương 3.</p>
+<p>Hãy kiểm tra lại code:</p>
+<pre><code class="language-console">{{#include ../listings/ch20-web-server/no-listing-02-impl-threadpool-new/output.txt}}
+</code></pre>
+<p>Bây giờ lỗi xuất hiện vì chúng ta chưa có phương thức <code>execute</code> trên
+<code>ThreadPool</code>. Hãy nhớ lại trong phần <a href="#creating-a-finite-number-of-threads">“Tạo Một Số Lượng Thread Hạn Chế”</a><!-- ignore --> rằng
+chúng ta quyết định thread pool nên có giao diện tương tự <code>thread::spawn</code>.
+Ngoài ra, chúng ta sẽ triển khai hàm <code>execute</code> sao cho nó nhận closure được
+truyền và giao nó cho một thread rỗi trong pool để chạy.</p>
+<p>Chúng ta sẽ định nghĩa phương thức <code>execute</code> trên <code>ThreadPool</code> để nhận
+một closure làm tham số. Hãy nhớ lại trong phần <a href="ch13-01-closures.html#moving-captured-values-out-of-the-closure-and-the-fn-traits">“Di chuyển giá trị
+bắt được ra khỏi closure và các trait <code>Fn</code>”</a><!-- ignore --> ở
+Chương 13 rằng chúng ta có thể nhận closures làm tham số với ba trait
+khác nhau: <code>Fn</code>, <code>FnMut</code>, và <code>FnOnce</code>. Chúng ta cần quyết định loại closure
+sẽ dùng ở đây. Chúng ta biết rằng cuối cùng sẽ làm điều gì đó tương tự
+như triển khai <code>thread::spawn</code> trong thư viện chuẩn, vì vậy có thể xem
+giới hạn mà chữ ký của <code>thread::spawn</code> đặt trên tham số của nó. Tài liệu
+cho chúng ta thấy như sau:</p>
+<pre><code class="language-rust ignore">pub fn spawn&lt;F, T&gt;(f: F) -&gt; JoinHandle&lt;T&gt;
+    where
+        F: FnOnce() -&gt; T,
+        F: Send + 'static,
+        T: Send + 'static,</code></pre>
+<p>Tham số kiểu <code>F</code> là thứ chúng ta quan tâm ở đây; tham số kiểu <code>T</code> liên quan
+đến giá trị trả về, và chúng ta không quan tâm đến điều đó. Chúng ta có thể
+thấy rằng <code>spawn</code> sử dụng <code>FnOnce</code> làm trait bound trên <code>F</code>. Đây có lẽ là
+cái chúng ta cũng muốn, vì cuối cùng chúng ta sẽ truyền đối số nhận được
+trong <code>execute</code> cho <code>spawn</code>. Chúng ta có thể tự tin hơn rằng <code>FnOnce</code> là
+trait cần dùng bởi vì thread chạy một yêu cầu sẽ chỉ thực thi closure của
+yêu cầu đó một lần, phù hợp với <code>Once</code> trong <code>FnOnce</code>.</p>
+<p>Tham số kiểu <code>F</code> cũng có trait bound <code>Send</code> và lifetime bound <code>'static</code>,
+các bound này hữu ích trong tình huống của chúng ta: cần <code>Send</code> để chuyển
+closure từ thread này sang thread khác và <code>'static</code> vì chúng ta không biết
+thread sẽ mất bao lâu để thực thi. Hãy tạo phương thức <code>execute</code> trên
+<code>ThreadPool</code> nhận một tham số generic kiểu <code>F</code> với các bound này:</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch20-web-server/no-listing-03-define-execute/src/lib.rs:here}}</code></pre>
+<p>Chúng ta vẫn dùng <code>()</code> sau <code>FnOnce</code> vì <code>FnOnce</code> này đại diện cho một closure
+không nhận tham số và trả về kiểu unit <code>()</code>. Giống như định nghĩa hàm, kiểu
+trả về có thể bỏ qua trong chữ ký, nhưng ngay cả khi không có tham số, chúng
+ta vẫn cần dấu ngoặc đơn.</p>
+<p>Một lần nữa, đây là triển khai đơn giản nhất của phương thức <code>execute</code>: nó
+không làm gì cả, nhưng mục tiêu hiện tại chỉ là làm cho code có thể biên
+dịch. Hãy kiểm tra lại:</p>
+<pre><code class="language-console">{{#include ../listings/ch20-web-server/no-listing-03-define-execute/output.txt}}
+</code></pre>
+<p>Nó biên dịch được rồi! Nhưng lưu ý rằng nếu bạn thử <code>cargo run</code> và gửi yêu cầu
+trong trình duyệt, bạn sẽ thấy các lỗi trong trình duyệt như đã thấy ở đầu
+chương. Thư viện của chúng ta vẫn chưa thực sự gọi closure được truyền vào
+<code>execute</code>!</p>
+<blockquote>
+<p>Lưu ý: Một câu nói bạn có thể nghe về các ngôn ngữ với compiler nghiêm ngặt,
+như Haskell và Rust, là “nếu code biên dịch được, thì nó chạy được.” Nhưng
+câu nói này không hoàn toàn đúng. Dự án của chúng ta biên dịch được, nhưng
+hoàn toàn không làm gì cả! Nếu chúng ta đang xây dựng một dự án thực sự,
+hoàn chỉnh, đây sẽ là thời điểm tốt để bắt đầu viết unit test để kiểm tra
+rằng code biên dịch <em>và</em> có hành vi chúng ta mong muốn.</p>
+</blockquote>
+<h4 id="xác-thực-số-lượng-thread-trong-new"><a class="header" href="#xác-thực-số-lượng-thread-trong-new">Xác thực Số Lượng Thread trong <code>new</code></a></h4>
+<p>Chúng ta chưa làm gì với các tham số của <code>new</code> và <code>execute</code>. Hãy triển khai
+nội dung của các hàm này với hành vi mà chúng ta muốn. Để bắt đầu, hãy nghĩ
+về <code>new</code>. Trước đó, chúng ta đã chọn kiểu unsigned cho tham số <code>size</code>,
+bởi vì một pool với số thread âm là vô nghĩa. Tuy nhiên, một pool với số
+thread bằng 0 cũng vô nghĩa, nhưng zero là một giá trị <code>usize</code> hoàn toàn
+hợp lệ. Chúng ta sẽ thêm code để kiểm tra rằng <code>size</code> lớn hơn 0 trước khi
+trả về một instance <code>ThreadPool</code> và làm chương trình panic nếu nhận được 0
+bằng cách sử dụng macro <code>assert!</code>, như minh họa trong Listing 20-13.</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch20-web-server/listing-20-13/src/lib.rs:here}}</code></pre>
+<p><span class="caption">Listing 20-13: Triển khai <code>ThreadPool::new</code> để panic nếu
+<code>size</code> bằng 0</span></p>
+<p>Chúng ta cũng đã thêm một số tài liệu cho <code>ThreadPool</code> bằng doc comments.
+Lưu ý rằng chúng ta đã tuân theo các thực hành tài liệu tốt bằng cách thêm
+một phần nêu ra các tình huống mà hàm có thể panic, như đã thảo luận trong
+Chương 14. Thử chạy <code>cargo doc --open</code> và nhấp vào struct <code>ThreadPool</code> để
+xem tài liệu được sinh ra cho <code>new</code> trông như thế nào!</p>
+<p>Thay vì thêm macro <code>assert!</code> như chúng ta đã làm ở đây, chúng ta có thể
+đổi <code>new</code> thành <code>build</code> và trả về một <code>Result</code> giống như với <code>Config::build</code>
+trong dự án I/O ở Listing 12-9. Nhưng trong trường hợp này, chúng ta quyết
+định rằng việc cố tạo một thread pool mà không có thread nào nên là lỗi
+không thể khôi phục. Nếu bạn cảm thấy tham vọng, thử viết một hàm tên là
+<code>build</code> với chữ ký sau để so sánh với hàm <code>new</code>:</p>
+<pre><code class="language-rust ignore">pub fn build(size: usize) -&gt; Result&lt;ThreadPool, PoolCreationError&gt; {</code></pre>
+<h4 id="tạo-không-gian-lưu-trữ-các-thread"><a class="header" href="#tạo-không-gian-lưu-trữ-các-thread">Tạo Không Gian Lưu Trữ Các Thread</a></h4>
+<p>Bây giờ chúng ta đã có cách để biết rằng số lượng thread hợp lệ để lưu trong
+pool, chúng ta có thể tạo các thread đó và lưu chúng trong struct <code>ThreadPool</code>
+trước khi trả về struct. Nhưng làm thế nào để “lưu” một thread? Hãy cùng
+nhìn lại chữ ký của <code>thread::spawn</code>:</p>
+<pre><code class="language-rust ignore">pub fn spawn&lt;F, T&gt;(f: F) -&gt; JoinHandle&lt;T&gt;
+    where
+        F: FnOnce() -&gt; T,
+        F: Send + 'static,
+        T: Send + 'static,</code></pre>
+<p>Hàm <code>spawn</code> trả về một <code>JoinHandle&lt;T&gt;</code>, trong đó <code>T</code> là kiểu mà closure trả
+về. Hãy thử sử dụng <code>JoinHandle</code> và xem điều gì xảy ra. Trong trường hợp của
+chúng ta, các closure được truyền vào thread pool sẽ xử lý kết nối và không
+trả về gì, nên <code>T</code> sẽ là kiểu unit <code>()</code>.</p>
+<p>Code trong Listing 20-14 sẽ biên dịch được nhưng vẫn chưa tạo bất kỳ thread
+nào. Chúng ta đã thay đổi định nghĩa của <code>ThreadPool</code> để giữ một vector các
+instance <code>thread::JoinHandle&lt;()&gt;</code>, khởi tạo vector với dung lượng <code>size</code>,
+thiết lập một vòng lặp <code>for</code> để chạy code tạo các thread, và trả về một
+instance <code>ThreadPool</code> chứa chúng.</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust ignore not_desired_behavior">{{#rustdoc_include ../listings/ch20-web-server/listing-20-14/src/lib.rs:here}}</code></pre>
+<p><span class="caption">Listing 20-14: Tạo một vector cho <code>ThreadPool</code> để giữ các thread</span></p>
+<p>Chúng ta đã đưa <code>std::thread</code> vào phạm vi sử dụng trong library crate, vì
+chúng ta dùng <code>thread::JoinHandle</code> làm kiểu của các phần tử trong vector của
+<code>ThreadPool</code>.</p>
+<p>Khi nhận được một kích thước hợp lệ, <code>ThreadPool</code> của chúng ta tạo một
+vector mới có thể chứa <code>size</code> phần tử. Hàm <code>with_capacity</code> thực hiện cùng
+một nhiệm vụ như <code>Vec::new</code> nhưng có một khác biệt quan trọng: nó cấp phát
+trước không gian trong vector. Vì chúng ta biết cần lưu <code>size</code> phần tử
+trong vector, việc cấp phát này trước giúp hiệu quả hơn một chút so với
+<code>Vec::new</code>, vốn sẽ tự thay đổi kích thước khi các phần tử được chèn vào.</p>
+<p>Khi bạn chạy lại <code>cargo check</code>, nó sẽ thành công.</p>
+<h4 id="struct-worker-chịu-trách-nhiệm-gửi-code-từ-threadpool-tới-thread"><a class="header" href="#struct-worker-chịu-trách-nhiệm-gửi-code-từ-threadpool-tới-thread">Struct <code>Worker</code> Chịu Trách Nhiệm Gửi Code từ <code>ThreadPool</code> tới Thread</a></h4>
+<p>Chúng ta đã để lại một comment trong vòng lặp <code>for</code> ở Listing 20-14 liên
+quan đến việc tạo các thread. Ở đây, chúng ta sẽ xem cách thực sự tạo thread.
+Thư viện chuẩn cung cấp <code>thread::spawn</code> như một cách để tạo thread, và
+<code>thread::spawn</code> mong muốn nhận được một đoạn code mà thread sẽ chạy ngay
+khi thread được tạo. Tuy nhiên, trong trường hợp của chúng ta, chúng ta muốn
+tạo các thread và để chúng <em>chờ</em> code mà chúng ta sẽ gửi sau. Việc triển
+khai thread trong thư viện chuẩn không bao gồm cách làm này; chúng ta phải
+tự triển khai.</p>
+<p>Chúng ta sẽ triển khai hành vi này bằng cách giới thiệu một cấu trúc dữ
+liệu mới giữa <code>ThreadPool</code> và các thread để quản lý hành vi này. Chúng ta
+sẽ gọi cấu trúc dữ liệu này là <em>Worker</em>, một thuật ngữ phổ biến trong các
+triển khai pooling. Worker sẽ nhận code cần chạy và thực thi code đó trên
+thread của chính Worker. Hãy tưởng tượng những người làm việc trong bếp
+tại một nhà hàng: các worker sẽ chờ cho đến khi có đơn hàng từ khách, rồi
+chịu trách nhiệm nhận đơn và thực hiện nó.</p>
+<p>Thay vì lưu một vector các instance <code>JoinHandle&lt;()&gt;</code> trong thread pool, chúng
+ta sẽ lưu các instance của struct <code>Worker</code>. Mỗi <code>Worker</code> sẽ lưu một instance
+<code>JoinHandle&lt;()&gt;</code>. Sau đó, chúng ta sẽ triển khai một phương thức trên <code>Worker</code>
+nhận một closure để chạy và gửi nó đến thread đang chạy để thực thi. Chúng
+ta cũng sẽ cấp cho mỗi worker một <code>id</code> để phân biệt các worker khác nhau
+trong pool khi ghi log hoặc gỡ lỗi.</p>
+<p>Dưới đây là quy trình mới xảy ra khi tạo một <code>ThreadPool</code>. Chúng ta sẽ
+triển khai code gửi closure tới thread sau khi đã thiết lập <code>Worker</code> như
+sau:</p>
+<ol>
+<li>Định nghĩa một struct <code>Worker</code> giữ <code>id</code> và <code>JoinHandle&lt;()&gt;</code>.</li>
+<li>Thay đổi <code>ThreadPool</code> để giữ một vector các instance <code>Worker</code>.</li>
+<li>Định nghĩa hàm <code>Worker::new</code> nhận một số <code>id</code> và trả về một instance
+<code>Worker</code> chứa <code>id</code> và một thread được spawn với một closure rỗng.</li>
+<li>Trong <code>ThreadPool::new</code>, dùng bộ đếm vòng lặp <code>for</code> để tạo <code>id</code>, tạo
+một <code>Worker</code> mới với <code>id</code> đó, và lưu worker vào vector.</li>
+</ol>
+<p>Nếu bạn muốn thử thách, hãy triển khai những thay đổi này trước khi xem
+code trong Listing 20-15.</p>
+<p>Sẵn sàng chưa? Đây là Listing 20-15 với một cách để thực hiện các sửa đổi
+nêu trên.</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch20-web-server/listing-20-15/src/lib.rs:here}}</code></pre>
+<p><span class="caption">Listing 20-15: Sửa đổi <code>ThreadPool</code> để giữ các instance <code>Worker</code> thay vì giữ trực tiếp các thread</span></p>
+<p>Chúng ta đã đổi tên trường trong <code>ThreadPool</code> từ <code>threads</code> thành <code>workers</code>
+vì bây giờ nó giữ các instance <code>Worker</code> thay vì các instance <code>JoinHandle&lt;()&gt;</code>.
+Chúng ta dùng bộ đếm trong vòng lặp <code>for</code> làm đối số cho <code>Worker::new</code>, và
+lưu từng <code>Worker</code> mới vào vector có tên <code>workers</code>.</p>
+<p>Code bên ngoài (như server của chúng ta trong <em>src/main.rs</em>) không cần
+biết chi tiết triển khai về việc sử dụng struct <code>Worker</code> trong <code>ThreadPool</code>,
+vì vậy chúng ta làm struct <code>Worker</code> và hàm <code>new</code> của nó là private. Hàm
+<code>Worker::new</code> dùng <code>id</code> được truyền vào và lưu một instance <code>JoinHandle&lt;()&gt;</code>
+được tạo ra bằng cách spawn một thread mới với closure rỗng.</p>
+<blockquote>
+<p>Lưu ý: Nếu hệ điều hành không thể tạo thread vì không đủ tài nguyên hệ
+thống, <code>thread::spawn</code> sẽ panic. Điều này sẽ khiến toàn bộ server của
+chúng ta panic, mặc dù một số thread có thể tạo thành công. Vì đơn giản,
+hành vi này là ổn, nhưng trong triển khai thread pool thực tế, bạn có thể
+muốn dùng <a href="../std/thread/struct.Builder.html"><code>std::thread::Builder</code></a><!-- ignore --> và phương thức
+<a href="../std/thread/struct.Builder.html#method.spawn"><code>spawn</code></a><!-- ignore --> của nó, trả về <code>Result</code> thay vì panic.</p>
+</blockquote>
+<p>Code này sẽ biên dịch và lưu số lượng instance <code>Worker</code> mà chúng ta chỉ định
+làm đối số cho <code>ThreadPool::new</code>. Nhưng chúng ta vẫn <em>chưa</em> xử lý closure
+mà ta nhận được trong <code>execute</code>. Hãy xem cách làm tiếp theo.</p>
+<h4 id="gửi-yêu-cầu-tới-thread-thông-qua-channels"><a class="header" href="#gửi-yêu-cầu-tới-thread-thông-qua-channels">Gửi Yêu Cầu tới Thread thông qua Channels</a></h4>
+<p>Vấn đề tiếp theo là các closure được truyền cho <code>thread::spawn</code> hiện không
+làm gì cả. Hiện tại, chúng ta nhận closure muốn thực thi trong phương thức
+<code>execute</code>. Nhưng chúng ta cần truyền một closure cho <code>thread::spawn</code> khi
+tạo mỗi <code>Worker</code> trong quá trình tạo <code>ThreadPool</code>.</p>
+<p>Chúng ta muốn các struct <code>Worker</code> vừa tạo lấy code để chạy từ một queue
+được giữ trong <code>ThreadPool</code> và gửi code đó tới thread của nó để thực thi.</p>
+<p>Các channel mà chúng ta đã học trong Chương 16 — một cách đơn giản để
+giao tiếp giữa hai thread — sẽ hoàn hảo cho trường hợp này. Chúng ta sẽ
+dùng một channel làm queue các job, và <code>execute</code> sẽ gửi một job từ
+<code>ThreadPool</code> tới các instance <code>Worker</code>, và <code>Worker</code> sẽ gửi job tới thread
+của nó. Kế hoạch như sau:</p>
+<ol>
+<li><code>ThreadPool</code> sẽ tạo một channel và giữ sender.</li>
+<li>Mỗi <code>Worker</code> sẽ giữ receiver.</li>
+<li>Chúng ta sẽ tạo một struct <code>Job</code> mới để giữ các closure mà muốn gửi qua channel.</li>
+<li>Phương thức <code>execute</code> sẽ gửi job mà nó muốn thực thi qua sender.</li>
+<li>Trong thread của nó, <code>Worker</code> sẽ lặp qua receiver và thực thi các closure
+của bất kỳ job nào nó nhận được.</li>
+</ol>
+<p>Hãy bắt đầu bằng việc tạo một channel trong <code>ThreadPool::new</code> và giữ sender
+trong instance <code>ThreadPool</code>, như minh họa trong Listing 20-16. Struct <code>Job</code>
+hiện tại chưa giữ gì nhưng sẽ là kiểu của item mà chúng ta gửi qua channel.</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch20-web-server/listing-20-16/src/lib.rs:here}}</code></pre>
+<p><span class="caption">Listing 20-16: Sửa đổi <code>ThreadPool</code> để lưu sender của một channel truyền các instance <code>Job</code></span></p>
+<p>Trong <code>ThreadPool::new</code>, chúng ta tạo channel mới và cho pool giữ sender. Điều
+này sẽ biên dịch thành công.</p>
+<p>Hãy thử truyền receiver của channel vào từng worker khi thread pool tạo
+channel. Chúng ta biết rằng muốn sử dụng receiver trong thread mà worker
+spawn, vì vậy sẽ tham chiếu tới tham số <code>receiver</code> trong closure. Code trong
+Listing 20-17 vẫn chưa thể biên dịch hoàn chỉnh.</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile">{{#rustdoc_include ../listings/ch20-web-server/listing-20-17/src/lib.rs:here}}</code></pre>
+<p><span class="caption">Listing 20-17: Truyền receiver tới các worker</span></p>
+<p>Chúng ta đã thực hiện một số thay đổi nhỏ và đơn giản: truyền receiver vào
+<code>Worker::new</code>, rồi sử dụng nó bên trong closure.</p>
+<p>Khi thử kiểm tra code này, chúng ta nhận được lỗi sau:</p>
+<pre><code class="language-console">{{#include ../listings/ch20-web-server/listing-20-17/output.txt}}
+</code></pre>
+<p>Code đang cố gắng truyền <code>receiver</code> tới nhiều instance <code>Worker</code>. Điều này sẽ
+không hoạt động, như bạn đã học trong Chương 16: triển khai channel mà Rust
+cung cấp là <em>nhiều producer</em>, một <em>consumer</em>. Điều này có nghĩa là chúng ta
+không thể chỉ clone đầu nhận của channel để sửa code này. Chúng ta cũng không
+muốn gửi một message nhiều lần tới nhiều consumer; chúng ta muốn một danh
+sách message với nhiều worker sao cho mỗi message chỉ được xử lý một lần.</p>
+<p>Ngoài ra, việc lấy một job ra khỏi queue của channel liên quan tới việc
+biến đổi <code>receiver</code>, vì vậy các thread cần một cách an toàn để chia sẻ và
+sửa đổi <code>receiver</code>; nếu không, chúng ta có thể gặp các race condition (như
+đã đề cập trong Chương 16).</p>
+<p>Hãy nhớ lại các smart pointer an toàn với thread được thảo luận trong Chương
+16: để chia sẻ quyền sở hữu giữa nhiều thread và cho phép các thread thay
+đổi giá trị, chúng ta cần dùng <code>Arc&lt;Mutex&lt;T&gt;&gt;</code>. Kiểu <code>Arc</code> cho phép nhiều
+worker sở hữu receiver, và <code>Mutex</code> đảm bảo rằng chỉ có một worker lấy job
+từ receiver tại một thời điểm. Listing 20-18 trình bày các thay đổi cần thực
+hiện.</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch20-web-server/listing-20-18/src/lib.rs:here}}</code></pre>
+<p><span class="caption">Listing 20-18: Chia sẻ receiver giữa các worker sử dụng <code>Arc</code> và <code>Mutex</code></span></p>
+<p>Trong <code>ThreadPool::new</code>, chúng ta đặt receiver vào trong một <code>Arc</code> và một <code>Mutex</code>.
+Với mỗi worker mới, chúng ta clone <code>Arc</code> để tăng reference count, cho phép các
+worker cùng sở hữu receiver.</p>
+<p>Với những thay đổi này, code đã biên dịch được! Chúng ta đang tiến gần tới mục tiêu!</p>
+<h4 id="triển-khai-phương-thức-execute"><a class="header" href="#triển-khai-phương-thức-execute">Triển khai phương thức <code>execute</code></a></h4>
+<p>Cuối cùng, hãy triển khai phương thức <code>execute</code> trên <code>ThreadPool</code>. Chúng ta cũng
+sẽ thay <code>Job</code> từ một struct sang type alias cho một trait object, chứa kiểu closure
+mà <code>execute</code> nhận vào. Như đã thảo luận trong phần <a href="ch19-04-advanced-types.html#creating-type-synonyms-with-type-aliases">“Creating Type Synonyms with Type Aliases”</a><!-- ignore -->
+trong Chương 19, type alias giúp chúng ta rút gọn các kiểu dài để tiện sử dụng.
+Xem ví dụ trong Listing 20-19.</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch20-web-server/listing-20-19/src/lib.rs:here}}</code></pre>
+<p><span class="caption">Listing 20-19: Tạo type alias <code>Job</code> cho một <code>Box</code> giữ từng closure và gửi job xuống channel</span></p>
+<p>Sau khi tạo một instance <code>Job</code> mới sử dụng closure nhận được trong <code>execute</code>,
+chúng ta gửi job đó xuống đầu gửi (sending end) của channel. Chúng ta gọi
+<code>unwrap</code> trên <code>send</code> trong trường hợp gửi thất bại. Điều này có thể xảy ra
+nếu, ví dụ, chúng ta dừng tất cả các thread, nghĩa là đầu nhận (receiving end)
+không còn nhận message mới. Hiện tại, chúng ta không thể dừng các thread:
+các thread sẽ tiếp tục thực thi miễn là pool tồn tại. Lý do chúng ta dùng
+<code>unwrap</code> là vì biết trường hợp thất bại sẽ không xảy ra, nhưng compiler không biết điều đó.</p>
+<p>Nhưng chúng ta vẫn chưa hoàn tất! Trong worker, closure được truyền cho
+<code>thread::spawn</code> hiện tại vẫn chỉ <em>tham chiếu</em> đến đầu nhận của channel.
+Thay vào đó, chúng ta cần closure lặp vô hạn, hỏi đầu nhận của channel về
+một job và chạy job khi nhận được. Hãy thực hiện thay đổi như trong Listing 20-20
+trong <code>Worker::new</code>.</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch20-web-server/listing-20-20/src/lib.rs:here}}</code></pre>
+<p><span class="caption">Listing 20-20: Nhận và thực thi các job trong thread của worker</span></p>
+<p>Ở đây, trước tiên chúng ta gọi <code>lock</code> trên <code>receiver</code> để lấy mutex, rồi gọi
+<code>unwrap</code> để panic nếu có lỗi. Việc lấy lock có thể thất bại nếu mutex ở trạng
+thái <em>poisoned</em>, điều này xảy ra nếu một thread khác panic trong khi giữ lock
+thay vì thả lock. Trong tình huống này, gọi <code>unwrap</code> để thread này panic là
+hành động đúng. Bạn có thể thay <code>unwrap</code> bằng <code>expect</code> với thông báo lỗi
+có ý nghĩa với bạn.</p>
+<p>Nếu chúng ta lấy được lock trên mutex, gọi <code>recv</code> để nhận một <code>Job</code> từ channel.
+Một <code>unwrap</code> cuối cùng bỏ qua mọi lỗi tại đây, có thể xảy ra nếu thread giữ
+sender đã tắt, tương tự như cách <code>send</code> trả về <code>Err</code> nếu receiver tắt.</p>
+<p>Lệnh gọi <code>recv</code> sẽ block, vì vậy nếu chưa có job, thread hiện tại sẽ chờ cho
+đến khi có job. <code>Mutex&lt;T&gt;</code> đảm bảo chỉ một thread <code>Worker</code> tại một thời điểm
+thử yêu cầu job.</p>
+<p>Thread pool của chúng ta giờ đã hoạt động! Hãy chạy <code>cargo run</code> và thực hiện
+một vài request:</p>
+<!-- manual-regeneration
+cd listings/ch20-web-server/listing-20-20
+cargo run
+make some requests to 127.0.0.1:7878
+Can't automate because the output depends on making requests
+-->
+<pre><code class="language-console">$ cargo run
+   Compiling hello v0.1.0 (file:///projects/hello)
+warning: field is never read: `workers`
+ --&gt; src/lib.rs:7:5
+  |
+7 |     workers: Vec&lt;Worker&gt;,
+  |     ^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(dead_code)]` on by default
+
+warning: field is never read: `id`
+  --&gt; src/lib.rs:48:5
+   |
+48 |     id: usize,
+   |     ^^^^^^^^^
+
+warning: field is never read: `thread`
+  --&gt; src/lib.rs:49:5
+   |
+49 |     thread: thread::JoinHandle&lt;()&gt;,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `hello` (lib) generated 3 warnings
+    Finished dev [unoptimized + debuginfo] target(s) in 1.40s
+     Running `target/debug/hello`
+Worker 0 got a job; executing.
+Worker 2 got a job; executing.
+Worker 1 got a job; executing.
+Worker 3 got a job; executing.
+Worker 0 got a job; executing.
+Worker 2 got a job; executing.
+Worker 1 got a job; executing.
+Worker 3 got a job; executing.
+Worker 0 got a job; executing.
+Worker 2 got a job; executing.
+</code></pre>
+<p>Thành công! Giờ chúng ta đã có một thread pool thực thi các kết nối một cách
+bất đồng bộ. Không bao giờ có hơn bốn thread được tạo, vì vậy hệ thống sẽ không
+bị quá tải nếu server nhận nhiều request. Nếu chúng ta gửi một request tới
+<em>/sleep</em>, server vẫn có thể phục vụ các request khác nhờ một thread khác
+thực thi chúng.</p>
+<blockquote>
+<p>Lưu ý: nếu bạn mở <em>/sleep</em> trên nhiều cửa sổ trình duyệt cùng lúc, chúng
+có thể tải lần lượt với khoảng cách 5 giây. Một số trình duyệt thực thi
+nhiều instance của cùng một request theo thứ tự để phục vụ caching.
+Giới hạn này không phải do server web của chúng ta gây ra.</p>
+</blockquote>
+<p>Sau khi học về vòng lặp <code>while let</code> trong Chương 18, bạn có thể tự hỏi
+tại sao chúng ta không viết code thread của worker như trong Listing 20-21.</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust ignore not_desired_behavior">{{#rustdoc_include ../listings/ch20-web-server/listing-20-21/src/lib.rs:here}}</code></pre>
+<p><span class="caption">Listing 20-21: Một cách triển khai khác của <code>Worker::new</code> sử dụng <code>while let</code></span></p>
+<p>Code này biên dịch và chạy được nhưng không mang lại hành vi threading như mong muốn:
+một request chậm vẫn sẽ khiến các request khác phải chờ xử lý. Nguyên nhân khá tinh tế:
+struct <code>Mutex</code> không có phương thức <code>unlock</code> công khai vì quyền sở hữu lock dựa trên
+vòng đời của <code>MutexGuard&lt;T&gt;</code> trong <code>LockResult&lt;MutexGuard&lt;T&gt;&gt;</code> mà phương thức <code>lock</code> trả về.
+Tại thời điểm biên dịch, borrow checker sẽ thực thi quy tắc rằng một tài nguyên được
+bảo vệ bởi <code>Mutex</code> không thể truy cập nếu chúng ta không giữ lock. Tuy nhiên, cách
+triển khai này cũng có thể khiến lock bị giữ lâu hơn dự kiến nếu chúng ta không chú ý
+đến vòng đời của <code>MutexGuard&lt;T&gt;</code>.</p>
+<p>Code trong Listing 20-20 sử dụng <code>let job = receiver.lock().unwrap().recv().unwrap();</code>
+hoạt động vì với <code>let</code>, bất kỳ giá trị tạm thời nào dùng trong biểu thức bên phải
+dấu bằng sẽ bị drop ngay khi câu lệnh <code>let</code> kết thúc. Tuy nhiên, <code>while let</code> (và <code>if let</code>
+và <code>match</code>) không drop các giá trị tạm thời cho đến khi kết thúc block liên quan. Trong
+Listing 20-21, lock vẫn bị giữ trong suốt cuộc gọi tới <code>job()</code>, nghĩa là các worker khác
+không thể nhận job.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch20-01-single-threaded.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch20-03-graceful-shutdown-and-cleanup.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch20-01-single-threaded.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch20-03-graceful-shutdown-and-cleanup.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

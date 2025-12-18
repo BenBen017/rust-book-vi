@@ -1,0 +1,569 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Treating Smart Pointers Like Regular References with the Deref Trait - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="xử-lý-smart-pointer-như-tham-chiếu-thường-với-trait-deref"><a class="header" href="#xử-lý-smart-pointer-như-tham-chiếu-thường-với-trait-deref">Xử lý Smart Pointer như Tham Chiếu Thường với Trait <code>Deref</code></a></h2>
+<p>Triển khai trait <code>Deref</code> cho phép bạn tùy chỉnh hành vi của <em>toán tử dereference</em> <code>*</code> (không nhầm lẫn với toán tử nhân hoặc glob). Bằng cách triển khai <code>Deref</code> sao cho smart pointer có thể được xử lý như một tham chiếu thông thường, bạn có thể viết code hoạt động trên các tham chiếu và cũng dùng code đó với smart pointer.</p>
+<p>Trước tiên, chúng ta sẽ xem cách toán tử dereference hoạt động với tham chiếu thông thường. Sau đó, chúng ta sẽ thử định nghĩa một kiểu tùy chỉnh hoạt động giống như <code>Box&lt;T&gt;</code>, và xem lý do tại sao toán tử dereference không hoạt động như một tham chiếu với kiểu mới định nghĩa của chúng ta. Chúng ta sẽ khám phá cách triển khai trait <code>Deref</code> giúp smart pointer hoạt động tương tự tham chiếu. Sau đó, chúng ta sẽ xem tính năng <em>deref coercion</em> của Rust và cách nó cho phép làm việc với cả tham chiếu lẫn smart pointer.</p>
+<blockquote>
+<p>Lưu ý: có một điểm khác biệt lớn giữa kiểu <code>MyBox&lt;T&gt;</code> mà chúng ta sắp xây dựng và <code>Box&lt;T&gt;</code> thật: phiên bản của chúng ta sẽ không lưu dữ liệu trên heap. Chúng ta tập trung vào ví dụ này về <code>Deref</code>, vì vậy nơi dữ liệu thực sự được lưu không quan trọng bằng hành vi giống con trỏ.</p>
+</blockquote>
+<!-- Old link, do not remove -->
+<p><a id="following-the-pointer-to-the-value-with-the-dereference-operator"></a></p>
+<h3 id="theo-dấu-con-trỏ-đến-giá-trị"><a class="header" href="#theo-dấu-con-trỏ-đến-giá-trị">Theo Dấu Con Trỏ đến Giá Trị</a></h3>
+<p>Một tham chiếu thông thường là một loại con trỏ, và một cách để nghĩ về con trỏ là như một mũi tên đến một giá trị được lưu ở nơi khác. Trong Listing 15-6, chúng ta tạo một tham chiếu đến một giá trị <code>i32</code> và sau đó sử dụng toán tử dereference để theo dấu tham chiếu đến giá trị:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">fn main() {
+    let x = 5;
+    let y = &amp;x;
+
+    assert_eq!(5, x);
+    assert_eq!(5, *y);
+}</code></pre></pre>
+<p><span class="caption">Listing 15-6: Sử dụng toán tử dereference để theo dấu
+một tham chiếu đến giá trị <code>i32</code></span></p>
+<p>Biến <code>x</code> giữ giá trị <code>i32</code> là <code>5</code>. Chúng ta gán <code>y</code> bằng một tham chiếu đến <code>x</code>. Chúng ta có thể xác nhận rằng <code>x</code> bằng <code>5</code>. Tuy nhiên, nếu muốn xác nhận giá trị trong <code>y</code>, chúng ta phải sử dụng <code>*y</code> để theo dấu tham chiếu đến giá trị mà nó đang trỏ tới (tức là <em>dereference</em>) để trình biên dịch có thể so sánh giá trị thực tế. Khi chúng ta dereference <code>y</code>, chúng ta sẽ truy cập được giá trị số nguyên mà <code>y</code> đang trỏ tới và có thể so sánh với <code>5</code>.</p>
+<p>Nếu chúng ta cố viết <code>assert_eq!(5, y);</code> thì sẽ nhận được lỗi biên dịch sau:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling deref-example v0.1.0 (file:///projects/deref-example)
+error[E0277]: can't compare `{integer}` with `&amp;{integer}`
+ --&gt; src/main.rs:6:5
+  |
+6 |     assert_eq!(5, y);
+  |     ^^^^^^^^^^^^^^^^ no implementation for `{integer} == &amp;{integer}`
+  |
+  = help: the trait `PartialEq&lt;&amp;{integer}&gt;` is not implemented for `{integer}`
+  = note: this error originates in the macro `assert_eq` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `deref-example` (bin "deref-example") due to 1 previous error
+</code></pre>
+<p>So sánh một số và một tham chiếu đến số không được phép vì chúng là các loại khác nhau. Chúng ta phải sử dụng toán tử dereference để theo dấu tham chiếu đến giá trị mà nó đang trỏ tới.</p>
+<h3 id="sử-dụng-boxt-giống-như-tham-chiếu"><a class="header" href="#sử-dụng-boxt-giống-như-tham-chiếu">Sử dụng <code>Box&lt;T&gt;</code> giống như tham chiếu</a></h3>
+<p>Chúng ta có thể viết lại mã trong Listing 15-6 để sử dụng <code>Box&lt;T&gt;</code> thay vì một tham chiếu; toán tử dereference được sử dụng trên <code>Box&lt;T&gt;</code> trong Listing 15-7 hoạt động cùng cách với toán tử dereference được sử dụng trên tham chiếu trong Listing 15-6:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">fn main() {
+    let x = 5;
+    let y = Box::new(x);
+
+    assert_eq!(5, x);
+    assert_eq!(5, *y);
+}</code></pre></pre>
+<p><span class="caption">Listing 15-7: Sử dụng toán tử dereference trên một
+<code>Box&lt;i32&gt;</code></span></p>
+<p>Sự khác biệt chính giữa Listing 15-7 và Listing 15-6 là ở đây chúng ta gán
+<code>y</code> thành một thể hiện của <code>Box&lt;T&gt;</code> trỏ tới một bản sao của giá trị <code>x</code>
+thay vì một tham chiếu trỏ tới giá trị của <code>x</code>. Trong câu lệnh assert cuối,
+chúng ta có thể sử dụng toán tử dereference để theo dấu con trỏ của <code>Box&lt;T&gt;</code>
+cùng cách mà chúng ta đã làm khi <code>y</code> là một tham chiếu. Tiếp theo, chúng ta
+sẽ khám phá điều gì đặc biệt ở <code>Box&lt;T&gt;</code> cho phép chúng ta sử dụng toán tử
+dereference bằng cách định nghĩa kiểu riêng của mình.</p>
+<h3 id="Định-nghĩa-smart-pointer-của-riêng-chúng-ta"><a class="header" href="#Định-nghĩa-smart-pointer-của-riêng-chúng-ta">Định nghĩa Smart Pointer của riêng chúng ta</a></h3>
+<p>Hãy xây dựng một smart pointer tương tự như kiểu <code>Box&lt;T&gt;</code> do thư viện
+chuẩn cung cấp để trải nghiệm cách mà smart pointer hoạt động khác với
+các tham chiếu theo mặc định. Sau đó, chúng ta sẽ xem cách thêm khả năng
+sử dụng toán tử dereference.</p>
+<p>Kiểu <code>Box&lt;T&gt;</code> cuối cùng được định nghĩa như một tuple struct với một phần tử,
+vì vậy Listing 15-8 định nghĩa một kiểu <code>MyBox&lt;T&gt;</code> theo cùng cách. Chúng ta
+cũng sẽ định nghĩa một hàm <code>new</code> để tương ứng với hàm <code>new</code> được định nghĩa
+trên <code>Box&lt;T&gt;</code>.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">struct MyBox&lt;T&gt;(T);
+
+impl&lt;T&gt; MyBox&lt;T&gt; {
+    fn new(x: T) -&gt; MyBox&lt;T&gt; {
+        MyBox(x)
+    }
+}
+<span class="boring">
+</span><span class="boring">fn main() {}</span></code></pre></pre>
+<p><span class="caption">Listing 15-8: Định nghĩa kiểu <code>MyBox&lt;T&gt;</code></span></p>
+<p>Chúng ta định nghĩa một struct tên là <code>MyBox</code> và khai báo một tham số generic <code>T</code>,
+vì chúng ta muốn kiểu của mình có thể chứa giá trị của bất kỳ loại nào. Kiểu
+<code>MyBox</code> là một tuple struct với một phần tử có kiểu <code>T</code>. Hàm <code>MyBox::new</code> nhận
+một tham số kiểu <code>T</code> và trả về một thể hiện <code>MyBox</code> chứa giá trị được truyền vào.</p>
+<p>Hãy thử thêm hàm <code>main</code> trong Listing 15-7 vào Listing 15-8 và thay đổi
+nó để sử dụng kiểu <code>MyBox&lt;T&gt;</code> mà chúng ta đã định nghĩa thay vì <code>Box&lt;T&gt;</code>.
+Mã trong Listing 15-9 sẽ không biên dịch vì Rust không biết cách dereference
+<code>MyBox</code>.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile"><span class="boring">struct MyBox&lt;T&gt;(T);
+</span><span class="boring">
+</span><span class="boring">impl&lt;T&gt; MyBox&lt;T&gt; {
+</span><span class="boring">    fn new(x: T) -&gt; MyBox&lt;T&gt; {
+</span><span class="boring">        MyBox(x)
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn main() {
+    let x = 5;
+    let y = MyBox::new(x);
+
+    assert_eq!(5, x);
+    assert_eq!(5, *y);
+}</code></pre>
+<p><span class="caption">Listing 15-9: Thử sử dụng <code>MyBox&lt;T&gt;</code> theo cùng cách
+chúng ta đã dùng references và <code>Box&lt;T&gt;</code></span></p>
+<p>Dưới đây là lỗi biên dịch mà chúng ta nhận được:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling deref-example v0.1.0 (file:///projects/deref-example)
+error[E0614]: type `MyBox&lt;{integer}&gt;` cannot be dereferenced
+  --&gt; src/main.rs:14:19
+   |
+14 |     assert_eq!(5, *y);
+   |                   ^^
+
+For more information about this error, try `rustc --explain E0614`.
+error: could not compile `deref-example` (bin "deref-example") due to 1 previous error
+</code></pre>
+<p>Kiểu <code>MyBox&lt;T&gt;</code> của chúng ta không thể dereference được vì chúng ta chưa triển khai
+khả năng đó cho kiểu này. Để cho phép dereferencing với toán tử <code>*</code>, chúng ta
+cần triển khai trait <code>Deref</code>.</p>
+<h3 id="xử-lý-một-kiểu-như-một-reference-bằng-cách-triển-khai-trait-deref"><a class="header" href="#xử-lý-một-kiểu-như-một-reference-bằng-cách-triển-khai-trait-deref">Xử lý một kiểu như một reference bằng cách triển khai trait <code>Deref</code></a></h3>
+<p>Như đã thảo luận trong phần <a href="ch10-02-traits.html#implementing-a-trait-on-a-type">“Implementing a Trait on a Type”</a><!-- ignore -->
+của Chương 10, để triển khai một trait, chúng ta cần cung cấp các
+cài đặt cho các phương thức bắt buộc của trait đó. Trait <code>Deref</code>, được cung cấp
+bởi thư viện chuẩn, yêu cầu chúng ta triển khai một phương thức tên là <code>deref</code>
+mượn <code>self</code> và trả về một reference đến dữ liệu bên trong. Listing 15-10
+chứa cài đặt của <code>Deref</code> để thêm vào định nghĩa của <code>MyBox</code>:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">use std::ops::Deref;
+
+impl&lt;T&gt; Deref for MyBox&lt;T&gt; {
+    type Target = T;
+
+    fn deref(&amp;self) -&gt; &amp;Self::Target {
+        &amp;self.0
+    }
+}
+<span class="boring">
+</span><span class="boring">struct MyBox&lt;T&gt;(T);
+</span><span class="boring">
+</span><span class="boring">impl&lt;T&gt; MyBox&lt;T&gt; {
+</span><span class="boring">    fn new(x: T) -&gt; MyBox&lt;T&gt; {
+</span><span class="boring">        MyBox(x)
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    let x = 5;
+</span><span class="boring">    let y = MyBox::new(x);
+</span><span class="boring">
+</span><span class="boring">    assert_eq!(5, x);
+</span><span class="boring">    assert_eq!(5, *y);
+</span><span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 15-10: Triển khai <code>Deref</code> trên <code>MyBox&lt;T&gt;</code></span></p>
+<p>Cú pháp <code>type Target = T;</code> định nghĩa một associated type cho trait <code>Deref</code> sử dụng.
+Associated types là một cách hơi khác để khai báo tham số generic, nhưng hiện
+tại bạn không cần lo lắng về chúng; chúng ta sẽ tìm hiểu chi tiết hơn trong
+Chương 19.</p>
+<p>Chúng ta điền thân phương thức <code>deref</code> với <code>&amp;self.0</code> để <code>deref</code> trả về một
+reference đến giá trị mà chúng ta muốn truy cập với toán tử <code>*</code>; nhớ lại từ
+phần <a href="ch05-01-defining-structs.html#using-tuple-structs-without-named-fields-to-create-different-types">“Using Tuple Structs without Named Fields to Create Different Types”</a><!-- ignore -->
+của Chương 5 rằng <code>.0</code> truy cập giá trị đầu tiên trong tuple struct. Hàm <code>main</code>
+trong Listing 15-9 gọi <code>*</code> trên giá trị <code>MyBox&lt;T&gt;</code> bây giờ đã biên dịch được,
+và các assertion đều pass!</p>
+<p>Nếu không có trait <code>Deref</code>, compiler chỉ có thể dereference các reference <code>&amp;</code>.
+Phương thức <code>deref</code> cung cấp cho compiler khả năng lấy một giá trị của bất kỳ
+kiểu nào triển khai <code>Deref</code> và gọi phương thức <code>deref</code> để có được một reference
+<code>&amp;</code> mà nó biết cách dereference.</p>
+<p>Khi chúng ta nhập <code>*y</code> trong Listing 15-9, phía sau, Rust thực sự chạy đoạn
+mã sau:</p>
+<pre><code class="language-rust ignore">*(y.deref())</code></pre>
+<p>Rust thay thế toán tử <code>*</code> bằng một lời gọi tới phương thức <code>deref</code> và sau đó
+một dereference bình thường, vì vậy chúng ta không cần phải nghĩ xem có cần
+gọi phương thức <code>deref</code> hay không. Tính năng này của Rust cho phép chúng ta
+viết mã hoạt động giống hệt, dù chúng ta đang dùng một reference thông thường
+hay một kiểu triển khai <code>Deref</code>.</p>
+<p>Lý do phương thức <code>deref</code> trả về một reference tới giá trị, và dereference
+bên ngoài dấu ngoặc trong <code>*(y.deref())</code> vẫn cần thiết, liên quan tới hệ
+thống ownership. Nếu phương thức <code>deref</code> trả về giá trị trực tiếp thay vì
+một reference tới giá trị, giá trị đó sẽ bị move ra khỏi <code>self</code>. Chúng ta
+không muốn chiếm quyền sở hữu giá trị bên trong <code>MyBox&lt;T&gt;</code> trong trường
+hợp này hoặc trong hầu hết các trường hợp sử dụng toán tử dereference.</p>
+<p>Lưu ý rằng toán tử <code>*</code> được thay thế bằng một lời gọi tới <code>deref</code> và sau đó
+một lời gọi tới <code>*</code> chỉ một lần, mỗi khi chúng ta sử dụng <code>*</code> trong mã.
+Vì việc thay thế toán tử <code>*</code> không lặp vô hạn, chúng ta cuối cùng nhận được
+dữ liệu kiểu <code>i32</code>, khớp với giá trị <code>5</code> trong <code>assert_eq!</code> ở Listing 15-9.</p>
+<h3 id="chuyển-đổi-deref-ngầm-định-với-hàm-và-phương-thức"><a class="header" href="#chuyển-đổi-deref-ngầm-định-với-hàm-và-phương-thức">Chuyển đổi Deref ngầm định với Hàm và Phương thức</a></h3>
+<p><em>Deref coercion</em> chuyển một reference tới một kiểu triển khai trait <code>Deref</code>
+thành một reference tới kiểu khác. Ví dụ, deref coercion có thể chuyển
+<code>&amp;String</code> thành <code>&amp;str</code> vì <code>String</code> triển khai <code>Deref</code> để trả về <code>&amp;str</code>.
+Deref coercion là một tiện ích mà Rust thực hiện trên các đối số của hàm
+và phương thức, và chỉ hoạt động trên các kiểu triển khai trait <code>Deref</code>.
+Nó xảy ra tự động khi chúng ta truyền một reference tới giá trị của một
+kiểu nhất định làm đối số cho một hàm hoặc phương thức mà kiểu tham số
+trong định nghĩa hàm/phương thức không khớp. Một chuỗi các lời gọi tới
+phương thức <code>deref</code> chuyển kiểu chúng ta cung cấp thành kiểu mà tham số
+cần.</p>
+<p>Deref coercion được thêm vào Rust để lập trình viên khi viết các lời gọi
+hàm và phương thức không cần thêm quá nhiều reference và dereference
+tường minh với <code>&amp;</code> và <code>*</code>. Tính năng này cũng cho phép viết nhiều mã
+hơn có thể hoạt động với cả reference hoặc smart pointer.</p>
+<p>Để thấy deref coercion hoạt động, chúng ta hãy dùng kiểu <code>MyBox&lt;T&gt;</code> đã
+định nghĩa trong Listing 15-8 cùng với việc triển khai <code>Deref</code> mà chúng
+ta đã thêm trong Listing 15-10. Listing 15-11 hiển thị định nghĩa một hàm
+có tham số là string slice:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">fn hello(name: &amp;str) {
+    println!("Hello, {name}!");
+}
+<span class="boring">
+</span><span class="boring">fn main() {}</span></code></pre></pre>
+<p><span class="caption">Listing 15-11: Hàm <code>hello</code> có tham số <code>name</code> kiểu <code>&amp;str</code></span></p>
+<p>Chúng ta có thể gọi hàm <code>hello</code> với một string slice làm đối số, ví dụ:
+<code>hello("Rust");</code>. Deref coercion cho phép gọi hàm <code>hello</code> với một reference
+tới giá trị kiểu <code>MyBox&lt;String&gt;</code>, như được minh họa trong Listing 15-12:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">use std::ops::Deref;
+</span><span class="boring">
+</span><span class="boring">impl&lt;T&gt; Deref for MyBox&lt;T&gt; {
+</span><span class="boring">    type Target = T;
+</span><span class="boring">
+</span><span class="boring">    fn deref(&amp;self) -&gt; &amp;T {
+</span><span class="boring">        &amp;self.0
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">struct MyBox&lt;T&gt;(T);
+</span><span class="boring">
+</span><span class="boring">impl&lt;T&gt; MyBox&lt;T&gt; {
+</span><span class="boring">    fn new(x: T) -&gt; MyBox&lt;T&gt; {
+</span><span class="boring">        MyBox(x)
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn hello(name: &amp;str) {
+</span><span class="boring">    println!("Hello, {name}!");
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn main() {
+    let m = MyBox::new(String::from("Rust"));
+    hello(&amp;m);
+}</code></pre></pre>
+<p><span class="caption">Listing 15-12: Gọi hàm <code>hello</code> với reference tới giá trị
+<code>MyBox&lt;String&gt;</code>, hoạt động nhờ deref coercion</span></p>
+<p>Ở đây chúng ta gọi hàm <code>hello</code> với đối số <code>&amp;m</code>, là một reference tới giá trị
+<code>MyBox&lt;String&gt;</code>. Bởi vì chúng ta đã triển khai trait <code>Deref</code> trên <code>MyBox&lt;T&gt;</code>
+trong Listing 15-10, Rust có thể chuyển <code>&amp;MyBox&lt;String&gt;</code> thành <code>&amp;String</code> bằng
+cách gọi <code>deref</code>. Thư viện chuẩn cung cấp một triển khai <code>Deref</code> trên <code>String</code>
+trả về một string slice, và điều này có trong tài liệu API của <code>Deref</code>. Rust
+lại gọi <code>deref</code> lần nữa để chuyển <code>&amp;String</code> thành <code>&amp;str</code>, phù hợp với định
+nghĩa của hàm <code>hello</code>.</p>
+<p>Nếu Rust không thực hiện deref coercion, chúng ta sẽ phải viết mã như trong
+Listing 15-13 thay vì mã trong Listing 15-12 để gọi <code>hello</code> với một giá trị
+kiểu <code>&amp;MyBox&lt;String&gt;</code>.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">use std::ops::Deref;
+</span><span class="boring">
+</span><span class="boring">impl&lt;T&gt; Deref for MyBox&lt;T&gt; {
+</span><span class="boring">    type Target = T;
+</span><span class="boring">
+</span><span class="boring">    fn deref(&amp;self) -&gt; &amp;T {
+</span><span class="boring">        &amp;self.0
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">struct MyBox&lt;T&gt;(T);
+</span><span class="boring">
+</span><span class="boring">impl&lt;T&gt; MyBox&lt;T&gt; {
+</span><span class="boring">    fn new(x: T) -&gt; MyBox&lt;T&gt; {
+</span><span class="boring">        MyBox(x)
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn hello(name: &amp;str) {
+</span><span class="boring">    println!("Hello, {name}!");
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn main() {
+    let m = MyBox::new(String::from("Rust"));
+    hello(&amp;(*m)[..]);
+}</code></pre></pre>
+<p><span class="caption">Listing 15-13: Mã mà chúng ta phải viết nếu Rust
+không có deref coercion</span></p>
+<p><code>(*m)</code> dereference <code>MyBox&lt;String&gt;</code> thành một <code>String</code>. Sau đó, <code>&amp;</code> và <code>[..]</code>
+lấy một string slice của <code>String</code> bằng toàn bộ chuỗi để phù hợp với chữ ký
+của hàm <code>hello</code>. Mã này nếu không có deref coercion sẽ khó đọc, viết và hiểu
+với tất cả các ký hiệu phức tạp này. Deref coercion cho phép Rust xử lý
+tự động các chuyển đổi này.</p>
+<p>Khi trait <code>Deref</code> được định nghĩa cho các kiểu liên quan, Rust sẽ phân tích
+các kiểu và sử dụng <code>Deref::deref</code> nhiều lần tùy cần để có một reference
+phù hợp với kiểu của tham số. Số lần <code>Deref::deref</code> được chèn được quyết
+định tại thời gian biên dịch, nên không có chi phí runtime khi sử dụng
+deref coercion!</p>
+<h3 id="cách-deref-coercion-tương-tác-với-mutability"><a class="header" href="#cách-deref-coercion-tương-tác-với-mutability">Cách Deref Coercion Tương Tác với Mutability</a></h3>
+<p>Tương tự như cách bạn dùng trait <code>Deref</code> để override toán tử <code>*</code> trên
+reference không thay đổi, bạn có thể dùng trait <code>DerefMut</code> để override
+toán tử <code>*</code> trên reference có thể thay đổi.</p>
+<p>Rust thực hiện deref coercion trong ba trường hợp:</p>
+<ul>
+<li>Từ <code>&amp;T</code> sang <code>&amp;U</code> khi <code>T: Deref&lt;Target=U&gt;</code></li>
+<li>Từ <code>&amp;mut T</code> sang <code>&amp;mut U</code> khi <code>T: DerefMut&lt;Target=U&gt;</code></li>
+<li>Từ <code>&amp;mut T</code> sang <code>&amp;U</code> khi <code>T: Deref&lt;Target=U&gt;</code></li>
+</ul>
+<p>Hai trường hợp đầu giống nhau ngoại trừ trường hợp thứ hai áp dụng cho
+mutable references. Trường hợp đầu nói rằng nếu bạn có một <code>&amp;T</code>, và <code>T</code>
+triển khai <code>Deref</code> tới kiểu <code>U</code>, bạn có thể nhận được một <code>&amp;U</code> một cách
+trong suốt. Trường hợp thứ hai cũng xảy ra tương tự cho mutable references.</p>
+<p>Trường hợp thứ ba phức tạp hơn: Rust cũng sẽ coercion một mutable reference
+thành immutable reference. Nhưng ngược lại <em>không</em> thực hiện được: immutable
+references sẽ không bao giờ coercion thành mutable references. Theo quy tắc
+mượn, nếu bạn có một mutable reference, reference đó phải là reference duy
+nhất tới dữ liệu đó (nếu không, chương trình sẽ không biên dịch). Việc
+chuyển một mutable reference thành immutable reference sẽ không vi phạm
+quy tắc mượn. Ngược lại, chuyển một immutable reference thành mutable
+reference sẽ yêu cầu reference immutable ban đầu là reference duy nhất tới
+dữ liệu đó, nhưng quy tắc mượn không đảm bảo điều này. Do đó, Rust không
+thể giả định rằng chuyển đổi immutable reference thành mutable reference là
+khả thi.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch15-01-box.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch15-03-drop.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch15-01-box.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch15-03-drop.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,491 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Using Threads to Run Code Simultaneously - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="sử-dụng-luồng-để-chạy-mã-Đồng-thời"><a class="header" href="#sử-dụng-luồng-để-chạy-mã-Đồng-thời">Sử Dụng Luồng để Chạy Mã Đồng Thời</a></h2>
+<p>Trong hầu hết các hệ điều hành hiện nay, mã của một chương trình khi thực thi được chạy trong một <em>process</em>, và hệ điều hành sẽ quản lý nhiều process cùng lúc. Trong một chương trình, bạn cũng có thể có các phần độc lập chạy đồng thời. Các tính năng chạy các phần độc lập này được gọi là <em>threads</em> (luồng). Ví dụ, một web server có thể có nhiều luồng để có thể phản hồi nhiều yêu cầu cùng một lúc.</p>
+<p>Chia việc tính toán trong chương trình của bạn thành nhiều luồng để chạy nhiều tác vụ cùng một lúc có thể cải thiện hiệu suất, nhưng cũng làm tăng độ phức tạp. Vì các luồng có thể chạy đồng thời, không có đảm bảo nào về thứ tự mà các phần mã trên các luồng khác nhau sẽ chạy. Điều này có thể dẫn đến các vấn đề như:</p>
+<ul>
+<li>Race conditions, nơi các luồng truy cập dữ liệu hoặc tài nguyên theo thứ tự không nhất quán</li>
+<li>Deadlocks, nơi hai luồng chờ lẫn nhau, khiến cả hai luồng không thể tiếp tục</li>
+<li>Lỗi chỉ xảy ra trong một số tình huống nhất định và khó tái tạo cũng như sửa chữa một cách đáng tin cậy</li>
+</ul>
+<p>Rust cố gắng giảm thiểu các tác động tiêu cực khi sử dụng luồng, nhưng lập trình trong bối cảnh đa luồng vẫn đòi hỏi suy nghĩ cẩn thận và yêu cầu cấu trúc mã khác với các chương trình chạy trong một luồng đơn.</p>
+<p>Các ngôn ngữ lập trình triển khai luồng theo một vài cách khác nhau, và nhiều hệ điều hành cung cấp một API mà ngôn ngữ có thể gọi để tạo luồng mới. Thư viện chuẩn của Rust sử dụng mô hình <em>1:1</em> trong việc triển khai luồng, theo đó một chương trình sử dụng một luồng hệ điều hành cho mỗi luồng trong ngôn ngữ. Có các crate triển khai các mô hình luồng khác, đưa ra các đánh đổi khác so với mô hình 1:1.</p>
+<h3 id="tạo-luồng-mới-với-spawn"><a class="header" href="#tạo-luồng-mới-với-spawn">Tạo Luồng Mới với <code>spawn</code></a></h3>
+<p>Để tạo một luồng mới, chúng ta gọi hàm <code>thread::spawn</code>
+và truyền vào một closure (chúng ta đã nói về closures trong Chương 13)
+chứa mã mà chúng ta muốn chạy trong luồng mới.
+Ví dụ trong Listing 16-1 in ra một số văn bản từ luồng chính và văn bản khác từ một luồng mới:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">use std::thread;
+use std::time::Duration;
+
+fn main() {
+    thread::spawn(|| {
+        for i in 1..10 {
+            println!("hi number {i} from the spawned thread!");
+            thread::sleep(Duration::from_millis(1));
+        }
+    });
+
+    for i in 1..5 {
+        println!("hi number {i} from the main thread!");
+        thread::sleep(Duration::from_millis(1));
+    }
+}</code></pre></pre>
+<p><span class="caption">Listing 16-1: Tạo một luồng mới để in một thứ trong khi luồng chính in thứ khác</span></p>
+<p>Lưu ý rằng khi luồng chính của một chương trình Rust hoàn tất, tất cả các luồng được sinh ra sẽ bị đóng, bất kể chúng đã chạy xong hay chưa. Đầu ra từ chương trình này có thể hơi khác nhau mỗi lần chạy, nhưng sẽ trông tương tự như sau:</p>
+<!-- Không trích xuất đầu ra vì các thay đổi trong đầu ra này không quan trọng; các thay đổi có khả năng do các luồng chạy khác nhau chứ không phải do thay đổi trong trình biên dịch -->
+<pre><code class="language-text">hi number 1 from the main thread!
+hi number 1 from the spawned thread!
+hi number 2 from the main thread!
+hi number 2 from the spawned thread!
+hi number 3 from the main thread!
+hi number 3 from the spawned thread!
+hi number 4 from the main thread!
+hi number 4 from the spawned thread!
+hi number 5 from the spawned thread!
+</code></pre>
+<p>Các lần gọi <code>thread::sleep</code> buộc một luồng phải tạm dừng thực thi trong một khoảng thời gian ngắn, cho phép luồng khác chạy. Các luồng có thể sẽ chạy lần lượt, nhưng điều đó không được đảm bảo: nó phụ thuộc vào cách hệ điều hành của bạn lập lịch các luồng. Trong lần chạy này, luồng chính in ra trước, mặc dù câu lệnh in từ luồng được sinh ra xuất hiện trước trong mã. Và mặc dù chúng ta bảo luồng được sinh ra in cho đến khi <code>i</code> là 9, nó chỉ in được đến 5 trước khi luồng chính kết thúc.</p>
+<p>Nếu bạn chạy mã này và chỉ thấy đầu ra từ luồng chính, hoặc không thấy sự chồng lấn nào, hãy thử tăng các con số trong các phạm vi để tạo thêm cơ hội cho hệ điều hành chuyển đổi giữa các luồng.</p>
+<h3 id="chờ-tất-cả-các-luồng-hoàn-thành-bằng-cách-sử-dụng-join-handles"><a class="header" href="#chờ-tất-cả-các-luồng-hoàn-thành-bằng-cách-sử-dụng-join-handles">Chờ tất cả các luồng hoàn thành bằng cách sử dụng <code>Join</code> Handles</a></h3>
+<p>Mã trong Listing 16-1 không chỉ dừng luồng được sinh ra sớm hơn hầu hết thời gian do luồng chính kết thúc, mà vì không có đảm bảo về thứ tự các luồng chạy, chúng ta cũng không thể đảm bảo rằng luồng được sinh ra sẽ chạy được chút nào!</p>
+<p>Chúng ta có thể giải quyết vấn đề luồng được sinh ra không chạy hoặc kết thúc sớm bằng cách lưu giá trị trả về của <code>thread::spawn</code> vào một biến. Kiểu trả về của <code>thread::spawn</code> là <code>JoinHandle</code>. Một <code>JoinHandle</code> là một giá trị sở hữu mà khi chúng ta gọi phương thức <code>join</code> trên nó, sẽ chờ cho luồng của nó hoàn thành. Listing 16-2 minh họa cách sử dụng <code>JoinHandle</code> của luồng chúng ta tạo trong Listing 16-1 và gọi <code>join</code> để đảm bảo luồng được sinh ra kết thúc trước khi <code>main</code> thoát:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">use std::thread;
+use std::time::Duration;
+
+fn main() {
+    let handle = thread::spawn(|| {
+        for i in 1..10 {
+            println!("hi number {i} from the spawned thread!");
+            thread::sleep(Duration::from_millis(1));
+        }
+    });
+
+    for i in 1..5 {
+        println!("hi number {i} from the main thread!");
+        thread::sleep(Duration::from_millis(1));
+    }
+
+    handle.join().unwrap();
+}</code></pre></pre>
+<p><span class="caption">Listing 16-2: Lưu <code>JoinHandle</code> từ <code>thread::spawn</code>
+để đảm bảo luồng được chạy đến khi hoàn thành</span></p>
+<p>Gọi <code>join</code> trên handle sẽ chặn luồng đang chạy cho đến khi luồng được handle đại diện kết thúc. <em>Chặn</em> một luồng có nghĩa là luồng đó bị ngăn không thực hiện công việc hoặc thoát. Vì chúng ta đặt lời gọi <code>join</code> sau vòng lặp <code>for</code> của luồng chính, chạy Listing 16-2 sẽ tạo ra đầu ra tương tự như sau:</p>
+<!-- Không trích xuất đầu ra vì các thay đổi đối với đầu ra này không quan trọng;
+các thay đổi có khả năng do các luồng chạy khác nhau thay vì do thay đổi trong trình biên dịch -->
+<pre><code class="language-text">hi number 1 from the main thread!
+hi number 2 from the main thread!
+hi number 1 from the spawned thread!
+hi number 3 from the main thread!
+hi number 2 from the spawned thread!
+hi number 4 from the main thread!
+hi number 3 from the spawned thread!
+hi number 4 from the spawned thread!
+hi number 5 from the spawned thread!
+hi number 6 from the spawned thread!
+hi number 7 from the spawned thread!
+hi number 8 from the spawned thread!
+hi number 9 from the spawned thread!
+</code></pre>
+<p>Hai luồng tiếp tục xen kẽ, nhưng luồng chính sẽ chờ vì lời gọi <code>handle.join()</code> và không kết thúc cho đến khi luồng được spawn hoàn tất.</p>
+<p>Nhưng hãy xem điều gì xảy ra nếu chúng ta chuyển <code>handle.join()</code> lên trước vòng lặp <code>for</code> trong <code>main</code>, như sau:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">use std::thread;
+use std::time::Duration;
+
+fn main() {
+    let handle = thread::spawn(|| {
+        for i in 1..10 {
+            println!("hi number {i} from the spawned thread!");
+            thread::sleep(Duration::from_millis(1));
+        }
+    });
+
+    handle.join().unwrap();
+
+    for i in 1..5 {
+        println!("hi number {i} from the main thread!");
+        thread::sleep(Duration::from_millis(1));
+    }
+}</code></pre></pre>
+<p>Luồng chính sẽ chờ cho luồng được spawn hoàn tất, sau đó mới chạy vòng lặp <code>for</code> của nó, vì vậy kết quả sẽ không còn xen kẽ nữa, như minh họa dưới đây:</p>
+<!-- Không trích xuất output vì các thay đổi của output này không quan trọng;
+các thay đổi có thể do các luồng chạy khác nhau hơn là do thay đổi trong compiler -->
+<pre><code class="language-text">hi number 1 from the spawned thread!
+hi number 2 from the spawned thread!
+hi number 3 from the spawned thread!
+hi number 4 from the spawned thread!
+hi number 5 from the spawned thread!
+hi number 6 from the spawned thread!
+hi number 7 from the spawned thread!
+hi number 8 from the spawned thread!
+hi number 9 from the spawned thread!
+hi number 1 from the main thread!
+hi number 2 from the main thread!
+hi number 3 from the main thread!
+hi number 4 from the main thread!
+</code></pre>
+<p>Những chi tiết nhỏ, chẳng hạn như nơi gọi <code>join</code>, có thể ảnh hưởng đến việc các luồng của bạn có chạy cùng lúc hay không.</p>
+<h3 id="sử-dụng-closure-với-move-trong-threads"><a class="header" href="#sử-dụng-closure-với-move-trong-threads">Sử dụng Closure với <code>move</code> trong Threads</a></h3>
+<p>Chúng ta thường sử dụng từ khóa <code>move</code> với các closure được truyền vào <code>thread::spawn</code> vì khi đó closure sẽ nhận quyền sở hữu các giá trị mà nó sử dụng từ môi trường, do đó chuyển quyền sở hữu các giá trị đó từ một luồng sang luồng khác. Trong phần <a href="ch13-01-closures.html#capturing-references-or-moving-ownership">“Capturing References or Moving Ownership”</a><!-- ignore --> của Chương 13, chúng ta đã thảo luận về <code>move</code> trong bối cảnh của closures. Bây giờ, chúng ta sẽ tập trung hơn vào sự tương tác giữa <code>move</code> và <code>thread::spawn</code>.</p>
+<p>Chú ý trong Listing 16-1 rằng closure mà chúng ta truyền vào <code>thread::spawn</code> không nhận tham số nào: chúng ta không sử dụng bất kỳ dữ liệu nào từ luồng chính trong code của luồng được spawn. Để sử dụng dữ liệu từ luồng chính trong luồng được spawn, closure của luồng được spawn phải capture các giá trị mà nó cần. Listing 16-3 cho thấy một cố gắng tạo một vector trong luồng chính và sử dụng nó trong luồng được spawn. Tuy nhiên, điều này chưa hoạt động, như bạn sẽ thấy ngay sau đây.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile">use std::thread;
+
+fn main() {
+    let v = vec![1, 2, 3];
+
+    let handle = thread::spawn(|| {
+        println!("Here's a vector: {v:?}");
+    });
+
+    handle.join().unwrap();
+}</code></pre>
+<p><span class="caption">Listing 16-3: Cố gắng sử dụng một vector được tạo bởi luồng chính trong một luồng khác</span></p>
+<p>Closure sử dụng <code>v</code>, do đó nó sẽ capture <code>v</code> và làm nó trở thành một phần của môi trường của closure. Vì <code>thread::spawn</code> chạy closure này trong một luồng mới, chúng ta sẽ mong muốn có thể truy cập <code>v</code> bên trong luồng mới đó. Nhưng khi biên dịch ví dụ này, chúng ta nhận được lỗi sau:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling threads v0.1.0 (file:///projects/threads)
+error[E0373]: closure may outlive the current function, but it borrows `v`, which is owned by the current function
+ --&gt; src/main.rs:6:32
+  |
+6 |     let handle = thread::spawn(|| {
+  |                                ^^ may outlive borrowed value `v`
+7 |         println!("Here's a vector: {v:?}");
+  |                                     - `v` is borrowed here
+  |
+note: function requires argument type to outlive `'static`
+ --&gt; src/main.rs:6:18
+  |
+6 |       let handle = thread::spawn(|| {
+  |  __________________^
+7 | |         println!("Here's a vector: {v:?}");
+8 | |     });
+  | |______^
+help: to force the closure to take ownership of `v` (and any other referenced variables), use the `move` keyword
+  |
+6 |     let handle = thread::spawn(move || {
+  |                                ++++
+
+For more information about this error, try `rustc --explain E0373`.
+error: could not compile `threads` (bin "threads") due to 1 previous error
+</code></pre>
+<p>Rust <em>suy diễn</em> cách capture <code>v</code>, và vì <code>println!</code> chỉ cần một tham chiếu đến <code>v</code>, closure cố gắng mượn <code>v</code>. Tuy nhiên, có một vấn đề: Rust không thể biết luồng được spawn sẽ chạy trong bao lâu, nên nó không biết liệu tham chiếu đến <code>v</code> có luôn hợp lệ hay không.</p>
+<p>Listing 16-4 đưa ra một kịch bản có khả năng cao hơn là tham chiếu đến <code>v</code> sẽ không hợp lệ:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile">use std::thread;
+
+fn main() {
+    let v = vec![1, 2, 3];
+
+    let handle = thread::spawn(|| {
+        println!("Here's a vector: {v:?}");
+    });
+
+    drop(v); // oh no!
+
+    handle.join().unwrap();
+}</code></pre>
+<p><span class="caption">Listing 16-4: Một luồng với closure cố gắng capture tham chiếu đến <code>v</code> từ luồng chính, nơi <code>v</code> đã bị drop</span></p>
+<p>Nếu Rust cho phép chúng ta chạy đoạn mã này, có khả năng luồng được spawn sẽ ngay lập tức bị đặt vào nền mà không chạy gì cả. Luồng được spawn có một tham chiếu đến <code>v</code> bên trong, nhưng luồng chính ngay lập tức drop <code>v</code>, sử dụng hàm <code>drop</code> mà chúng ta đã thảo luận trong Chương 15. Sau đó, khi luồng được spawn bắt đầu thực thi, <code>v</code> không còn hợp lệ nữa, nên tham chiếu đến nó cũng không hợp lệ. Ôi không!</p>
+<p>Để sửa lỗi compiler trong Listing 16-3, chúng ta có thể dùng lời khuyên từ thông báo lỗi:</p>
+<!-- manual-regeneration
+after automatic regeneration, look at listings/ch16-fearless-concurrency/listing-16-03/output.txt and copy the relevant part
+-->
+<pre><code class="language-text">help: to force the closure to take ownership of `v` (and any other referenced variables), use the `move` keyword
+  |
+6 |     let handle = thread::spawn(move || {
+  |                                ++++
+</code></pre>
+<p>Bằng cách thêm từ khóa <code>move</code> trước closure, chúng ta buộc closure nhận quyền sở hữu của các giá trị mà nó sử dụng thay vì để Rust suy đoán rằng nó nên mượn các giá trị đó. Sự chỉnh sửa đối với Listing 16-3 được thể hiện trong Listing 16-5 sẽ biên dịch và chạy như chúng ta mong muốn:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">use std::thread;
+
+fn main() {
+    let v = vec![1, 2, 3];
+
+    let handle = thread::spawn(move || {
+        println!("Here's a vector: {v:?}");
+    });
+
+    handle.join().unwrap();
+}</code></pre></pre>
+<p>Chúng ta có thể bị cám dỗ để thử làm điều tương tự để sửa mã trong Listing 16-4,
+nơi luồng chính gọi <code>drop</code>, bằng cách sử dụng một closure <code>move</code>.
+Tuy nhiên, cách sửa này sẽ không hoạt động vì những gì Listing 16-4
+đang cố gắng làm bị cấm vì một lý do khác. Nếu chúng ta thêm <code>move</code> vào closure,
+chúng ta sẽ chuyển <code>v</code> vào môi trường của closure, và sẽ không thể gọi <code>drop</code>
+trên nó trong luồng chính nữa. Thay vào đó, chúng ta sẽ nhận được lỗi biên dịch như sau:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling threads v0.1.0 (file:///projects/threads)
+error[E0382]: use of moved value: `v`
+  --&gt; src/main.rs:10:10
+   |
+4  |     let v = vec![1, 2, 3];
+   |         - move occurs because `v` has type `Vec&lt;i32&gt;`, which does not implement the `Copy` trait
+5  |
+6  |     let handle = thread::spawn(move || {
+   |                                ------- value moved into closure here
+7  |         println!("Here's a vector: {v:?}");
+   |                                     - variable moved due to use in closure
+...
+10 |     drop(v); // oh no!
+   |          ^ value used here after move
+
+For more information about this error, try `rustc --explain E0382`.
+error: could not compile `threads` (bin "threads") due to 1 previous error
+</code></pre>
+<p>Các quy tắc sở hữu của Rust lại cứu chúng ta một lần nữa! Chúng ta nhận được lỗi từ mã trong Listing 16-3 vì Rust thận trọng và chỉ mượn <code>v</code> cho luồng, điều này có nghĩa là luồng chính về lý thuyết có thể làm cho tham chiếu trong luồng spawn trở nên không hợp lệ. Bằng cách bảo Rust chuyển quyền sở hữu <code>v</code> sang luồng spawn, chúng ta đảm bảo với Rust rằng luồng chính sẽ không sử dụng <code>v</code> nữa. Nếu chúng ta thay đổi Listing 16-4 theo cách tương tự, chúng ta sẽ vi phạm quy tắc sở hữu khi cố gắng sử dụng <code>v</code> trong luồng chính. Từ khóa <code>move</code> ghi đè mặc định thận trọng của Rust là mượn; nó không cho phép chúng ta vi phạm các quy tắc sở hữu.</p>
+<p>Với hiểu biết cơ bản về luồng và API của luồng, hãy xem chúng ta có thể <em>làm gì</em> với các luồng.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch16-00-concurrency.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch16-02-message-passing.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch16-00-concurrency.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch16-02-message-passing.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

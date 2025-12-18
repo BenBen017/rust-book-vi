@@ -1,0 +1,636 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Định nghĩa một Enum - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="defining-an-enum"><a class="header" href="#defining-an-enum">Defining an Enum</a></h2>
+<p>Trong khi struct cho phép bạn nhóm các trường dữ liệu liên quan lại với nhau,
+ví dụ như <code>Rectangle</code> (hình chữ nhật) sẽ có <code>width</code> (chiều rộng) và <code>height</code>
+(chiều dài), enum cho phép bạn miêu tả một tập hợp chứa các giá trị có thể xảy
+ra. Ví dụ, chúng ta có thể muốn nói rằng <code>Rectangle</code> là một hình trong một tập
+hợp các hình, bao gồm <code>Circle</code> (hình tròn) và <code>Triangle</code> (tam giác). Rust cho
+phép chúng ta định nghĩa kiểu dữ liệu này bằng một enum.</p>
+<p>Hãy xem xét một trường hợp mà chúng ta có thể muốn biểu diễn trong code và xem
+tại sao enum là hữu ích và phù hợp hơn struct trong trường hợp này. Hãy nói
+rằng chúng ta cần làm việc với địa chỉ IP. Hiện tại, có hai tiêu chuẩn chính
+được sử dụng cho địa chỉ IP: IPv4 và IPv6. Vì đây là những lựa chọn duy nhất
+cho địa chỉ IP mà chương trình của chúng ta sẽ gặp phải, chúng ta có thể <em>liệt
+kê</em> (enumerate) tất cả các biến thể có thể xảy ra, tên <code>enum</code> cũng được đặt ra
+từ enumerate.</p>
+<p>Bất kỳ địa chỉ IP nào đều có thể là địa chỉ IPv4 hoặc địa chỉ IPv6, nhưng không
+thể là cả hai cùng một lúc. Đặc tính này của địa chỉ IP khiến cho kiểu dữ liệu
+enum phù hợp, vì một giá trị enum chỉ có thể là một trong các biến thể của nó.
+Cả địa chỉ IPv4 và địa chỉ IPv6 vẫn là địa chỉ cơ bản đều là địa chỉ IP, vì vậy
+chúng nên được xem như cùng một kiểu dữ liệu khi code cần xử lý địa chỉ IP.</p>
+<p>Chúng ta có thể biểu diễn khái niệm này trong code bằng cách định nghĩa một
+enum <code>IpAddrKind</code> và liệt kê các loại có thể có của địa chỉ IP, <code>V4</code> và <code>V6</code>.
+Đây là các biến thể của enum:</p>
+<pre><pre class="playground"><code class="language-rust edition2024">enum IpAddrKind {
+    V4,
+    V6,
+}
+<span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    let four = IpAddrKind::V4;
+</span><span class="boring">    let six = IpAddrKind::V6;
+</span><span class="boring">
+</span><span class="boring">    route(IpAddrKind::V4);
+</span><span class="boring">    route(IpAddrKind::V6);
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn route(ip_kind: IpAddrKind) {}</span></code></pre></pre>
+<p><code>IpAddrKind</code> là một kiểu dữ liệu tùy chỉnh mà chúng ta có thể sử dụng ở bất kỳ
+đâu trong code của mình.</p>
+<h3 id="enum-values"><a class="header" href="#enum-values">Enum Values</a></h3>
+<p>Chúng ta có thể tạo các thể hiện (instance) của mỗi biến thể của <code>IpAddrKind</code>
+như sau:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">enum IpAddrKind {
+</span><span class="boring">    V4,
+</span><span class="boring">    V6,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span>    let four = IpAddrKind::V4;
+    let six = IpAddrKind::V6;
+<span class="boring">
+</span><span class="boring">    route(IpAddrKind::V4);
+</span><span class="boring">    route(IpAddrKind::V6);
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn route(ip_kind: IpAddrKind) {}</span></code></pre></pre>
+<p>Lưu ý rằng các biến thể của enum được đặt trong namepsace của nó, và chúng ta
+sử dụng hai dấu hai chấm để phân tách chúng. Điều này rất hữu ích bởi vì giờ cả
+hai giá trị <code>IpAddrKind::V4</code> và <code>IpAddrKind::V6</code> đều là cùng một kiểu:
+<code>IpAddrKind</code>. Chúng ta có thể, ví dụ, định nghĩa một hàm nhận bất kỳ
+<code>IpAddrKind</code> nào:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">enum IpAddrKind {
+</span><span class="boring">    V4,
+</span><span class="boring">    V6,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    let four = IpAddrKind::V4;
+</span><span class="boring">    let six = IpAddrKind::V6;
+</span><span class="boring">
+</span><span class="boring">    route(IpAddrKind::V4);
+</span><span class="boring">    route(IpAddrKind::V6);
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn route(ip_kind: IpAddrKind) {}</code></pre></pre>
+<p>Và chúng ta có thể gọi hàm này với bất kỳ biến thể nào:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">enum IpAddrKind {
+</span><span class="boring">    V4,
+</span><span class="boring">    V6,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    let four = IpAddrKind::V4;
+</span><span class="boring">    let six = IpAddrKind::V6;
+</span><span class="boring">
+</span>    route(IpAddrKind::V4);
+    route(IpAddrKind::V6);
+<span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn route(ip_kind: IpAddrKind) {}</span></code></pre></pre>
+<p>Sử dụng enum có nhiều lợi ích khác. Nghĩ về kiểu địa chỉ IP của chúng ta, hiện
+tại chúng ta không có cách nào để lưu trữ <em>dữ liệu</em> thực sự của địa chỉ IP;
+chúng ta chỉ biết nó là <em>loại</em> gì. Vì bạn mới học về struct trong chương 5, bạn
+có thể muốn giải quyết vấn đề này bằng cách sử dụng struct như trong Listing
+6-1.</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">fn main() {
+</span>    enum IpAddrKind {
+        V4,
+        V6,
+    }
+
+    struct IpAddr {
+        kind: IpAddrKind,
+        address: String,
+    }
+
+    let home = IpAddr {
+        kind: IpAddrKind::V4,
+        address: String::from("127.0.0.1"),
+    };
+
+    let loopback = IpAddr {
+        kind: IpAddrKind::V6,
+        address: String::from("::1"),
+    };
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 6-1: Lưu trữ dữ liệu và biến thể <code>IpAddrKind</code> của
+một địa chỉ IP bằng cách sử dụng một <code>struct</code></span></p>
+<p>Ở đây, chúng ta đã định nghĩa một struct <code>IpAddr</code> có hai trường: một trường
+<code>kind</code> có kiểu <code>IpAddrKind</code> (enum mà chúng ta đã định nghĩa trước đó) và một
+trường <code>address</code> có kiểu <code>String</code>. Chúng ta có hai thể hiện của struct này. Thứ
+nhất là <code>home</code>, và nó có giá trị <code>IpAddrKind::V4</code> làm giá trị <code>kind</code> với dữ
+liệu địa chỉ liên quan là <code>127.0.0.1</code>. Thể hiện thứ hai là <code>loopback</code>. Nó có
+biến thể khác của <code>IpAddrKind</code> làm giá trị <code>kind</code>, <code>V6</code>, và có địa chỉ <code>::1</code>.
+Chúng ta đã sử dụng một struct để gói gọn các giá trị <code>kind</code> và <code>address</code> lại
+với nhau, vì vậy giờ biến thể được liên kết với giá trị.</p>
+<p>Tuy nhiên, biểu diễn cùng một khái niệm bằng cách sử dụng chỉ một enum sẽ ngắn
+gọn hơn: thay vì một enum bên trong một struct, chúng ta có thể đặt dữ liệu
+trực tiếp vào mỗi biến thể enum. Định nghĩa mới của enum <code>IpAddr</code> nói rằng cả
+biến thể <code>V4</code> và <code>V6</code> sẽ có các giá trị <code>String</code> liên quan:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">fn main() {
+</span>    enum IpAddr {
+        V4(String),
+        V6(String),
+    }
+
+    let home = IpAddr::V4(String::from("127.0.0.1"));
+
+    let loopback = IpAddr::V6(String::from("::1"));
+<span class="boring">}</span></code></pre></pre>
+<p>Chúng ta gắn dữ liệu vào mỗi biến thể enum trực tiếp, vì vậy không cần một
+struct bổ sung. Ở đây cũng dễ dàng hơn để thấy một chi tiết khác về cách hoạt
+động của enum: tên của mỗi biến thể enum mà chúng ta định nghĩa cũng trở thành
+constructor tạo ra một instance của enum. Trong đó, <code>IpAddr::V4()</code> là
+constructor nhận một đối số <code>String</code> và trả về một instance của kiểu <code>IpAddr</code>. Constructor này được tự động định nghĩa khi định nghĩa enum.</p>
+<p>Một lợi ích khác của việc sử dụng enum thay vì struct là mỗi biến thể có thể có
+các kiểu và số lượng dữ liệu liên quan khác nhau (ở đây nói về kiểủ của dữ liệu
+được gắn vào enum, không phải kiểu dữ liệu mà enum thể hiện). Địa chỉ IP phiên
+bản 4 sẽ luôn có 4 thành phần số có giá trị từ 0 đến 255. Nếu chúng ta muốn lưu
+trữ địa chỉ <code>V4</code> dưới dạng 4 giá trị <code>u8</code> nhưng vẫn muốn biểu diễn địa chỉ <code>V6</code>
+dưới dạng một giá trị <code>String</code>, chúng ta sẽ không thể làm được với một struct.
+Enum xử lý trường hợp này một cách dễ dàng:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">fn main() {
+</span>    enum IpAddr {
+        V4(u8, u8, u8, u8),
+        V6(String),
+    }
+
+    let home = IpAddr::V4(127, 0, 0, 1);
+
+    let loopback = IpAddr::V6(String::from("::1"));
+<span class="boring">}</span></code></pre></pre>
+<p>Chúng ta đã có thể dùng nhiều cách khác nhau để định nghĩa cấu trúc dữ liệu để
+lưu trữ địa chỉ IPv4 và IPv6. Tuy nhiên, việc lưu trữ địa chỉ IP và mã hóa loại
+địa chỉ đó là rất phổ biến nên <a href="../std/net/enum.IpAddr.html">thư viện chuẩn có một định nghĩa cho chúng mà chúng ta có thể sử dụng!</a><!-- ignore --> Hãy xem cách thư viện chuẩn
+định nghĩa <code>IpAddr</code>: nó có enum và các biến thể mà chúng ta đã định nghĩa và sử
+dụng, nhưng nó nhúng dữ liệu địa chỉ bên trong các biến thể dưới dạng hai
+struct khác nhau, được định nghĩa khác nhau cho mỗi biến thể:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct Ipv4Addr {
+    // --snip--
+}
+
+struct Ipv6Addr {
+    // --snip--
+}
+
+enum IpAddr {
+    V4(Ipv4Addr),
+    V6(Ipv6Addr),
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Đoạn code này minh họa rằng bạn có thể đặt bất kỳ loại dữ liệu nào bên trong
+một biến thể enum: chuỗi, kiểu số, hoặc struct. Bạn cũng có thể bao gồm một
+enum khác! Ngoài ra, các loại thư viện chuẩn thường không phức tạp hơn những gì
+bạn có thể tạo ra.</p>
+<p>Lưu ý rằng ngay cả khi thư viện chuẩn chứa một định nghĩa cho <code>IpAddr</code>, chúng
+ta vẫn có thể tạo và sử dụng định nghĩa của riêng mình mà không xung đột vì
+chúng ta chưa đưa định nghĩa của thư viện chuẩn vào phạm vi (scope) của mình.
+Chúng ta sẽ nói thêm về việc đưa các loại vào phạm vi trong Chương 7.</p>
+<p>Hãy cùng nhìn vào một ví dụ khác về enum trong Listing 6-2: một enum <code>Message</code>
+có các biến thể lưu trữ các loại và số lượng khác nhau của giá trị.</p>
+<pre><pre class="playground"><code class="language-rust edition2024">enum Message {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(i32, i32, i32),
+}
+<span class="boring">
+</span><span class="boring">fn main() {}</span></code></pre></pre>
+<p>Enum này có 4 biến thể với các loại khác nhau:</p>
+<ul>
+<li><code>Quit</code> không có dữ liệu nào được gắn với nó.</li>
+<li><code>Move</code> có các trường được đặt tên giống như một struct.</li>
+<li><code>Write</code> bao gồm một chuỗi <code>String</code>.</li>
+<li><code>ChangeColor</code> bao gồm 3 giá trị <code>i32</code>.</li>
+</ul>
+<p>Định nghĩa một enum với các biến thể như trong Listing 6-2 tương tự như định
+nghĩa các loại struct khác, ngoại trừ enum không sử dụng từ khóa <code>struct</code> và
+tất cả các biến thể được nhóm lại dưới loại <code>Message</code>. Các struct sau có thể chứa cùng dữ liệu với các biến thể enum trước đó:</p>
+<pre><pre class="playground"><code class="language-rust edition2024">struct QuitMessage; // unit struct
+struct MoveMessage {
+    x: i32,
+    y: i32,
+}
+struct WriteMessage(String); // tuple struct
+struct ChangeColorMessage(i32, i32, i32); // tuple struct
+<span class="boring">
+</span><span class="boring">fn main() {}</span></code></pre></pre>
+<p>Nhưng nếu chúng ta sử dụng các struct khác, mỗi struct có loại riêng, chúng ta
+sẽ không thể dễ dàng định nghĩa một hàm nhận bất kỳ loại tin nhắn nào như chúng
+ta có thể với enum <code>Message</code> được định nghĩa trong Listing 6-2, một loại duy
+nhất.</p>
+<p>Có một điểm tương đồng nữa giữa enum và struct: giống như chúng ta có thể định
+nghĩa các phương thức trên struct sử dụng <code>impl</code>, chúng ta cũng có thể định
+nghĩa các phương thức trên enum. Đây là một phương thức có tên <code>call</code> mà chúng
+ta có thể định nghĩa trên enum <code>Message</code> của chúng ta:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">fn main() {
+</span><span class="boring">    enum Message {
+</span><span class="boring">        Quit,
+</span><span class="boring">        Move { x: i32, y: i32 },
+</span><span class="boring">        Write(String),
+</span><span class="boring">        ChangeColor(i32, i32, i32),
+</span><span class="boring">    }
+</span><span class="boring">
+</span>    impl Message {
+        fn call(&amp;self) {
+            // method body would be defined here
+        }
+    }
+
+    let m = Message::Write(String::from("hello"));
+    m.call();
+<span class="boring">}</span></code></pre></pre>
+<p>Phần thân của phương thức sẽ sử dụng <code>self</code> để lấy giá trị mà chúng ta khởi
+tạo. Trong ví dụ này, chúng ta đã tạo một biến <code>m</code> có giá trị <code>Message::Write(String::from("hello"))</code>, và giá trị này cũng sẽ là giá trị của <code>self</code> mà
+phương thức <code>call</code> sẽ lấy ra khi <code>m.call()</code> chạy.</p>
+<p>Hãy xem một enum khác trong thư viện chuẩn rất phổ biến và hữu ích: <code>Option</code>.</p>
+<hr />
+<h3 id="the-option-enum-and-its-advantages-over-null-values"><a class="header" href="#the-option-enum-and-its-advantages-over-null-values">The <code>Option</code> Enum and Its Advantages Over Null Values</a></h3>
+<p>Phần này sẽ khám phá một trường hợp sử dụng của <code>Option</code>, một enum được định
+nghĩa bởi thư viện chuẩn. Kiểu <code>Option</code> có thể được dùng trong nhiều tình huống
+mà dữ liệu có thể là một giá trị hoặc không có giá trị.</p>
+<p>Ví dụ, nếu bạn yêu cầu phần tử đầu tiên của một danh sách, bạn sẽ nhận được một
+giá trị. Nếu bạn yêu cầu phần tử đầu tiên của một danh sách rỗng, bạn sẽ không
+nhận được gì. Biểu diễn khái niệm này trong hệ thống kiểu có nghĩa là trình
+biên dịch có thể kiểm tra xem bạn có xử lý tất cả các trường hợp mà bạn nên xử
+lý hay không; tính năng này có thể ngăn chặn các lỗi rất phổ biến trong các
+ngôn ngữ lập trình khác.</p>
+<p>Thiết kế ngôn ngữ lập trình thường được xem như là việc bạn sẽ thêm vào các
+tính năng nào, nhưng các tính năng bạn loại bỏ cũng quan trọng. Rust không có
+tính năng null mà nhiều ngôn ngữ khác có. <em>Null</em> là một giá trị có nghĩa là
+không có giá trị nào ở đó. Trong các ngôn ngữ có null, các biến luôn có thể ở
+một trong hai trạng thái: null hoặc không null.</p>
+<p>Vào năm 2009, trong bài trình bày “Null References: The Billion Dollar
+Mistake”, Tony Hoare, người sáng chế null, nói như sau:</p>
+<blockquote>
+<p>Tôi gọi nó là sai lầm đắt đỏ hàng tỷ đô la của tôi. Tại thời điểm đó, tôi
+đang thiết kế hệ thống kiểu tham chiếu đầu tiên cho một ngôn ngữ lập trình
+hướng đối tượng. Mục tiêu của tôi là đảm bảo rằng tất cả các tham chiếu sẽ được
+an toàn, với kiểm tra được thực hiện tự động bởi trình biên dịch. Nhưng tôi
+không thể cưỡng lại nỗi nản lòng của tôi để thêm vào một tham chiếu null, chỉ
+vì nó rất dễ để triển khai. Điều này đã dẫn đến hàng ngàn lỗi, thiệt hại và
+hỏng hóc hệ thống, có thể đã gây ra hàng tỷ đô la sự cố trong 40 năm qua.</p>
+</blockquote>
+<p>Vấn đề với các giá trị null là nếu bạn cố gắng sử dụng một giá trị null như một
+giá trị not-null, bạn sẽ nhận được một loại lỗi nào đó. Bởi vì tính chất này
+null hoặc not-null rất phổ biến, nó rất dễ để gây ra loại lỗi này.</p>
+<p>Tuy nhiên, khái niệm mà null đang cố gắng biểu thị vẫn là một khái niệm hữu
+ích: một null là một giá trị hiện tại không hợp lệ hoặc vắng mặt vì một lý do
+nào đó.</p>
+<p>Vấn đề thực sự không phải là với khái niệm mà là với cách hiện thực cụ thể của
+null. Vì vậy, Rust không có null, nhưng nó có một dạng enum có thể  thể hiện
+rằng giá trị đang vắng mặt. Enum này là <code>Option&lt;T&gt;</code>, và nó được <a href="../std/option/enum.Option.html">định nghĩa bởi thư viện chuẩn</a><!-- ignore --> như sau:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum Option&lt;T&gt; {
+    None,
+    Some(T),
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Enum <code>Option&lt;T&gt;</code> rất hữu ích nên nó được bao gồm trong prelude; bạn không cần
+phải đưa nó vào scope một cách tường minh. Các biến thể của nó cũng được bao
+gồm trong prelude: bạn có thể sử dụng <code>Some</code> và <code>None</code> trực tiếp mà không cần
+tiền tố <code>Option::</code>. Enum <code>Option&lt;T&gt;</code> vẫn chỉ là một enum thông thường, và <code>Some(T)</code> và <code>None</code> vẫn là các biến thể của kiểu <code>Option&lt;T&gt;</code>.</p>
+<p><code>&lt;T&gt;</code> là syntax của Rust mà chúng ta chưa nói đến. Nó là một tham số kiểu
+generic, và chúng ta sẽ tìm hiểu về generic chi tiết hơn trong chương 10. Hiện
+tại, bạn chỉ cần biết rằng <code>&lt;T&gt;</code> có nghĩa là biến thể <code>Some</code> của enum <code>Option</code>
+có thể chứa một phần dữ liệu của bất kỳ kiểu nào, và mỗi kiểu cụ thể được sử
+dụng thay thế cho <code>T</code> làm cho kiểu <code>Option&lt;T&gt;</code> tổng thể trở thành một kiểu
+khác. Đây là một số ví dụ về việc sử dụng giá trị <code>Option</code> để chứa các kiểu số
+và các kiểu chuỗi:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">fn main() {
+</span>    let some_number = Some(5);
+    let some_char = Some('e');
+
+    let absent_number: Option&lt;i32&gt; = None;
+<span class="boring">}</span></code></pre></pre>
+<p>Kiểu của <code>some_number</code> là <code>Option&lt;i32&gt;</code>. Kiểu của <code>some_char</code> là
+<code>Option&lt;char&gt;</code>, đây là một kiểu khác. Rust có thể suy ra các kiểu này vì chúng
+ta đã chỉ định một giá trị bên trong biến thể <code>Some</code>. Đối với <code>absent_number</code>,
+Rust yêu cầu chúng ta phải gắn nhãn kiểu tổng thể <code>Option</code>: trình biên dịch
+không thể suy ra kiểu mà biến thể <code>Some</code> sẽ chứa bằng cách chỉ xem một giá trị
+<code>None</code>. Ở đây, chúng ta nói với Rust rằng chúng ta muốn <code>absent_number</code> có kiểu
+<code>Option&lt;i32&gt;</code>.</p>
+<p>Khi chúng ta có một giá trị <code>Some</code>, chúng ta biết rằng có một giá trị hiện có
+và giá trị đó được giữ bên trong <code>Some</code>. Khi chúng ta có một giá trị <code>None</code>,
+một cách nào đó, nó có nghĩa giống như null: chúng ta không có một giá trị hợp
+lệ. Vậy tại sao  <code>Option&lt;T&gt;</code> tốt hơn null?</p>
+<p>Ngắn gọn mà nói, vì <code>Option&lt;T&gt;</code> và <code>T</code> (với <code>T</code> có thể là bất kỳ kiểu nào) là
+các kiểu khác nhau, trình biên dịch sẽ không cho phép chúng ta sử dụng một giá
+trị <code>Option&lt;T&gt;</code> như là một giá trị hợp lệ. Ví dụ, đoạn mã này sẽ không biên
+dịch được vì nó đang cố gắng cộng một <code>i8</code> với một <code>Option&lt;i8&gt;</code>:</p>
+<pre><code class="language-rust ignore does_not_compile"><span class="boring">fn main() {
+</span>    let x: i8 = 5;
+    let y: Option&lt;i8&gt; = Some(5);
+
+    let sum = x + y;
+<span class="boring">}</span></code></pre>
+<p>Nếu chúng ta chạy đoạn code này, chúng ta sẽ nhận được một thông báo lỗi như
+sau:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling enums v0.1.0 (file:///projects/enums)
+error[E0277]: cannot add `Option&lt;i8&gt;` to `i8`
+ --&gt; src/main.rs:5:17
+  |
+5 |     let sum = x + y;
+  |                 ^ no implementation for `i8 + Option&lt;i8&gt;`
+  |
+  = help: the trait `Add&lt;Option&lt;i8&gt;&gt;` is not implemented for `i8`
+  = help: the following other types implement trait `Add&lt;Rhs&gt;`:
+            `&amp;i8` implements `Add&lt;i8&gt;`
+            `&amp;i8` implements `Add`
+            `i8` implements `Add&lt;&amp;i8&gt;`
+            `i8` implements `Add`
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `enums` (bin "enums") due to 1 previous error
+</code></pre>
+<p>Thông báo lỗi này có nghĩa là Rust không hiểu cách cộng một <code>i8</code> và một
+<code>Option&lt;i8&gt;</code>, vì chúng là các kiểu khác nhau. Khi chúng ta có một giá trị của
+một kiểu như <code>i8</code> trong Rust, trình biên dịch sẽ đảm bảo rằng chúng ta luôn có
+một giá trị hợp lệ. Chúng ta có thể tiến hành một cách tự tin mà không cần kiểm
+tra null trước khi sử dụng giá trị đó. Chỉ khi chúng ta có một <code>Option&lt;i8&gt;</code>
+(hoặc bất kỳ kiểu giá trị nào chúng ta đang làm việc với nó) thì chúng ta mới
+phải lo lắng về việc có thể không có một giá trị, và trình biên dịch sẽ đảm bảo
+rằng chúng ta xử lý trường hợp đó trước khi sử dụng giá trị.</p>
+<p>Nói cách khác, bạn phải chuyển đổi một <code>Option&lt;T&gt;</code> thành một <code>T</code> trước khi bạn
+có thể thực hiện các thao tác trên <code>T</code>. Thông thường, điều này giúp phát hiện
+một trong những vấn đề phổ biến nhất với null: giả định rằng một thứ gì đó
+không phải là null khi nó thực chất là null.</p>
+<p>Giảm thiểu rủi ro của những giả định không đúng về giá trị not-null giúp bạn
+tin tưởng hơn vào code của mình. Để có một giá trị có thể là null, bạn phải
+chọn lựa một cách rõ ràng bằng cách đặt kiểu của giá trị đó là <code>Option&lt;T&gt;</code>. Sau
+đó, khi bạn sử dụng giá trị đó, bạn sẽ buộc phải xử lý trường hợp khi giá trị
+là null. Mọi nơi mà một giá trị có một kiểu không phải là <code>Option&lt;T&gt;</code>, bạn <em>có
+thể</em> an toàn giả định rằng giá trị đó không phải là null. Đây là một quyết định
+thiết kế có chủ đích của Rust để giới hạn sự lan truyền của null và tăng tính
+an toàn của code Rust.</p>
+<p>Do đó, làm thế nào để bạn lấy giá trị <code>T</code> ra khỏi một biến thể <code>Some</code> khi bạn
+có một giá trị của kiểu <code>Option&lt;T&gt;</code> để bạn có thể sử dụng giá trị đó? Enum
+<code>Option&lt;T&gt;</code> có một số phương thức rất hữu ích trong một số tình huống; bạn có
+thể kiểm tra chúng trong <a href="../std/option/enum.Option.html">tài liệu của nó</a><!-- ignore -->. Quen thuộc với
+các phương thức trên <code>Option&lt;T&gt;</code> sẽ rất hữu ích trong hành trình của bạn với
+Rust.</p>
+<p>Tổng quan mà nói, để sử dụng một giá trị <code>Option&lt;T&gt;</code>, bạn cần có code để xử lý
+mỗi biến thể. Bạn cần một code để chạy chỉ khi bạn có một giá trị <code>Some(T)</code>, và
+code này được phép sử dụng <code>T</code> bên trong. Bạn cần một code khác để chạy nếu bạn
+có một giá trị <code>None</code> và code đó không có một giá trị <code>T</code> nào. Biểu thức
+<code>match</code> là một cấu trúc điều khiển sẽ giúp bạn làm điều này khi được sử dụng
+với enum: nó sẽ chạy code khác nhau tùy thuộc vào biến thể của enum mà nó có,
+và code đó có thể sử dụng dữ liệu bên trong giá trị khớp với nó.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch06-00-enums.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch06-02-match.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch06-00-enums.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch06-02-match.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

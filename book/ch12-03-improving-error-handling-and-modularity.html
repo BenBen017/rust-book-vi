@@ -1,0 +1,823 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Refactoring to Improve Modularity and Error Handling - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="tái-cấu-trúc-Để-cải-thiện-tính-module-và-xử-lý-lỗi"><a class="header" href="#tái-cấu-trúc-Để-cải-thiện-tính-module-và-xử-lý-lỗi">Tái Cấu Trúc Để Cải Thiện Tính Module và Xử Lý Lỗi</a></h2>
+<p>Để cải thiện chương trình, chúng ta sẽ khắc phục bốn vấn đề liên quan đến cấu trúc chương trình và cách xử lý các lỗi tiềm ẩn. Đầu tiên, hàm <code>main</code> hiện tại thực hiện hai nhiệm vụ: phân tích tham số và đọc tệp. Khi chương trình phát triển, số lượng nhiệm vụ riêng lẻ mà hàm <code>main</code> đảm nhận sẽ tăng lên. Khi một hàm càng nhiều trách nhiệm, nó càng khó lý giải, khó kiểm thử và khó thay đổi mà không làm hỏng một phần nào đó. Tốt nhất là tách chức năng để mỗi hàm chỉ chịu trách nhiệm cho một nhiệm vụ duy nhất.</p>
+<p>Vấn đề này cũng liên quan đến vấn đề thứ hai: mặc dù <code>query</code> và <code>file_path</code> là các biến cấu hình cho chương trình, các biến như <code>contents</code> được dùng để thực hiện logic của chương trình. Khi <code>main</code> trở nên dài hơn, chúng ta sẽ cần nhiều biến hơn trong phạm vi; càng nhiều biến trong phạm vi, việc theo dõi mục đích của từng biến càng khó. Tốt nhất là nhóm các biến cấu hình thành một cấu trúc để làm rõ mục đích của chúng.</p>
+<p>Vấn đề thứ ba là chúng ta đã dùng <code>expect</code> để in thông báo lỗi khi việc đọc tệp thất bại, nhưng thông báo lỗi chỉ in ra <code>Should have been able to read the file</code>. Việc đọc tệp có thể thất bại theo nhiều cách: ví dụ, tệp có thể bị mất, hoặc chúng ta có thể không có quyền mở tệp. Hiện tại, bất kể tình huống nào, chúng ta cũng in cùng một thông báo lỗi, điều này sẽ không cung cấp thông tin gì cho người dùng!</p>
+<p>Thứ tư, chúng ta dùng <code>expect</code> lặp đi lặp lại để xử lý các lỗi khác nhau, và nếu người dùng chạy chương trình mà không cung cấp đủ tham số, họ sẽ nhận được lỗi <code>index out of bounds</code> từ Rust, mà không giải thích rõ vấn đề. Sẽ tốt hơn nếu tất cả mã xử lý lỗi được đặt ở một chỗ, để các người bảo trì trong tương lai chỉ cần tham khảo một nơi nếu logic xử lý lỗi cần thay đổi. Việc đặt tất cả mã xử lý lỗi ở một chỗ cũng đảm bảo rằng chúng ta in các thông điệp có ý nghĩa với người dùng cuối.</p>
+<p>Hãy giải quyết bốn vấn đề này bằng cách tái cấu trúc dự án của chúng ta.</p>
+<h3 id="tách-biệt-trách-nhiệm-cho-các-dự-Án-binary"><a class="header" href="#tách-biệt-trách-nhiệm-cho-các-dự-Án-binary">Tách Biệt Trách Nhiệm Cho Các Dự Án Binary</a></h3>
+<p>Vấn đề tổ chức khi phân bổ trách nhiệm cho nhiều nhiệm vụ vào hàm <code>main</code> là phổ biến trong nhiều dự án binary. Do đó, cộng đồng Rust đã phát triển các hướng dẫn để tách các mối quan tâm riêng biệt của một chương trình binary khi <code>main</code> bắt đầu trở nên lớn. Quá trình này có các bước sau:</p>
+<ul>
+<li>Chia chương trình của bạn thành <em>main.rs</em> và <em>lib.rs</em> và chuyển logic của chương trình sang <em>lib.rs</em>.</li>
+<li>Miễn là logic phân tích tham số dòng lệnh còn nhỏ, nó có thể giữ lại trong <em>main.rs</em>.</li>
+<li>Khi logic phân tích tham số dòng lệnh bắt đầu phức tạp, tách nó ra khỏi <em>main.rs</em> và chuyển sang <em>lib.rs</em>.</li>
+</ul>
+<p>Các trách nhiệm còn lại trong hàm <code>main</code> sau quá trình này nên giới hạn ở các mục sau:</p>
+<ul>
+<li>Gọi logic phân tích tham số dòng lệnh với các giá trị tham số</li>
+<li>Thiết lập bất kỳ cấu hình nào khác</li>
+<li>Gọi hàm <code>run</code> trong <em>lib.rs</em></li>
+<li>Xử lý lỗi nếu <code>run</code> trả về lỗi</li>
+</ul>
+<p>Mẫu này nhằm tách biệt các mối quan tâm: <em>main.rs</em> đảm nhận việc chạy chương trình, và <em>lib.rs</em> đảm nhận toàn bộ logic của nhiệm vụ. Vì bạn không thể kiểm thử trực tiếp hàm <code>main</code>, cấu trúc này cho phép bạn kiểm thử toàn bộ logic chương trình bằng cách chuyển nó vào các hàm trong <em>lib.rs</em>. Mã còn lại trong <em>main.rs</em> sẽ đủ nhỏ để xác minh độ chính xác chỉ bằng cách đọc. Hãy tái cấu trúc chương trình theo quá trình này.</p>
+<h4 id="tách-hàm-phân-tích-tham-số"><a class="header" href="#tách-hàm-phân-tích-tham-số">Tách Hàm Phân Tích Tham Số</a></h4>
+<p>Chúng ta sẽ tách chức năng phân tích tham số vào một hàm mà <code>main</code> sẽ gọi, để chuẩn bị chuyển logic phân tích tham số dòng lệnh sang <em>src/lib.rs</em>. Listing 12-5 cho thấy phần đầu mới của <code>main</code> gọi một hàm mới <code>parse_config</code>, mà chúng ta sẽ định nghĩa trong <em>src/main.rs</em> tạm thời.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore"><span class="boring">use std::env;
+</span><span class="boring">use std::fs;
+</span><span class="boring">
+</span>fn main() {
+    let args: Vec&lt;String&gt; = env::args().collect();
+
+    let (query, file_path) = parse_config(&amp;args);
+
+    // --snip--
+<span class="boring">
+</span><span class="boring">    println!("Searching for {query}");
+</span><span class="boring">    println!("In file {file_path}");
+</span><span class="boring">
+</span><span class="boring">    let contents = fs::read_to_string(file_path)
+</span><span class="boring">        .expect("Should have been able to read the file");
+</span><span class="boring">
+</span><span class="boring">    println!("With text:\n{contents}");
+</span>}
+
+fn parse_config(args: &amp;[String]) -&gt; (&amp;str, &amp;str) {
+    let query = &amp;args[1];
+    let file_path = &amp;args[2];
+
+    (query, file_path)
+}</code></pre>
+<p><span class="caption">Listing 12-5: Tách hàm <code>parse_config</code> từ <code>main</code></span></p>
+<p>Chúng ta vẫn đang thu thập các tham số dòng lệnh vào một vector, nhưng thay vì gán giá trị tham số tại chỉ số 1 vào biến <code>query</code> và giá trị tham số tại chỉ số 2 vào biến <code>file_path</code> trong hàm <code>main</code>, chúng ta truyền toàn bộ vector vào hàm <code>parse_config</code>. Hàm <code>parse_config</code> sau đó chứa logic xác định tham số nào sẽ vào biến nào và trả lại các giá trị cho <code>main</code>. Chúng ta vẫn tạo các biến <code>query</code> và <code>file_path</code> trong <code>main</code>, nhưng <code>main</code> không còn trách nhiệm xác định cách các tham số dòng lệnh và biến tương ứng với nhau.</p>
+<p>Việc tái cấu trúc này có thể có vẻ quá mức đối với chương trình nhỏ của chúng ta, nhưng chúng ta đang refactor theo các bước nhỏ, từng phần. Sau khi thực hiện thay đổi này, hãy chạy lại chương trình để xác minh rằng việc phân tích tham số vẫn hoạt động. Việc kiểm tra tiến trình thường xuyên là tốt, giúp xác định nguyên nhân vấn đề khi chúng xảy ra.</p>
+<h4 id="nhóm-các-giá-trị-cấu-hình"><a class="header" href="#nhóm-các-giá-trị-cấu-hình">Nhóm Các Giá Trị Cấu Hình</a></h4>
+<p>Chúng ta có thể thực hiện một bước nhỏ nữa để cải thiện hàm <code>parse_config</code>. Hiện tại, chúng ta đang trả về một tuple, nhưng ngay sau đó lại tách tuple đó thành các phần riêng lẻ. Đây là dấu hiệu rằng có lẽ chúng ta chưa có trừu tượng (abstraction) phù hợp.</p>
+<p>Một chỉ báo khác cho thấy còn có thể cải thiện là phần <code>config</code> trong <code>parse_config</code>, cho thấy hai giá trị chúng ta trả về có liên quan và đều là một phần của một giá trị cấu hình. Hiện tại, chúng ta chỉ truyền đạt ý nghĩa này bằng cách nhóm hai giá trị vào một tuple; thay vào đó, chúng ta sẽ đưa hai giá trị vào một struct và đặt tên có ý nghĩa cho từng trường trong struct. Làm như vậy sẽ giúp những người bảo trì mã trong tương lai hiểu rõ cách các giá trị khác nhau liên quan với nhau và mục đích của chúng là gì.</p>
+<p>Listing 12-6 trình bày các cải tiến cho hàm <code>parse_config</code>.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust should_panic noplayground"><span class="boring">use std::env;
+</span><span class="boring">use std::fs;
+</span><span class="boring">
+</span>fn main() {
+    let args: Vec&lt;String&gt; = env::args().collect();
+
+    let config = parse_config(&amp;args);
+
+    println!("Searching for {}", config.query);
+    println!("In file {}", config.file_path);
+
+    let contents = fs::read_to_string(config.file_path)
+        .expect("Should have been able to read the file");
+
+    // --snip--
+<span class="boring">
+</span><span class="boring">    println!("With text:\n{contents}");
+</span>}
+
+struct Config {
+    query: String,
+    file_path: String,
+}
+
+fn parse_config(args: &amp;[String]) -&gt; Config {
+    let query = args[1].clone();
+    let file_path = args[2].clone();
+
+    Config { query, file_path }
+}</code></pre>
+<p><span class="caption">Listing 12-6: Tái cấu trúc <code>parse_config</code> để trả về một thể hiện của struct <code>Config</code></span></p>
+<p>Chúng ta đã thêm một struct có tên <code>Config</code> với các trường <code>query</code> và <code>file_path</code>. Chữ ký của <code>parse_config</code> hiện nay cho biết nó trả về một giá trị <code>Config</code>. Trong thân của <code>parse_config</code>, nơi trước đây chúng ta trả về các string slice tham chiếu tới các giá trị <code>String</code> trong <code>args</code>, bây giờ chúng ta định nghĩa <code>Config</code> để chứa các giá trị <code>String</code> sở hữu (owned). Biến <code>args</code> trong <code>main</code> là chủ sở hữu của các giá trị tham số và chỉ cho phép hàm <code>parse_config</code> mượn chúng, điều này có nghĩa là chúng ta sẽ vi phạm quy tắc mượn của Rust nếu <code>Config</code> cố gắng chiếm quyền sở hữu các giá trị trong <code>args</code>.</p>
+<p>Có nhiều cách để quản lý dữ liệu <code>String</code>; cách đơn giản nhất, mặc dù hơi kém hiệu quả, là gọi phương thức <code>clone</code> trên các giá trị. Điều này sẽ tạo một bản sao đầy đủ của dữ liệu để thể hiện <code>Config</code> sở hữu, mất nhiều thời gian và bộ nhớ hơn so với việc chỉ lưu tham chiếu tới dữ liệu chuỗi. Tuy nhiên, việc clone dữ liệu cũng làm cho mã của chúng ta rất trực quan vì chúng ta không phải quản lý thời gian sống của các tham chiếu; trong trường hợp này, đánh đổi một chút hiệu suất để đổi lấy sự đơn giản là xứng đáng.</p>
+<section class="note" aria-role="note">
+<h3 id="những-đánh-đổi-khi-sử-dụng-clone"><a class="header" href="#những-đánh-đổi-khi-sử-dụng-clone">Những đánh đổi khi sử dụng <code>clone</code></a></h3>
+<p>Nhiều Rustacean có xu hướng tránh sử dụng <code>clone</code> để giải quyết vấn đề ownership vì chi phí thời gian chạy của nó. Trong <a href="ch13-00-functional-features.html">Chương 13</a><!-- ignore -->, bạn sẽ học cách sử dụng các phương pháp hiệu quả hơn trong tình huống này. Nhưng hiện tại, sao chép một vài chuỗi để tiếp tục tiến triển là ổn vì bạn chỉ thực hiện các bản sao này một lần và đường dẫn tệp cùng chuỗi truy vấn rất nhỏ. Tốt hơn là có một chương trình hoạt động hơi kém hiệu quả hơn là cố gắng tối ưu hóa mã ngay lần đầu tiên. Khi bạn quen thuộc hơn với Rust, việc bắt đầu với giải pháp hiệu quả nhất sẽ dễ dàng hơn, nhưng hiện tại, việc gọi <code>clone</code> hoàn toàn chấp nhận được.</p>
+</section>
+<p>Chúng ta đã cập nhật <code>main</code> để đặt thể hiện <code>Config</code> được trả về từ <code>parse_config</code> vào một biến có tên <code>config</code>, và cập nhật mã trước đây sử dụng các biến riêng biệt <code>query</code> và <code>file_path</code> để bây giờ sử dụng các trường trong struct <code>Config</code>.</p>
+<p>Bây giờ mã của chúng ta truyền đạt rõ ràng hơn rằng <code>query</code> và <code>file_path</code> có liên quan với nhau và mục đích của chúng là cấu hình cách chương trình hoạt động. Bất kỳ mã nào sử dụng các giá trị này biết rằng chúng nằm trong thể hiện <code>config</code> và được đặt trong các trường với tên phản ánh mục đích.</p>
+<h4 id="tạo-constructor-cho-config"><a class="header" href="#tạo-constructor-cho-config">Tạo Constructor cho <code>Config</code></a></h4>
+<p>Cho đến nay, chúng ta đã tách logic chịu trách nhiệm phân tích tham số dòng lệnh ra khỏi <code>main</code> và đặt nó trong hàm <code>parse_config</code>. Việc này giúp chúng ta thấy rằng các giá trị <code>query</code> và <code>file_path</code> có liên quan và mối quan hệ này nên được thể hiện trong mã. Chúng ta sau đó thêm một struct <code>Config</code> để đặt tên cho mục đích liên quan của <code>query</code> và <code>file_path</code> và có thể trả về các giá trị này với tên trường trong struct từ hàm <code>parse_config</code>.</p>
+<p>Bây giờ, mục đích của hàm <code>parse_config</code> là tạo một thể hiện <code>Config</code>, vì vậy chúng ta có thể thay đổi <code>parse_config</code> từ một hàm thông thường thành một hàm <code>new</code> liên kết với struct <code>Config</code>. Việc này sẽ làm mã trở nên idiomatic hơn. Chúng ta có thể tạo các thể hiện của các kiểu trong thư viện chuẩn, như <code>String</code>, bằng cách gọi <code>String::new</code>. Tương tự, bằng cách đổi <code>parse_config</code> thành hàm <code>new</code> liên kết với <code>Config</code>, chúng ta sẽ có thể tạo các thể hiện của <code>Config</code> bằng cách gọi <code>Config::new</code>. Listing 12-7 trình bày các thay đổi cần thực hiện.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust should_panic noplayground"><span class="boring">use std::env;
+</span><span class="boring">use std::fs;
+</span><span class="boring">
+</span>fn main() {
+    let args: Vec&lt;String&gt; = env::args().collect();
+
+    let config = Config::new(&amp;args);
+<span class="boring">
+</span><span class="boring">    println!("Searching for {}", config.query);
+</span><span class="boring">    println!("In file {}", config.file_path);
+</span><span class="boring">
+</span><span class="boring">    let contents = fs::read_to_string(config.file_path)
+</span><span class="boring">        .expect("Should have been able to read the file");
+</span><span class="boring">
+</span><span class="boring">    println!("With text:\n{contents}");
+</span>
+    // --snip--
+}
+
+// --snip--
+
+<span class="boring">struct Config {
+</span><span class="boring">    query: String,
+</span><span class="boring">    file_path: String,
+</span><span class="boring">}
+</span><span class="boring">
+</span>impl Config {
+    fn new(args: &amp;[String]) -&gt; Config {
+        let query = args[1].clone();
+        let file_path = args[2].clone();
+
+        Config { query, file_path }
+    }
+}</code></pre>
+<p><span class="caption">Listing 12-7: Chuyển <code>parse_config</code> thành <code>Config::new</code></span></p>
+<p>Chúng ta đã cập nhật <code>main</code>, nơi trước đây gọi <code>parse_config</code>, để thay vào đó gọi <code>Config::new</code>. Chúng ta đã đổi tên <code>parse_config</code> thành <code>new</code> và chuyển nó vào trong một khối <code>impl</code>, liên kết hàm <code>new</code> với <code>Config</code>. Hãy thử biên dịch lại mã để đảm bảo nó hoạt động.</p>
+<h3 id="sửa-xử-lý-lỗi"><a class="header" href="#sửa-xử-lý-lỗi">Sửa Xử Lý Lỗi</a></h3>
+<p>Bây giờ chúng ta sẽ sửa cách xử lý lỗi. Hãy nhớ rằng việc truy cập các giá trị trong vector <code>args</code> tại chỉ số 1 hoặc 2 sẽ khiến chương trình panic nếu vector chứa ít hơn ba phần tử. Hãy thử chạy chương trình mà không có tham số nào; kết quả sẽ như sau:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.0s
+     Running `target/debug/minigrep`
+
+thread 'main' panicked at src/main.rs:27:21:
+index out of bounds: the len is 1 but the index is 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+</code></pre>
+<p>Dòng <code>index out of bounds: the len is 1 but the index is 1</code> là thông báo lỗi dành cho lập trình viên. Nó sẽ không giúp người dùng cuối hiểu họ nên làm gì. Hãy sửa điều đó ngay bây giờ.</p>
+<h4 id="cải-thiện-thông-báo-lỗi"><a class="header" href="#cải-thiện-thông-báo-lỗi">Cải Thiện Thông Báo Lỗi</a></h4>
+<p>Trong Listing 12-8, chúng ta thêm một kiểm tra trong hàm <code>new</code> để xác minh rằng slice đủ dài trước khi truy cập chỉ số 1 và 2. Nếu slice không đủ dài, chương trình sẽ panic và hiển thị một thông báo lỗi tốt hơn.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore"><span class="boring">use std::env;
+</span><span class="boring">use std::fs;
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    let args: Vec&lt;String&gt; = env::args().collect();
+</span><span class="boring">
+</span><span class="boring">    let config = Config::new(&amp;args);
+</span><span class="boring">
+</span><span class="boring">    println!("Searching for {}", config.query);
+</span><span class="boring">    println!("In file {}", config.file_path);
+</span><span class="boring">
+</span><span class="boring">    let contents = fs::read_to_string(config.file_path)
+</span><span class="boring">        .expect("Should have been able to read the file");
+</span><span class="boring">
+</span><span class="boring">    println!("With text:\n{contents}");
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">struct Config {
+</span><span class="boring">    query: String,
+</span><span class="boring">    file_path: String,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl Config {
+</span>    // --snip--
+    fn new(args: &amp;[String]) -&gt; Config {
+        if args.len() &lt; 3 {
+            panic!("not enough arguments");
+        }
+        // --snip--
+<span class="boring">
+</span><span class="boring">        let query = args[1].clone();
+</span><span class="boring">        let file_path = args[2].clone();
+</span><span class="boring">
+</span><span class="boring">        Config { query, file_path }
+</span><span class="boring">    }
+</span><span class="boring">}</span></code></pre>
+<p><span class="caption">Listing 12-8: Thêm kiểm tra số lượng tham số</span></p>
+<p>Mã này tương tự với <a href="ch09-03-to-panic-or-not-to-panic.html#creating-custom-types-for-validation">hàm <code>Guess::new</code> mà chúng ta đã viết trong Listing 9-13</a><!-- ignore -->, nơi chúng ta gọi <code>panic!</code> khi tham số <code>value</code> nằm ngoài phạm vi giá trị hợp lệ. Thay vì kiểm tra phạm vi giá trị ở đây, chúng ta kiểm tra rằng độ dài của <code>args</code> ít nhất là 3 và phần còn lại của hàm có thể hoạt động với giả định điều kiện này đã được thỏa mãn. Nếu <code>args</code> có ít hơn ba phần tử, điều kiện này sẽ đúng, và chúng ta gọi macro <code>panic!</code> để kết thúc chương trình ngay lập tức.</p>
+<p>Với vài dòng mã bổ sung trong <code>new</code>, hãy chạy lại chương trình mà không có tham số nào để xem thông báo lỗi trông như thế nào bây giờ:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.0s
+     Running `target/debug/minigrep`
+
+thread 'main' panicked at src/main.rs:26:13:
+not enough arguments
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+</code></pre>
+<p>Kết quả này tốt hơn: chúng ta giờ có một thông báo lỗi hợp lý. Tuy nhiên, cũng có một số thông tin thừa mà chúng ta không muốn cung cấp cho người dùng. Có lẽ kỹ thuật mà chúng ta đã dùng trong Listing 9-13 không phải là cách tốt nhất ở đây: việc gọi <code>panic!</code> thích hợp hơn cho vấn đề lập trình hơn là vấn đề sử dụng, <a href="ch09-03-to-panic-or-not-to-panic.html#guidelines-for-error-handling">như đã thảo luận trong Chương 9</a><!-- ignore -->. Thay vào đó, chúng ta sẽ dùng kỹ thuật khác mà bạn đã học trong Chương 9 — <a href="ch09-02-recoverable-errors-with-result.html">trả về một <code>Result</code></a><!-- ignore -->, biểu thị thành công hoặc lỗi.</p>
+<!-- Old headings. Do not remove or links may break. -->
+<p><a id="returning-a-result-from-new-instead-of-calling-panic"></a></p>
+<h4 id="trả-về-result-thay-vì-gọi-panic"><a class="header" href="#trả-về-result-thay-vì-gọi-panic">Trả Về <code>Result</code> Thay Vì Gọi <code>panic!</code></a></h4>
+<p>Chúng ta có thể trả về một giá trị <code>Result</code>, trong đó sẽ chứa một thể hiện <code>Config</code> trong trường hợp thành công và mô tả vấn đề trong trường hợp lỗi. Chúng ta cũng sẽ đổi tên hàm từ <code>new</code> thành <code>build</code> vì nhiều lập trình viên kỳ vọng các hàm <code>new</code> sẽ không bao giờ thất bại. Khi <code>Config::build</code> truyền thông tin về <code>main</code>, chúng ta có thể dùng kiểu <code>Result</code> để báo hiệu có vấn đề xảy ra. Sau đó, chúng ta có thể thay đổi <code>main</code> để chuyển một biến thể <code>Err</code> thành lỗi thực tế hơn cho người dùng mà không kèm theo các thông tin về <code>thread 'main'</code> và <code>RUST_BACKTRACE</code> mà một lần gọi <code>panic!</code> gây ra.</p>
+<p>Listing 12-9 trình bày các thay đổi cần thực hiện đối với giá trị trả về của hàm mà bây giờ chúng ta gọi là <code>Config::build</code> và phần thân hàm cần để trả về <code>Result</code>. Lưu ý rằng mã này sẽ không biên dịch cho đến khi chúng ta cập nhật <code>main</code>, điều này sẽ được thực hiện trong listing tiếp theo.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile"><span class="boring">use std::env;
+</span><span class="boring">use std::fs;
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    let args: Vec&lt;String&gt; = env::args().collect();
+</span><span class="boring">
+</span><span class="boring">    let config = Config::new(&amp;args);
+</span><span class="boring">
+</span><span class="boring">    println!("Searching for {}", config.query);
+</span><span class="boring">    println!("In file {}", config.file_path);
+</span><span class="boring">
+</span><span class="boring">    let contents = fs::read_to_string(config.file_path)
+</span><span class="boring">        .expect("Should have been able to read the file");
+</span><span class="boring">
+</span><span class="boring">    println!("With text:\n{contents}");
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">struct Config {
+</span><span class="boring">    query: String,
+</span><span class="boring">    file_path: String,
+</span><span class="boring">}
+</span><span class="boring">
+</span>impl Config {
+    fn build(args: &amp;[String]) -&gt; Result&lt;Config, &amp;'static str&gt; {
+        if args.len() &lt; 3 {
+            return Err("not enough arguments");
+        }
+
+        let query = args[1].clone();
+        let file_path = args[2].clone();
+
+        Ok(Config { query, file_path })
+    }
+}</code></pre>
+<p><span class="caption">Listing 12-9: Trả về <code>Result</code> từ <code>Config::build</code></span></p>
+<p>Hàm <code>build</code> của chúng ta trả về một <code>Result</code> với thể hiện <code>Config</code> trong trường hợp thành công và một <code>&amp;'static str</code> trong trường hợp lỗi. Các giá trị lỗi của chúng ta sẽ luôn là literal string có thời gian sống <code>'static</code>.</p>
+<p>Chúng ta đã thực hiện hai thay đổi trong thân hàm: thay vì gọi <code>panic!</code> khi người dùng không cung cấp đủ tham số, chúng ta bây giờ trả về một giá trị <code>Err</code>, và chúng ta đã bọc giá trị <code>Config</code> trong <code>Ok</code>. Những thay đổi này giúp hàm phù hợp với chữ ký kiểu mới của nó.</p>
+<p>Việc trả về một giá trị <code>Err</code> từ <code>Config::build</code> cho phép hàm <code>main</code> xử lý giá trị <code>Result</code> trả về từ hàm <code>build</code> và kết thúc tiến trình một cách gọn gàng hơn trong trường hợp lỗi.</p>
+<!-- Old headings. Do not remove or links may break. -->
+<p><a id="calling-confignew-and-handling-errors"></a></p>
+<h4 id="gọi-configbuild-và-xử-lý-lỗi"><a class="header" href="#gọi-configbuild-và-xử-lý-lỗi">Gọi <code>Config::build</code> và Xử Lý Lỗi</a></h4>
+<p>Để xử lý trường hợp lỗi và in thông báo thân thiện với người dùng, chúng ta cần cập nhật <code>main</code> để xử lý giá trị <code>Result</code> được trả về từ <code>Config::build</code>, như được trình bày trong Listing 12-10. Chúng ta cũng sẽ loại bỏ trách nhiệm kết thúc công cụ dòng lệnh với mã lỗi khác 0 khỏi <code>panic!</code> và thay vào đó tự triển khai thủ công. Mã thoát khác 0 là một quy ước để báo cho tiến trình gọi chương trình của chúng ta rằng chương trình đã kết thúc với trạng thái lỗi.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore"><span class="boring">use std::env;
+</span><span class="boring">use std::fs;
+</span>use std::process;
+
+fn main() {
+    let args: Vec&lt;String&gt; = env::args().collect();
+
+    let config = Config::build(&amp;args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {err}");
+        process::exit(1);
+    });
+
+    // --snip--
+<span class="boring">
+</span><span class="boring">    println!("Searching for {}", config.query);
+</span><span class="boring">    println!("In file {}", config.file_path);
+</span><span class="boring">
+</span><span class="boring">    let contents = fs::read_to_string(config.file_path)
+</span><span class="boring">        .expect("Should have been able to read the file");
+</span><span class="boring">
+</span><span class="boring">    println!("With text:\n{contents}");
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">struct Config {
+</span><span class="boring">    query: String,
+</span><span class="boring">    file_path: String,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl Config {
+</span><span class="boring">    fn build(args: &amp;[String]) -&gt; Result&lt;Config, &amp;'static str&gt; {
+</span><span class="boring">        if args.len() &lt; 3 {
+</span><span class="boring">            return Err("not enough arguments");
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        let query = args[1].clone();
+</span><span class="boring">        let file_path = args[2].clone();
+</span><span class="boring">
+</span><span class="boring">        Ok(Config { query, file_path })
+</span><span class="boring">    }
+</span><span class="boring">}</span></code></pre>
+<p><span class="caption">Listing 12-10: Thoát với mã lỗi nếu việc tạo <code>Config</code> thất bại</span></p>
+<p>Trong listing này, chúng ta đã sử dụng một phương thức mà chưa đề cập chi tiết: <code>unwrap_or_else</code>, được định nghĩa trên <code>Result&lt;T, E&gt;</code> bởi thư viện chuẩn. Việc sử dụng <code>unwrap_or_else</code> cho phép chúng ta định nghĩa một số xử lý lỗi tùy chỉnh, không dùng <code>panic!</code>. Nếu <code>Result</code> là một giá trị <code>Ok</code>, hành vi của phương thức này tương tự như <code>unwrap</code>: nó trả về giá trị bên trong mà <code>Ok</code> bọc. Tuy nhiên, nếu giá trị là <code>Err</code>, phương thức này sẽ gọi mã trong <em>closure</em>, là một hàm ẩn danh mà chúng ta định nghĩa và truyền như một tham số cho <code>unwrap_or_else</code>. Chúng ta sẽ tìm hiểu closures chi tiết hơn trong <a href="ch13-00-functional-features.html">Chương 13</a><!-- ignore -->. Hiện tại, bạn chỉ cần biết rằng <code>unwrap_or_else</code> sẽ truyền giá trị bên trong của <code>Err</code>, trong trường hợp này là chuỗi tĩnh <code>"not enough arguments"</code> mà chúng ta đã thêm trong Listing 12-9, vào closure của chúng ta thông qua tham số <code>err</code> xuất hiện giữa hai dấu thẳng đứng. Mã trong closure có thể dùng giá trị <code>err</code> khi chạy.</p>
+<p>Chúng ta đã thêm một dòng <code>use</code> mới để đưa <code>process</code> từ thư viện chuẩn vào phạm vi. Mã trong closure chạy khi xảy ra lỗi chỉ gồm hai dòng: in giá trị <code>err</code> và gọi <code>process::exit</code>. Hàm <code>process::exit</code> sẽ dừng chương trình ngay lập tức và trả về số được truyền làm mã trạng thái thoát. Điều này tương tự cách xử lý dựa trên <code>panic!</code> mà chúng ta đã dùng trong Listing 12-8, nhưng giờ đây chúng ta không nhận được tất cả thông tin thừa. Hãy thử nó:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.48s
+     Running `target/debug/minigrep`
+Problem parsing arguments: not enough arguments
+</code></pre>
+<p>Tuyệt vời! Kết quả này thân thiện hơn nhiều với người dùng của chúng ta.</p>
+<h3 id="tách-logic-ra-khỏi-main"><a class="header" href="#tách-logic-ra-khỏi-main">Tách Logic Ra Khỏi <code>main</code></a></h3>
+<p>Bây giờ chúng ta đã hoàn tất việc refactor phân tích cấu hình, hãy chuyển sang logic của chương trình. Như đã nêu trong <a href="#separation-of-concerns-for-binary-projects">“Tách Biệt Trách Nhiệm Cho Các Dự Án Binary”</a><!-- ignore -->, chúng ta sẽ tách một hàm có tên <code>run</code> để chứa tất cả logic hiện đang nằm trong hàm <code>main</code> mà không liên quan đến việc thiết lập cấu hình hoặc xử lý lỗi. Khi hoàn tất, <code>main</code> sẽ ngắn gọn và dễ kiểm tra bằng cách đọc, và chúng ta sẽ có thể viết các bài kiểm tra cho toàn bộ logic còn lại.</p>
+<p>Listing 12-11 trình bày hàm <code>run</code> đã được tách. Hiện tại, chúng ta chỉ thực hiện cải tiến nhỏ, từng bước bằng cách tách hàm. Chúng ta vẫn định nghĩa hàm này trong <em>src/main.rs</em>.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore"><span class="boring">use std::env;
+</span><span class="boring">use std::fs;
+</span><span class="boring">use std::process;
+</span><span class="boring">
+</span>fn main() {
+    // --snip--
+
+<span class="boring">    let args: Vec&lt;String&gt; = env::args().collect();
+</span><span class="boring">
+</span><span class="boring">    let config = Config::build(&amp;args).unwrap_or_else(|err| {
+</span><span class="boring">        println!("Problem parsing arguments: {err}");
+</span><span class="boring">        process::exit(1);
+</span><span class="boring">    });
+</span><span class="boring">
+</span>    println!("Searching for {}", config.query);
+    println!("In file {}", config.file_path);
+
+    run(config);
+}
+
+fn run(config: Config) {
+    let contents = fs::read_to_string(config.file_path)
+        .expect("Should have been able to read the file");
+
+    println!("With text:\n{contents}");
+}
+
+// --snip--
+<span class="boring">
+</span><span class="boring">struct Config {
+</span><span class="boring">    query: String,
+</span><span class="boring">    file_path: String,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl Config {
+</span><span class="boring">    fn build(args: &amp;[String]) -&gt; Result&lt;Config, &amp;'static str&gt; {
+</span><span class="boring">        if args.len() &lt; 3 {
+</span><span class="boring">            return Err("not enough arguments");
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        let query = args[1].clone();
+</span><span class="boring">        let file_path = args[2].clone();
+</span><span class="boring">
+</span><span class="boring">        Ok(Config { query, file_path })
+</span><span class="boring">    }
+</span><span class="boring">}</span></code></pre>
+<p><span class="caption">Listing 12-11: Tách hàm <code>run</code> chứa phần còn lại của logic chương trình</span></p>
+<p>Hàm <code>run</code> bây giờ chứa tất cả logic còn lại từ <code>main</code>, bắt đầu từ việc đọc file. Hàm <code>run</code> nhận thể hiện <code>Config</code> làm tham số.</p>
+<h4 id="trả-lỗi-từ-hàm-run"><a class="header" href="#trả-lỗi-từ-hàm-run">Trả Lỗi từ Hàm <code>run</code></a></h4>
+<p>Với logic chương trình còn lại đã được tách ra thành hàm <code>run</code>, chúng ta có thể cải thiện việc xử lý lỗi, giống như đã làm với <code>Config::build</code> trong Listing 12-9. Thay vì để chương trình panic bằng cách gọi <code>expect</code>, hàm <code>run</code> sẽ trả về một <code>Result&lt;T, E&gt;</code> khi có vấn đề xảy ra. Điều này cho phép chúng ta tiếp tục gom gọn logic xử lý lỗi vào <code>main</code> theo cách thân thiện với người dùng. Listing 12-12 trình bày các thay đổi cần thực hiện đối với chữ ký và thân hàm của <code>run</code>.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore"><span class="boring">use std::env;
+</span><span class="boring">use std::fs;
+</span><span class="boring">use std::process;
+</span>use std::error::Error;
+
+// --snip--
+
+<span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    let args: Vec&lt;String&gt; = env::args().collect();
+</span><span class="boring">
+</span><span class="boring">    let config = Config::build(&amp;args).unwrap_or_else(|err| {
+</span><span class="boring">        println!("Problem parsing arguments: {err}");
+</span><span class="boring">        process::exit(1);
+</span><span class="boring">    });
+</span><span class="boring">
+</span><span class="boring">    println!("Searching for {}", config.query);
+</span><span class="boring">    println!("In file {}", config.file_path);
+</span><span class="boring">
+</span><span class="boring">    run(config);
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn run(config: Config) -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
+    let contents = fs::read_to_string(config.file_path)?;
+
+    println!("With text:\n{contents}");
+
+    Ok(())
+}
+<span class="boring">
+</span><span class="boring">struct Config {
+</span><span class="boring">    query: String,
+</span><span class="boring">    file_path: String,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl Config {
+</span><span class="boring">    fn build(args: &amp;[String]) -&gt; Result&lt;Config, &amp;'static str&gt; {
+</span><span class="boring">        if args.len() &lt; 3 {
+</span><span class="boring">            return Err("not enough arguments");
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        let query = args[1].clone();
+</span><span class="boring">        let file_path = args[2].clone();
+</span><span class="boring">
+</span><span class="boring">        Ok(Config { query, file_path })
+</span><span class="boring">    }
+</span><span class="boring">}</span></code></pre>
+<p><span class="caption">Listing 12-12: Thay đổi hàm <code>run</code> để trả về <code>Result</code></span></p>
+<p>Chúng ta đã thực hiện ba thay đổi quan trọng ở đây. Thứ nhất, chúng ta thay đổi kiểu trả về của hàm <code>run</code> thành <code>Result&lt;(), Box&lt;dyn Error&gt;&gt;</code>. Trước đây hàm này trả về kiểu unit <code>()</code>, và chúng ta giữ giá trị đó trong trường hợp <code>Ok</code>.</p>
+<p>Đối với kiểu lỗi, chúng ta dùng <em>trait object</em> <code>Box&lt;dyn Error&gt;</code> (và đã đưa <code>std::error::Error</code> vào phạm vi với một câu lệnh <code>use</code> ở đầu). Chúng ta sẽ tìm hiểu trait object trong <a href="ch17-00-oop.html">Chương 17</a><!-- ignore -->. Hiện tại, chỉ cần biết rằng <code>Box&lt;dyn Error&gt;</code> nghĩa là hàm sẽ trả về một kiểu triển khai trait <code>Error</code>, nhưng chúng ta không phải chỉ định loại cụ thể của giá trị trả về. Điều này cho phép chúng ta linh hoạt trả về các giá trị lỗi có thể khác nhau trong các trường hợp lỗi khác nhau. Từ khóa <code>dyn</code> là viết tắt của “dynamic”.</p>
+<p>Thứ hai, chúng ta đã loại bỏ việc gọi <code>expect</code> và thay bằng toán tử <code>?</code>, như đã bàn trong <a href="ch09-02-recoverable-errors-with-result.html#a-shortcut-for-propagating-errors-the--operator">Chương 9</a><!-- ignore -->. Thay vì <code>panic!</code> khi có lỗi, <code>?</code> sẽ trả về giá trị lỗi từ hàm hiện tại cho hàm gọi xử lý.</p>
+<p>Thứ ba, hàm <code>run</code> bây giờ trả về giá trị <code>Ok</code> trong trường hợp thành công. Chúng ta khai báo kiểu thành công của hàm <code>run</code> là <code>()</code> trong chữ ký, có nghĩa là chúng ta cần bọc giá trị unit trong <code>Ok</code>. Cú pháp <code>Ok(())</code> có vẻ hơi lạ lúc đầu, nhưng dùng <code>()</code> như thế này là cách idiomatic để biểu thị rằng chúng ta gọi <code>run</code> chỉ vì hiệu ứng phụ; nó không trả về giá trị mà chúng ta cần.</p>
+<p>Khi chạy mã này, nó sẽ biên dịch nhưng sẽ hiển thị một cảnh báo:</p>
+<pre><code class="language-console">$ cargo run -- the poem.txt
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+warning: unused `Result` that must be used
+  --&gt; src/main.rs:19:5
+   |
+19 |     run(config);
+   |     ^^^^^^^^^^^
+   |
+   = note: this `Result` may be an `Err` variant, which should be handled
+   = note: `#[warn(unused_must_use)]` on by default
+help: use `let _ = ...` to ignore the resulting value
+   |
+19 |     let _ = run(config);
+   |     +++++++
+
+warning: `minigrep` (bin "minigrep") generated 1 warning
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.71s
+     Running `target/debug/minigrep the poem.txt`
+Searching for the
+In file poem.txt
+With text:
+I'm nobody! Who are you?
+Are you nobody, too?
+Then there's a pair of us - don't tell!
+They'd banish us, you know.
+
+How dreary to be somebody!
+How public, like a frog
+To tell your name the livelong day
+To an admiring bog!
+
+</code></pre>
+<p>Rust báo cho chúng ta rằng mã của chúng ta đã bỏ qua giá trị <code>Result</code> và giá trị <code>Result</code> có thể chỉ ra rằng đã xảy ra lỗi. Nhưng chúng ta không kiểm tra xem có lỗi hay không, và trình biên dịch nhắc nhở rằng có lẽ chúng ta muốn có một số mã xử lý lỗi ở đây! Hãy khắc phục vấn đề đó ngay bây giờ.</p>
+<h4 id="xử-lý-lỗi-trả-về-từ-run-trong-main"><a class="header" href="#xử-lý-lỗi-trả-về-từ-run-trong-main">Xử Lý Lỗi Trả Về Từ <code>run</code> Trong <code>main</code></a></h4>
+<p>Chúng ta sẽ kiểm tra lỗi và xử lý chúng bằng một kỹ thuật tương tự như đã dùng với <code>Config::build</code> trong Listing 12-10, nhưng có một chút khác biệt:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore"><span class="boring">use std::env;
+</span><span class="boring">use std::error::Error;
+</span><span class="boring">use std::fs;
+</span><span class="boring">use std::process;
+</span><span class="boring">
+</span>fn main() {
+    // --snip--
+
+<span class="boring">    let args: Vec&lt;String&gt; = env::args().collect();
+</span><span class="boring">
+</span><span class="boring">    let config = Config::build(&amp;args).unwrap_or_else(|err| {
+</span><span class="boring">        println!("Problem parsing arguments: {err}");
+</span><span class="boring">        process::exit(1);
+</span><span class="boring">    });
+</span><span class="boring">
+</span>    println!("Searching for {}", config.query);
+    println!("In file {}", config.file_path);
+
+    if let Err(e) = run(config) {
+        println!("Application error: {e}");
+        process::exit(1);
+    }
+}
+<span class="boring">
+</span><span class="boring">fn run(config: Config) -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
+</span><span class="boring">    let contents = fs::read_to_string(config.file_path)?;
+</span><span class="boring">
+</span><span class="boring">    println!("With text:\n{contents}");
+</span><span class="boring">
+</span><span class="boring">    Ok(())
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">struct Config {
+</span><span class="boring">    query: String,
+</span><span class="boring">    file_path: String,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl Config {
+</span><span class="boring">    fn build(args: &amp;[String]) -&gt; Result&lt;Config, &amp;'static str&gt; {
+</span><span class="boring">        if args.len() &lt; 3 {
+</span><span class="boring">            return Err("not enough arguments");
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        let query = args[1].clone();
+</span><span class="boring">        let file_path = args[2].clone();
+</span><span class="boring">
+</span><span class="boring">        Ok(Config { query, file_path })
+</span><span class="boring">    }
+</span><span class="boring">}</span></code></pre>
+<p>Chúng ta sử dụng <code>if let</code> thay vì <code>unwrap_or_else</code> để kiểm tra xem <code>run</code> có trả về giá trị <code>Err</code> không và gọi <code>process::exit(1)</code> nếu có. Hàm <code>run</code> không trả về một giá trị mà chúng ta muốn <code>unwrap</code> giống như <code>Config::build</code> trả về thể hiện <code>Config</code>. Vì <code>run</code> trả về <code>()</code> trong trường hợp thành công, chúng ta chỉ quan tâm đến việc phát hiện lỗi, nên không cần dùng <code>unwrap_or_else</code> để trả về giá trị đã được unwrap, vốn chỉ là <code>()</code>.</p>
+<p>Thân hàm của <code>if let</code> và <code>unwrap_or_else</code> đều giống nhau trong cả hai trường hợp: chúng ta in lỗi và thoát chương trình.</p>
+<h3 id="tách-mã-thành-thư-viện-library-crate"><a class="header" href="#tách-mã-thành-thư-viện-library-crate">Tách Mã Thành Thư Viện (Library Crate)</a></h3>
+<p>Dự án <code>minigrep</code> của chúng ta trông khá ổn rồi! Bây giờ chúng ta sẽ tách file <em>src/main.rs</em> và chuyển một số mã vào file <em>src/lib.rs</em>. Bằng cách đó, chúng ta có thể viết test cho mã và có một file <em>src/main.rs</em> với ít trách nhiệm hơn.</p>
+<p>Hãy chuyển tất cả mã không phải hàm <code>main</code> từ <em>src/main.rs</em> sang <em>src/lib.rs</em>:</p>
+<ul>
+<li>Định nghĩa hàm <code>run</code></li>
+<li>Các câu lệnh <code>use</code> liên quan</li>
+<li>Định nghĩa của <code>Config</code></li>
+<li>Định nghĩa hàm <code>Config::build</code></li>
+</ul>
+<p>Nội dung của <em>src/lib.rs</em> nên có chữ ký các hàm như trong Listing 12-13 (chúng tôi đã bỏ qua thân hàm để ngắn gọn). Lưu ý rằng mã này sẽ không biên dịch cho đến khi chúng ta chỉnh sửa <em>src/main.rs</em> trong Listing 12-14.</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile"><span class="boring">pub fn search&lt;'a&gt;(query: &amp;str, contents: &amp;'a str) -&gt; Vec&lt;&amp;'a str&gt; {
+</span><span class="boring">    unimplemented!();
+</span><span class="boring">}</span></code></pre>
+<p><span class="caption">Listing 12-13: Chuyển <code>Config</code> và <code>run</code> vào <em>src/lib.rs</em></span></p>
+<p>Chúng ta đã sử dụng rộng rãi từ khóa <code>pub</code>: trên <code>Config</code>, trên các trường của nó và phương thức <code>build</code>, cũng như trên hàm <code>run</code>. Bây giờ chúng ta có một library crate với API công khai mà chúng ta có thể viết test!</p>
+<p>Bây giờ chúng ta cần đưa mã đã chuyển vào <em>src/lib.rs</em> vào phạm vi của binary crate trong <em>src/main.rs</em>, như được trình bày trong Listing 12-14.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore"><span class="boring">use std::env;
+</span><span class="boring">use std::error::Error;
+</span><span class="boring">use std::fs;
+</span><span class="boring">use std::process;
+</span><span class="boring">
+</span>// --snip--
+use minigrep::search;
+
+fn main() {
+    // --snip--
+<span class="boring">    let args: Vec&lt;String&gt; = env::args().collect();
+</span><span class="boring">
+</span><span class="boring">    let config = Config::build(&amp;args).unwrap_or_else(|err| {
+</span><span class="boring">        println!("Problem parsing arguments: {err}");
+</span><span class="boring">        process::exit(1);
+</span><span class="boring">    });
+</span><span class="boring">
+</span><span class="boring">    if let Err(e) = run(config) {
+</span><span class="boring">        println!("Application error: {e}");
+</span><span class="boring">        process::exit(1);
+</span><span class="boring">    }
+</span>}
+
+// --snip--
+
+<span class="boring">
+</span><span class="boring">struct Config {
+</span><span class="boring">    query: String,
+</span><span class="boring">    file_path: String,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl Config {
+</span><span class="boring">    fn build(args: &amp;[String]) -&gt; Result&lt;Config, &amp;'static str&gt; {
+</span><span class="boring">        if args.len() &lt; 3 {
+</span><span class="boring">            return Err("not enough arguments");
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        let query = args[1].clone();
+</span><span class="boring">        let file_path = args[2].clone();
+</span><span class="boring">
+</span><span class="boring">        Ok(Config { query, file_path })
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn run(config: Config) -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
+    let contents = fs::read_to_string(config.file_path)?;
+
+    for line in search(&amp;config.query, &amp;contents) {
+        println!("{line}");
+    }
+
+    Ok(())
+}</code></pre>
+<p><span class="caption">Listing 12-14: Sử dụng library crate <code>minigrep</code> trong <em>src/main.rs</em></span></p>
+<p>Chúng ta thêm một dòng <code>use minigrep::Config</code> để đưa kiểu <code>Config</code> từ library crate vào phạm vi của binary crate, và tiền tố hàm <code>run</code> bằng tên crate của chúng ta. Bây giờ tất cả chức năng nên được kết nối và hoạt động. Chạy chương trình với <code>cargo run</code> và đảm bảo mọi thứ hoạt động đúng.</p>
+<p>Hú! Đó là một khối lượng công việc khá lớn, nhưng chúng ta đã chuẩn bị tốt cho thành công trong tương lai. Bây giờ việc xử lý lỗi trở nên dễ dàng hơn, và chúng ta đã làm cho mã modular hơn. Hầu hết công việc của chúng ta từ đây về sau sẽ được thực hiện trong <em>src/lib.rs</em>.</p>
+<p>Hãy tận dụng tính modular mới này bằng cách làm một việc mà trước đây sẽ khó với mã cũ nhưng giờ đây lại dễ dàng: chúng ta sẽ viết một số bài kiểm tra (tests)!</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch12-02-reading-a-file.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch12-04-testing-the-librarys-functionality.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch12-02-reading-a-file.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch12-04-testing-the-librarys-functionality.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

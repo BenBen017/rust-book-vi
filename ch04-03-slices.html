@@ -1,0 +1,655 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Kiểu Slice - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <p><a id="the-slice-type"></a></p>
+<h2 id="kiểu-slice"><a class="header" href="#kiểu-slice">Kiểu Slice</a></h2>
+<p><em>Slice</em> cho phép bạn tham chiếu một chuỗi các phần tử liền kề trong một collection
+thay vì toàn bộ collection. Một slide là một dạng reference, do đó, nó
+không có ownership.</p>
+<p>Đây là một vấn đề lập trình nhỏ: viết một hàm nhận vào một chuỗi
+các từ được phân tách bằng khoảng trắng và trả về từ đầu tiên nó tìm thấy trong chuỗi đó.
+Nếu hàm không tìm thấy khoảng trắng trong chuỗi, toàn bộ chuỗi phải là
+một từ, vì vậy toàn bộ chuỗi sẽ được trả về.</p>
+<p>Hãy tìm hiểu cách chúng ta viết khai báo hàm này mà không cần sử dụng
+slice, để hiểu vấn đề mà slice sẽ giải quyết:</p>
+<pre><code class="language-rust ignore">fn first_word(s: &amp;String) -&gt; ?</code></pre>
+<p>Hàm <code>first_word</code> có <code>&amp;String</code> làm tham số. chúng tôi không muốn
+ownership, vì vậy điều này là tốt. Nhưng chúng ta nên trả về những gì? Chúng ta
+không thực sự có một cách để nói về <em>phần</em> của một chuỗi. Tuy nhiên, chúng ta
+có thể trả về index của vị trí cuối từ, được biểu thị bằng khoảng trắng. Hãy
+thử điều đó, như trong Liệt kê 4-7.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">fn first_word(s: &amp;String) -&gt; usize {
+    let bytes = s.as_bytes();
+
+    for (i, &amp;item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return i;
+        }
+    }
+
+    s.len()
+}
+<span class="boring">
+</span><span class="boring">fn main() {}</span></code></pre></pre>
+<p><span class="caption">Liệt kê 4-7: Hàm <code>first_word</code> trả về một
+giá trị byte index vào tham số <code>String</code></span></p>
+<p>Vì chúng ta cần đi qua từng phần tử <code>String</code> và kiểm tra xem
+một giá trị có là khoảng trắng hay không, chúng ta sẽ chuyển
+đổi <code>String</code> của mình thành một mảng byte bằng cách sử dụng
+phương thức <code>as_bytes</code>:</p>
+<pre><code class="language-rust ignore"><span class="boring">fn first_word(s: &amp;String) -&gt; usize {
+</span>    let bytes = s.as_bytes();
+<span class="boring">
+</span><span class="boring">    for (i, &amp;item) in bytes.iter().enumerate() {
+</span><span class="boring">        if item == b' ' {
+</span><span class="boring">            return i;
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    s.len()
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn main() {}</span></code></pre>
+<p>Tiếp theo, chúng ta tạo một iterator trên mảng byte bằng phương thức <code>iter</code>:</p>
+<pre><code class="language-rust ignore"><span class="boring">fn first_word(s: &amp;String) -&gt; usize {
+</span><span class="boring">    let bytes = s.as_bytes();
+</span><span class="boring">
+</span>    for (i, &amp;item) in bytes.iter().enumerate() {
+<span class="boring">        if item == b' ' {
+</span><span class="boring">            return i;
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    s.len()
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn main() {}</span></code></pre>
+<p>Chúng ta sẽ thảo luận chi tiết hơn về các iterator trong <a href="ch13-02-iterators.html">Chương 13</a><!-- ignore -->.
+Hiện tại, hãy biết rằng <code>iter</code> là một phương thức trả về từng phần tử trong một collection
+và <code>enumerate</code> bao bọc kết quả của <code>iter</code> và trả về mỗi phần tử dưới dạng tuple.
+Phần tử đầu tiên của bộ dữ liệu được trả về từ
+<code>enumerate</code> là chỉ mục và phần tử thứ hai là tham chiếu đến phần tử.
+Điều này thuận tiện hơn một chút so với việc tự tính toán index.</p>
+<p>Vì phương thức <code>enumerate</code> trả về một tuple, nên chúng ta có thể sử dụng các pattern (mẫu) để
+hủy tuple đó. Chúng ta sẽ thảo luận nhiều hơn về các pattern trong <a href="ch06-02-match.html#patterns-that-bind-to-values">Chương
+6</a><!-- ignore -->. Trong vòng lặp <code>for</code>, chúng ta chỉ định một pattern có <code>i</code>
+cho chỉ mục trong tuple và <code>&amp;item</code> cho byte đơn trong tuple.
+Bởi vì chúng tôi nhận được tham chiếu đến phần tử từ <code>.iter().enumerate()</code>, nên chúng ta sử dụng
+<code>&amp;</code> trong pattern.</p>
+<p>Bên trong vòng lặp <code>for</code>, chúng ta tìm kiếm byte đại diện cho khoảng trắng bằng cách
+sử dụng cú pháp ký tự byte. Nếu tìm thấy một khoảng trống, chúng ta sẽ trả lại vị trí.
+Ngược lại, chúng tôi trả về độ dài của chuỗi bằng cách sử dụng <code>s.len()</code>:</p>
+<pre><code class="language-rust ignore"><span class="boring">fn first_word(s: &amp;String) -&gt; usize {
+</span><span class="boring">    let bytes = s.as_bytes();
+</span><span class="boring">
+</span><span class="boring">    for (i, &amp;item) in bytes.iter().enumerate() {
+</span>        if item == b' ' {
+            return i;
+        }
+    }
+
+    s.len()
+<span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn main() {}</span></code></pre>
+<p>Bây giờ chúng ta có một cách để tìm ra chỉ số kết thúc của từ đầu tiên trong
+chuỗi, nhưng có một vấn đề. Chúng ta đang trả về một <code>usize</code>, nhưng nó
+chỉ có ý nghĩa trong ngữ cảnh của <code>&amp;String</code>. Nói cách khác,
+bởi vì đó là một giá trị riêng biệt từ <code>String</code>, nên không có gì đảm bảo rằng nó
+vẫn sẽ hợp lệ trong tương lai. Hãy xem xét chương trình trong Listing 4-8
+sử dụng hàm <code>first_word</code> từ Listing 4-7.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">fn first_word(s: &amp;String) -&gt; usize {
+</span><span class="boring">    let bytes = s.as_bytes();
+</span><span class="boring">
+</span><span class="boring">    for (i, &amp;item) in bytes.iter().enumerate() {
+</span><span class="boring">        if item == b' ' {
+</span><span class="boring">            return i;
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    s.len()
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn main() {
+    let mut s = String::from("hello world");
+
+    let word = first_word(&amp;s); // word will get the value 5
+
+    s.clear(); // this empties the String, making it equal to ""
+
+    // word still has the value 5 here, but s no longer has any content that we
+    // could meaningfully use with the value 5, so word is now totally invalid!
+}</code></pre></pre>
+<p><span class="caption">Listing 4-8: Lưu trữ kết quả từ việc gọi hàm
+hàm <code>first_word</code> rồi thay đổi nội dung <code>String</code></span></p>
+<p>Chương trình này biên dịch mà không có bất kỳ lỗi nào và cũng sẽ vậy nếu chúng ta sử dụng <code>word</code>
+sau khi gọi <code>s.clear()</code>. Bởi vì <code>word</code> không được kết nối với trạng thái của <code>s</code>
+hoàn toàn, <code>word</code> vẫn chứa giá trị <code>5</code>. Chúng ta có thể sử dụng giá trị <code>5</code> đó với
+biến <code>s</code> để trích xuất từ đầu tiên, nhưng đây sẽ là một lỗi bởi vì nội dung
+của <code>s</code> đã thay đổi kể từ khi chúng ta lưu <code>5</code> trong <code>word</code>.</p>
+<p>Việc phải lo lắng về index trong <code>word</code> không đồng bộ với dữ liệu trong
+<code>s</code> thật chán và dễ bị lỗi! Việc quản lý các chỉ số này thậm chí còn khó khăn hơn nếu
+chúng tôi viết một hàm <code>second_word</code>. Khai báo của nó sẽ phải trông như thế này:</p>
+<pre><code class="language-rust ignore">fn second_word(s: &amp;String) -&gt; (sử dụng, sử dụng) {</code></pre>
+<p>Bây giờ chúng ta đang theo dõi chỉ mục bắt đầu <em>và</em> kết thúc, và chúng ta thậm chí còn có
+các giá trị được tính toán từ dữ liệu ở một trạng thái cụ thể nhưng không bị ràng buộc với
+trạng thái đó. Chúng ta có ba biến không liên quan trôi nổi xung quanh
+cần được giữ đồng bộ với nhau.</p>
+<p>May mắn thay, Rust có một giải pháp cho vấn đề này: slide.</p>
+<h3 id="string-slices"><a class="header" href="#string-slices">String Slices</a></h3>
+<p>Một <em>string slice</em> là một tham chiếu đến một phần của <code>String</code>, và nó trông như thế này:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">fn main() {
+</span>    let s = String::from("hello world");
+
+    let hello = &amp;s[0..5];
+    let world = &amp;s[6..11];
+<span class="boring">}</span></code></pre></pre>
+<p>Thay vì reference đến toàn bộ <code>String</code>, <code>hello</code> là một reference đến một
+phần của <code>String</code>, được chỉ định trong phần <code>[0..5]</code>. Chúng ta tạo ra các slice
+sử dụng toán tử phạm vi trong ngoặc bằng cách viết <code>[starting_index..ending_index]</code>,
+trong đó <code>starting_index</code> là vị trí đầu tiên trong slice và <code>ending_index</code> là
+vị trí cuối cùng + 1 trong slice. Bên trong, cấu trúc dữ liệu slice
+lưu trữ vị trí bắt đầu và độ dài của slice, tương ứng với <code>ending_index</code> trừ <code>starting_index</code>.
+Vì vậy, trong trường hợp <code>let world = &amp;s[6..11];</code>, <code>world</code> sẽ là một slice chứa con trỏ tới
+byte tại index 6 của <code>s</code> với giá trị độ dài là 5.</p>
+<p>Hình 4-6 cho thấy điều này trong một diagram.</p>
+<img alt="world chứa con trỏ tới byte ở chỉ số 6 của String s và độ dài 5" src="img/trpl04-06.svg" class="center" style="width: 50%;" />
+<p><span class="caption">Hình 4-6: String slice tham chiếu đến một phần của
+<code>String</code></span></p>
+<p>Với cú pháp phạm vi <code>..</code> của Rust, nếu bạn muốn bắt đầu từ chỉ số 0, bạn có thể bỏ
+giá trị trước hai dấu chấm. Nói cách khác, chúng bằng nhau:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let s = String::from("hello");
+
+let slice = &amp;s[0..2];
+let slice = &amp;s[..2];
+<span class="boring">}</span></code></pre></pre>
+<p>Tương tự như vậy, nếu slice của bạn bao gồm byte cuối cùng của <code>String</code>, thì bạn
+có thể chỉ số cuối. Điều đó có nghĩa là các lệnh sau tương tự nhau:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let s = String::from("hello");
+
+let len = s.len();
+
+let slice = &amp;s[3..len];
+let slice = &amp;s[3..];
+<span class="boring">}</span></code></pre></pre>
+<p>Bạn cũng có thể bỏ cả hai giá trị để lấy một phần của toàn bộ chuỗi:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let s = String::from("hello");
+
+let len = s.len();
+
+let slice = &amp;s[0..len];
+let slice = &amp;s[..];
+<span class="boring">}</span></code></pre></pre>
+<blockquote>
+<p>Lưu ý: Chỉ số phạm vi string slice phải xuất hiện ở vị trí là ranh giới một ký tự UTF-8 hợp lệ.
+Nếu bạn cố gắng tạo một lát cắt chuỗi ở giữa một
+ký tự multibyte, chương trình của bạn sẽ thoát với một lỗi. Với mục đích
+giới thiệu các string slice, chúng ta giả sử chỉ dùng ASCII trong phần này; Một
+thảo luận kỹ lưỡng hơn về xử lý UTF-8 có trong <a href="ch08-02-strings.html#storing-utf-8-encoded-text-with-strings">“Lưu trữ văn bản UTF-8 Encoded
+với String”</a><!-- ignore --> phần của Chương 8.</p>
+</blockquote>
+<p>Với tất cả những thông tin đã có, hãy viết lại <code>first_word</code> để trả về một
+slice. Loại biểu thị “lát cắt chuỗi” được viết là <code>&amp;str</code>:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">fn first_word(s: &amp;String) -&gt; &amp;str {
+    let bytes = s.as_bytes();
+
+    for (i, &amp;item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return &amp;s[0..i];
+        }
+    }
+
+    &amp;s[..]
+}
+<span class="boring">
+</span><span class="boring">fn main() {}</span></code></pre></pre>
+<p>Chúng ta lấy chỉ mục cho phần cuối của từ giống như cách chúng ta đã làm trong Liệt kê
+4-7, bằng cách tìm kiếm sự xuất hiện đầu tiên của khoảng trắng. Khi tìm thấy một space, ta
+trả về một string slice bằng cách sử dụng phần đầu của chuỗi và index của space
+như các chỉ số bắt đầu và kết thúc.</p>
+<p>Bây giờ, khi gọi <code>first_word</code>, chúng ta nhận lại một giá trị duy nhất được gắn với
+dữ liệu bên dưới. Giá trị được tạo thành từ một tham chiếu đến điểm bắt đầu của
+slice và số phần tử trong slice.</p>
+<p>Trả về một slice cũng sẽ hoạt động đối với hàm <code>second_word</code>:</p>
+<pre><code class="language-rust ignore">fn second_word(s: &amp;String) -&gt; &amp;str {</code></pre>
+<p>Bây giờ chúng tôi có một API đơn giản, khó gây ra rắc rối hơn nhiều, vì
+trình biên dịch sẽ đảm bảo các tham chiếu vào <code>String</code> vẫn hợp lệ. Nhớ
+lỗi trong chương trình trong Liệt kê 4-8, khi chúng ta lấy index đến cuối
+từ đầu tiên nhưng sau đó xóa chuỗi để index đó trở nên không hợp lệ? Đoạn code đó
+không chính xác về mặt logic nhưng không hiển thị bất kỳ lỗi ngay lập tức nào.
+Các vấn đề sẽ xuất hiện sau nếu chúng ta tiếp tục cố gắng sử dụng chỉ mục từ đầu tiên
+với một chuỗi rỗng. Các slide khiến lỗi này không thể xảy ra và cho ta biết
+về các vấn đề của code sớm hơn nhiều. Sử dụng phiên bản slide của <code>first_word</code> sẽ tạo ra một
+lỗi biên dịch:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile"><span class="boring">fn first_word(s: &amp;String) -&gt; &amp;str {
+</span><span class="boring">    let bytes = s.as_bytes();
+</span><span class="boring">
+</span><span class="boring">    for (i, &amp;item) in bytes.iter().enumerate() {
+</span><span class="boring">        if item == b' ' {
+</span><span class="boring">            return &amp;s[0..i];
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    &amp;s[..]
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn main() {
+    let mut s = String::from("hello world");
+
+    let word = first_word(&amp;s);
+
+    s.clear(); // error!
+
+    println!("the first word is: {word}");
+}</code></pre>
+<p>Đây là lỗi biên dịch:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling ownership v0.1.0 (file:///projects/ownership)
+error[E0502]: cannot borrow `s` as mutable because it is also borrowed as immutable
+  --&gt; src/main.rs:18:5
+   |
+16 |     let word = first_word(&amp;s);
+   |                           -- immutable borrow occurs here
+17 |
+18 |     s.clear(); // error!
+   |     ^^^^^^^^^ mutable borrow occurs here
+19 |
+20 |     println!("the first word is: {word}");
+   |                                  ------ immutable borrow later used here
+
+For more information about this error, try `rustc --explain E0502`.
+error: could not compile `ownership` (bin "ownership") due to 1 previous error
+</code></pre>
+<p>Hãy nhớ lại từ các quy tắc borrowing rằng nếu ta có một immutable reference đến
+một cái gì đó, ta cũng không thể lấy một mutable reference. Bởi vì <code>clear</code> cần
+cắt bớt <code>String</code>, nó cần lấy mutable reference. Lệnh <code>println!</code> sau lệnh gọi <code>clear</code>
+sử dụng tham chiếu trong <code>word</code>, vì vậy giá trị immutable reference vẫn đang
+được sử dụng tại thời điểm đó. Rust không cho phép thay đổi
+tham chiếu trong <code>clear</code> và immutable reference trong <code>word</code> cùng lúc
+và việc biên dịch sẽ không thành công. Rust không chỉ làm cho API của chúng
+ta dễ sử dụng hơn, mà nó còn loại bỏ toàn bộ các lỗi tại thời điểm biên dịch!</p>
+<h4 id="string-literals-are-slices"><a class="header" href="#string-literals-are-slices">String Literals Are Slices</a></h4>
+<p>Nhớ lại rằng chúng ta đã nói về string literal được lưu trữ bên trong dữ liệu nhị phân. Hiện nay
+mà chúng ta biết về slice, chúng ta có thể hiểu đúng về string literal:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let s = "Hello, world!";
+<span class="boring">}</span></code></pre></pre>
+<p>Kiểu của <code>s</code> ở đây là <code>&amp;str</code>: đó là một slice trỏ đến một điểm cụ thể của giá trị
+nhị phân. Đây cũng là lý do tại sao string literal là bất biến; <code>&amp;str</code> là một
+immutable reference.</p>
+<h4 id="string-slices-as-parameters"><a class="header" href="#string-slices-as-parameters">String Slices as Parameters</a></h4>
+<p>Khi đã biết rằng bạn có thể lấy slice của các literal và giá trị của <code>String</code>, ta sẽ thấy thêm
+một cải tiến nữa trên <code>first_word</code>, và đây là chữ ký của nó:</p>
+<pre><code class="language-rust ignore">fn first_word(s: &amp;String) -&gt; &amp;str {</code></pre>
+<p>Một Rustacean có kinh nghiệm hơn sẽ viết chữ ký như trong Listing 4-9
+vì nó cho phép chúng ta sử dụng cùng một chức năng trên cả hai giá trị <code>&amp;String</code>
+và các giá trị <code>&amp;str</code>.</p>
+<pre><code class="language-rust ignore">fn first_word(s: &amp;str) -&gt; &amp;str {
+<span class="boring">    let bytes = s.as_bytes();
+</span><span class="boring">
+</span><span class="boring">    for (i, &amp;item) in bytes.iter().enumerate() {
+</span><span class="boring">        if item == b' ' {
+</span><span class="boring">            return &amp;s[0..i];
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    &amp;s[..]
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    let my_string = String::from("hello world");
+</span><span class="boring">
+</span><span class="boring">    // `first_word` works on slices of `String`s, whether partial or whole.
+</span><span class="boring">    let word = first_word(&amp;my_string[0..6]);
+</span><span class="boring">    let word = first_word(&amp;my_string[..]);
+</span><span class="boring">    // `first_word` also works on references to `String`s, which are equivalent
+</span><span class="boring">    // to whole slices of `String`s.
+</span><span class="boring">    let word = first_word(&amp;my_string);
+</span><span class="boring">
+</span><span class="boring">    let my_string_literal = "hello world";
+</span><span class="boring">
+</span><span class="boring">    // `first_word` works on slices of string literals, whether partial or
+</span><span class="boring">    // whole.
+</span><span class="boring">    let word = first_word(&amp;my_string_literal[0..6]);
+</span><span class="boring">    let word = first_word(&amp;my_string_literal[..]);
+</span><span class="boring">
+</span><span class="boring">    // Because string literals *are* string slices already,
+</span><span class="boring">    // this works too, without the slice syntax!
+</span><span class="boring">    let word = first_word(my_string_literal);
+</span><span class="boring">}</span></code></pre>
+<p><span class="caption">Listing 4-9: Cải thiện chức năng <code>first_word</code> bằng cách sử dụng
+một slice cho kiểu của tham số <code>s</code></span></p>
+<p>Nếu chúng ta có một string slice, chúng ta có thể truyền nó trực tiếp. Nếu chúng ta có <code>String</code>,
+chúng ta có thể chuyển một slice của <code>String</code> hoặc tham chiếu đến <code>String</code>. Sự linh hoạt này
+cho phép ta tận dụng <em>deref coercions</em>, một tính năng mà chúng tôi sẽ đề cập trong
+phần <a href="ch15-02-deref.html#implicit-deref-coercions-with-functions-and-methods">“Implicit Deref Coercions with Functions and
+Methods”</a><!--ignore--> trong chương 15.
+Việc xác định một function lấy một string slice thay vì tham chiếu đến <code>String</code> giúp cho
+API của chúng ta trở nên tổng quát và hữu ích hơn mà không làm mất bất kỳ tính năng nào:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">fn first_word(s: &amp;str) -&gt; &amp;str {
+</span><span class="boring">    let bytes = s.as_bytes();
+</span><span class="boring">
+</span><span class="boring">    for (i, &amp;item) in bytes.iter().enumerate() {
+</span><span class="boring">        if item == b' ' {
+</span><span class="boring">            return &amp;s[0..i];
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    &amp;s[..]
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn main() {
+    let my_string = String::from("hello world");
+
+    // `first_word` works on slices of `String`s, whether partial or whole.
+    let word = first_word(&amp;my_string[0..6]);
+    let word = first_word(&amp;my_string[..]);
+    // `first_word` also works on references to `String`s, which are equivalent
+    // to whole slices of `String`s.
+    let word = first_word(&amp;my_string);
+
+    let my_string_literal = "hello world";
+
+    // `first_word` works on slices of string literals, whether partial or
+    // whole.
+    let word = first_word(&amp;my_string_literal[0..6]);
+    let word = first_word(&amp;my_string_literal[..]);
+
+    // Because string literals *are* string slices already,
+    // this works too, without the slice syntax!
+    let word = first_word(my_string_literal);
+}</code></pre></pre>
+<h3 id="other-slices"><a class="header" href="#other-slices">Other Slices</a></h3>
+<p>Các string slice, như bạn có thể tưởng tượng, là dành riêng cho chuỗi. Nhưng cũng có một
+loại slice tổng quát hơn, quá. Hãy xem xét mảng này:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let a = [1, 2, 3, 4, 5];
+<span class="boring">}</span></code></pre></pre>
+<p>Cũng tương tự như khi ta muốn tham chiếu đến một phần của chuỗi, ta cũng có thể muốn
+tham chiếu thành một phần của mảng. Khi đó ta sẽ làm như vậy như thế này:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let a = [1, 2, 3, 4, 5];
+
+let slice = &amp;a[1..3];
+
+assert_eq!(slice, &amp;[2, 3]);
+<span class="boring">}</span></code></pre></pre>
+<p>Slice này có kiểu <code>&amp;[i32]</code>. Nó hoạt động giống như các string slice, bằng cách
+lưu trữ tham chiếu đến phần tử đầu tiên và độ dài. Bạn sẽ sử dụng kiểu
+slice này cho tất cả các kiểu collection khác. Chúng ta sẽ thảo luận về những collection này
+chi tiết hơn khi nói về vector trong Chương 8.</p>
+<h2 id="tổng-kết"><a class="header" href="#tổng-kết">Tổng kết</a></h2>
+<p>Các khái niệm về ownership, borrowing và slice đảm bảo an toàn cho bộ nhớ trong
+chương trình Rust tại thời điểm biên dịch. Ngôn ngữ Rust cho phép bạn kiểm soát
+việc sử dụng bộ nhớ giống như trong các ngôn ngữ lập trình hệ thống khác, nhưng có
+owner của dữ liệu sẽ tự động giải phóng dữ liệu đó khi owner vượt quá phạm vi,
+có nghĩa là bạn không phải viết và debug thêm code để có quyền kiểm soát này.</p>
+<p>Ownership ảnh hưởng đến số lượng các phần khác của Rust khi hoạt động, vì vậy
+chúng ta sẽ nói về những khái niệm này sâu hơn trong suốt phần còn lại của cuốn sách.
+Hãy chuyển sang Chương 5 và xem xét việc nhóm các phần dữ liệu lại với nhau
+trong một <code>struct</code>.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch04-02-references-and-borrowing.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch05-00-structs.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch04-02-references-and-borrowing.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch05-00-structs.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

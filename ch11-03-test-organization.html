@@ -1,0 +1,437 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Test Organization - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="tổ-chức-các-hàm-kiểm-tra"><a class="header" href="#tổ-chức-các-hàm-kiểm-tra">Tổ chức các hàm kiểm tra</a></h2>
+<p>Như đã đề cập ở đầu chương, kiểm tra là một lĩnh vực phức tạp, và những người khác nhau sử dụng thuật ngữ và cách tổ chức khác nhau. Cộng đồng Rust chia các hàm kiểm tra thành hai loại chính: unit tests và integration tests. <em>Unit tests</em> nhỏ và tập trung hơn, kiểm tra một module riêng lẻ tại một thời điểm và có thể kiểm tra các giao diện private. <em>Integration tests</em> hoàn toàn nằm ngoài thư viện của bạn và sử dụng mã của bạn giống như bất kỳ mã bên ngoài nào khác, chỉ sử dụng giao diện public và có thể kiểm tra nhiều module trong một hàm kiểm tra.</p>
+<p>Việc viết cả hai loại kiểm tra là quan trọng để đảm bảo rằng các phần của thư viện hoạt động như bạn mong đợi, riêng lẻ và kết hợp với nhau.</p>
+<h3 id="unit-tests"><a class="header" href="#unit-tests">Unit Tests</a></h3>
+<p>Mục đích của unit tests là kiểm tra từng đơn vị mã một cách riêng biệt với phần còn lại của mã để nhanh chóng xác định vị trí mã đang hoạt động hoặc không hoạt động như mong đợi. Bạn sẽ đặt unit tests trong thư mục <em>src</em> trong mỗi file chứa mã mà chúng đang kiểm tra. Quy ước là tạo một module có tên <code>tests</code> trong mỗi file để chứa các hàm kiểm tra và chú thích module bằng <code>cfg(test)</code>.</p>
+<h4 id="module-tests-và-cfgtest"><a class="header" href="#module-tests-và-cfgtest">Module Tests và <code>#[cfg(test)]</code></a></h4>
+<p>Chú thích <code>#[cfg(test)]</code> trên module tests thông báo cho Rust chỉ biên dịch và chạy mã kiểm tra khi bạn chạy <code>cargo test</code>, không khi chạy <code>cargo build</code>. Điều này tiết kiệm thời gian biên dịch khi bạn chỉ muốn build thư viện và tiết kiệm dung lượng trong file nhị phân kết quả vì các hàm kiểm tra không được bao gồm. Bạn sẽ thấy rằng vì các integration tests nằm ở thư mục khác, chúng không cần chú thích <code>#[cfg(test)]</code>. Tuy nhiên, vì unit tests nằm trong cùng file với mã, bạn sẽ dùng <code>#[cfg(test)]</code> để chỉ định rằng chúng không nên được bao gồm trong kết quả biên dịch.</p>
+<p>Hãy nhớ rằng khi chúng ta tạo dự án mới <code>adder</code> trong phần đầu tiên của chương này, Cargo đã tạo ra đoạn mã sau cho chúng ta:</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">pub fn add(left: u64, right: u64) -&gt; u64 {
+    left + right
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        let result = add(2, 2);
+        assert_eq!(result, 4);
+    }
+}</code></pre>
+<p>Đoạn mã này là module kiểm tra được tạo tự động. Attribute <code>cfg</code> là viết tắt của <em>configuration</em> và thông báo cho Rust rằng mục tiếp theo chỉ nên được bao gồm khi có một tùy chọn cấu hình nhất định. Trong trường hợp này, tùy chọn cấu hình là <code>test</code>, được Rust cung cấp để biên dịch và chạy các hàm kiểm tra. Bằng cách sử dụng attribute <code>cfg</code>, Cargo chỉ biên dịch mã kiểm tra của chúng ta khi chúng ta thực sự chạy các hàm kiểm tra bằng <code>cargo test</code>. Điều này bao gồm bất kỳ hàm trợ giúp nào nằm trong module này, cũng như các hàm được chú thích bằng <code>#[test]</code>.</p>
+<h4 id="kiểm-tra-các-hàm-private"><a class="header" href="#kiểm-tra-các-hàm-private">Kiểm tra các hàm private</a></h4>
+<p>Trong cộng đồng kiểm tra, có tranh luận về việc có nên kiểm tra trực tiếp các hàm private hay không, và các ngôn ngữ khác thường khó hoặc không thể kiểm tra các hàm private. Bất kể bạn theo quan điểm kiểm tra nào, quy tắc private của Rust cho phép bạn kiểm tra các hàm private. Hãy xem xét đoạn mã trong Listing 11-12 với hàm private <code>internal_adder</code>.</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">pub fn add_two(a: u64) -&gt; u64 {
+    internal_adder(a, 2)
+}
+
+fn internal_adder(left: u64, right: u64) -&gt; u64 {
+    left + right
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn internal() {
+        let result = internal_adder(2, 2);
+        assert_eq!(result, 4);
+    }
+}</code></pre>
+<p><span class="caption">Listing 11-12: Kiểm tra một hàm private</span></p>
+<p>Lưu ý rằng hàm <code>internal_adder</code> không được đánh dấu là <code>pub</code>. Các hàm kiểm tra chỉ là mã Rust, và module <code>tests</code> chỉ là một module khác. Như chúng ta đã thảo luận trong phần <a href="ch07-03-paths-for-referring-to-an-item-in-the-module-tree.html">“Paths for Referring to an Item in the Module Tree”</a><!-- ignore -->, các phần tử trong module con có thể sử dụng các phần tử trong module cha của chúng. Trong kiểm tra này, chúng ta đưa tất cả các phần tử của module cha vào phạm vi với <code>use super::*</code>, và sau đó hàm kiểm tra có thể gọi <code>internal_adder</code>. Nếu bạn không cho rằng các hàm private nên được kiểm tra, Rust không ép buộc bạn phải làm điều đó.</p>
+<h3 id="integration-tests"><a class="header" href="#integration-tests">Integration Tests</a></h3>
+<p>Trong Rust, integration tests hoàn toàn nằm ngoài thư viện của bạn. Chúng sử dụng thư viện của bạn giống như bất kỳ mã nào khác, có nghĩa là chúng chỉ có thể gọi các hàm là một phần của API public của thư viện. Mục đích của chúng là kiểm tra xem nhiều phần của thư viện có hoạt động cùng nhau đúng không. Các đơn vị mã hoạt động đúng riêng lẻ có thể gặp vấn đề khi tích hợp, vì vậy việc bao phủ kiểm tra mã tích hợp cũng quan trọng. Để tạo integration tests, trước tiên bạn cần tạo thư mục <em>tests</em>.</p>
+<h4 id="thư-mục-tests"><a class="header" href="#thư-mục-tests">Thư mục <em>tests</em></a></h4>
+<p>Chúng ta tạo thư mục <em>tests</em> ở cấp cao nhất của dự án, cạnh thư mục <em>src</em>. Cargo biết tìm các file kiểm tra tích hợp trong thư mục này. Chúng ta có thể tạo bao nhiêu file kiểm tra tùy thích, và Cargo sẽ biên dịch từng file như một crate riêng lẻ.</p>
+<p>Hãy tạo một integration test. Với mã trong Listing 11-12 vẫn nằm trong file <em>src/lib.rs</em>, tạo thư mục <em>tests</em> và tạo một file mới tên <em>tests/integration_test.rs</em>. Cấu trúc thư mục của bạn sẽ trông như sau:</p>
+<pre><code class="language-text">adder
+├── Cargo.lock
+├── Cargo.toml
+├── src
+│   └── lib.rs
+└── tests
+    └── integration_test.rs
+</code></pre>
+<p>Enter the code in Listing 11-13 into the <em>tests/integration_test.rs</em> file:</p>
+<p><span class="filename">Filename: tests/integration_test.rs</span></p>
+<pre><code class="language-rust ignore">use adder::add_two;
+
+#[test]
+fn it_adds_two() {
+    let result = add_two(2);
+    assert_eq!(result, 4);
+}</code></pre>
+<p><span class="caption">Listing 11-13: Một integration test cho một hàm trong crate <code>adder</code></span></p>
+<p>Mỗi file trong thư mục <code>tests</code> là một crate riêng biệt, vì vậy chúng ta cần đưa thư viện của mình vào phạm vi của từng test crate. Vì lý do đó, chúng ta thêm <code>use adder</code> ở đầu mã, điều mà trong unit tests chúng ta không cần.</p>
+<p>Chúng ta không cần chú thích bất kỳ mã nào trong <em>tests/integration_test.rs</em> với <code>#[cfg(test)]</code>. Cargo xử lý thư mục <code>tests</code> đặc biệt và chỉ biên dịch các file trong thư mục này khi chạy <code>cargo test</code>. Bây giờ hãy chạy <code>cargo test</code>:</p>
+<pre><code class="language-console">$ cargo test
+   Compiling adder v0.1.0 (file:///projects/adder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.31s
+     Running unittests src/lib.rs (target/debug/deps/adder-1082c4b063a8fbe6)
+
+running 1 test
+test tests::internal ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/integration_test.rs (target/debug/deps/integration_test-1082c4b063a8fbe6)
+
+running 1 test
+test it_adds_two ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests adder
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+</code></pre>
+<p>Ba phần của output bao gồm unit tests, integration test và doc tests. Lưu ý rằng nếu bất kỳ hàm kiểm tra nào trong một phần thất bại, các phần tiếp theo sẽ không được chạy. Ví dụ, nếu một unit test thất bại, sẽ không có output cho integration và doc tests vì các test đó chỉ được chạy nếu tất cả unit tests đều thành công.</p>
+<p>Phần đầu tiên cho unit tests giống như những gì chúng ta đã thấy: một dòng cho mỗi unit test (một test tên là <code>internal</code> mà chúng ta đã thêm trong Listing 11-12) và sau đó là một dòng tóm tắt cho các unit tests.</p>
+<p>Phần integration tests bắt đầu với dòng <code>Running tests/integration_test.rs</code>. Tiếp theo, có một dòng cho mỗi hàm kiểm tra trong integration test đó và một dòng tóm tắt kết quả của integration test ngay trước khi phần <code>Doc-tests adder</code> bắt đầu.</p>
+<p>Mỗi file integration test có phần riêng của nó, vì vậy nếu chúng ta thêm nhiều file trong thư mục <em>tests</em>, sẽ có thêm các phần cho integration tests.</p>
+<p>Chúng ta vẫn có thể chạy một hàm kiểm tra integration cụ thể bằng cách chỉ định tên hàm kiểm tra làm đối số cho <code>cargo test</code>. Để chạy tất cả các test trong một file integration test cụ thể, dùng đối số <code>--test</code> của <code>cargo test</code> theo sau là tên file:</p>
+<pre><code class="language-console">$ cargo test --test integration_test
+   Compiling adder v0.1.0 (file:///projects/adder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.64s
+     Running tests/integration_test.rs (target/debug/deps/integration_test-82e7799c1bc62298)
+
+running 1 test
+test it_adds_two ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+</code></pre>
+<p>Lệnh này chỉ chạy các hàm kiểm tra trong file <em>tests/integration_test.rs</em>.</p>
+<h4 id="submodules-trong-integration-tests"><a class="header" href="#submodules-trong-integration-tests">Submodules trong Integration Tests</a></h4>
+<p>Khi bạn thêm nhiều integration tests, bạn có thể muốn tạo thêm các file trong thư mục <em>tests</em> để giúp tổ chức chúng; ví dụ, bạn có thể nhóm các hàm kiểm tra theo chức năng mà chúng đang kiểm tra. Như đã đề cập trước đó, mỗi file trong thư mục <em>tests</em> được biên dịch như một crate riêng biệt, điều này hữu ích để tạo các phạm vi riêng nhằm mô phỏng gần hơn cách người dùng cuối sẽ sử dụng crate của bạn. Tuy nhiên, điều này có nghĩa là các file trong thư mục <em>tests</em> không chia sẻ cùng hành vi như các file trong <em>src</em>, như bạn đã học ở Chương 7 về cách tách mã thành các module và file.</p>
+<p>Sự khác biệt trong hành vi của các file trong thư mục <em>tests</em> rõ ràng nhất khi bạn có một bộ hàm trợ giúp dùng trong nhiều file integration test và bạn cố gắng theo các bước trong phần <a href="ch07-05-separating-modules-into-different-files.html">“Separating Modules into Different Files”</a><!-- ignore --> của Chương 7 để trích xuất chúng thành một module chung. Ví dụ, nếu chúng ta tạo file <em>tests/common.rs</em> và đặt một hàm tên là <code>setup</code> trong đó, chúng ta có thể thêm một số mã vào <code>setup</code> mà muốn gọi từ nhiều hàm kiểm tra trong nhiều file test:</p>
+<p><span class="filename">Filename: tests/common.rs</span></p>
+<pre><code class="language-rust noplayground">pub fn setup() {
+    // setup code specific to your library's tests would go here
+}</code></pre>
+<p>Khi chúng ta chạy lại các hàm kiểm tra, chúng ta sẽ thấy một phần mới trong output cho file <em>common.rs</em>, mặc dù file này không chứa bất kỳ hàm kiểm tra nào và chúng ta cũng không gọi hàm <code>setup</code> từ đâu cả:</p>
+<pre><code class="language-console">$ cargo test
+   Compiling adder v0.1.0 (file:///projects/adder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.89s
+     Running unittests src/lib.rs (target/debug/deps/adder-92948b65e88960b4)
+
+running 1 test
+test tests::internal ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/common.rs (target/debug/deps/common-92948b65e88960b4)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/integration_test.rs (target/debug/deps/integration_test-92948b65e88960b4)
+
+running 1 test
+test it_adds_two ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests adder
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+</code></pre>
+<p>Việc <code>common</code> xuất hiện trong kết quả kiểm tra với thông báo <code>running 0 tests</code> không phải là điều chúng ta mong muốn. Chúng ta chỉ muốn chia sẻ một số mã với các file integration test khác.</p>
+<p>Để tránh <code>common</code> xuất hiện trong output của kiểm tra, thay vì tạo file <em>tests/common.rs</em>, chúng ta sẽ tạo <em>tests/common/mod.rs</em>. Cấu trúc thư mục dự án bây giờ trông như sau:</p>
+<pre><code class="language-text">├── Cargo.lock
+├── Cargo.toml
+├── src
+│   └── lib.rs
+└── tests
+    ├── common
+    │   └── mod.rs
+    └── integration_test.rs
+</code></pre>
+<p>Đây là quy ước đặt tên cũ mà Rust vẫn hiểu, như chúng ta đã đề cập trong phần <a href="ch07-05-separating-modules-into-different-files.html#alternate-file-paths">“Alternate File Paths”</a><!-- ignore --> của Chương 7. Đặt tên file theo cách này thông báo cho Rust rằng không nên coi module <code>common</code> là một file integration test. Khi chúng ta chuyển mã hàm <code>setup</code> vào <em>tests/common/mod.rs</em> và xóa file <em>tests/common.rs</em>, phần hiển thị trong output kiểm tra sẽ không còn xuất hiện. Các file trong các thư mục con của <em>tests</em> sẽ không được biên dịch như các crate riêng biệt và cũng không xuất hiện trong output kiểm tra.</p>
+<p>Sau khi tạo xong <em>tests/common/mod.rs</em>, chúng ta có thể sử dụng nó từ bất kỳ file integration test nào như một module. Dưới đây là ví dụ gọi hàm <code>setup</code> từ test <code>it_adds_two</code> trong <em>tests/integration_test.rs</em>:</p>
+<p><span class="filename">Filename: tests/integration_test.rs</span></p>
+<pre><code class="language-rust ignore">use adder::add_two;
+
+mod common;
+
+#[test]
+fn it_adds_two() {
+    common::setup();
+
+    let result = add_two(2);
+    assert_eq!(result, 4);
+}</code></pre>
+<p>Lưu ý rằng khai báo <code>mod common;</code> giống như khai báo module mà chúng ta đã minh họa trong Listing 7-21. Sau đó, trong hàm kiểm tra, chúng ta có thể gọi hàm <code>common::setup()</code>.</p>
+<h4 id="integration-tests-cho-binary-crates"><a class="header" href="#integration-tests-cho-binary-crates">Integration Tests cho Binary Crates</a></h4>
+<p>Nếu dự án của chúng ta là một binary crate chỉ chứa file <em>src/main.rs</em> và không có file <em>src/lib.rs</em>, chúng ta không thể tạo integration tests trong thư mục <em>tests</em> và đưa các hàm được định nghĩa trong file <em>src/main.rs</em> vào phạm vi với câu lệnh <code>use</code>. Chỉ các library crate mới cung cấp các hàm mà crate khác có thể sử dụng; binary crate được thiết kế để chạy độc lập.</p>
+<p>Đây là một trong những lý do mà các dự án Rust cung cấp binary thường có file <em>src/main.rs</em> đơn giản, gọi các logic nằm trong file <em>src/lib.rs</em>. Sử dụng cấu trúc đó, integration tests <em>có thể</em> kiểm tra library crate với <code>use</code> để làm cho các chức năng quan trọng có thể sử dụng được. Nếu các chức năng quan trọng hoạt động, phần mã nhỏ trong file <em>src/main.rs</em> cũng sẽ hoạt động, và phần mã nhỏ đó không cần phải kiểm tra.</p>
+<h2 id="tóm-tắt"><a class="header" href="#tóm-tắt">Tóm tắt</a></h2>
+<p>Các tính năng kiểm tra của Rust cung cấp cách để xác định cách mã nên hoạt động nhằm đảm bảo nó tiếp tục hoạt động như bạn mong đợi, ngay cả khi bạn thực hiện các thay đổi. Unit tests kiểm tra các phần khác nhau của thư viện một cách riêng biệt và có thể kiểm tra các chi tiết triển khai riêng tư. Integration tests kiểm tra rằng nhiều phần của thư viện hoạt động cùng nhau chính xác, và chúng sử dụng API công khai của thư viện để kiểm tra mã giống như cách mã bên ngoài sẽ sử dụng. Mặc dù hệ thống kiểu và quy tắc sở hữu của Rust giúp ngăn ngừa một số loại lỗi, nhưng việc kiểm tra vẫn quan trọng để giảm thiểu các lỗi logic liên quan đến cách mã của bạn được mong đợi hoạt động.</p>
+<p>Hãy kết hợp kiến thức bạn học được trong chương này và các chương trước để làm việc trên một dự án!</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch11-02-running-tests.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch12-00-an-io-project.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch11-02-running-tests.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch12-00-an-io-project.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

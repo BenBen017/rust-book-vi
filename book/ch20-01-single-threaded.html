@@ -1,0 +1,493 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Building a Single-Threaded Web Server - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="xây-dựng-web-server-Đơn-luồng"><a class="header" href="#xây-dựng-web-server-Đơn-luồng">Xây dựng Web Server Đơn Luồng</a></h2>
+<p>Chúng ta sẽ bắt đầu bằng việc tạo một web server đơn luồng hoạt động. Trước khi bắt đầu, hãy xem qua tổng quan nhanh về các giao thức liên quan đến việc xây dựng web server. Chi tiết về các giao thức này vượt ngoài phạm vi của cuốn sách, nhưng một cái nhìn tổng quan sẽ cung cấp thông tin cần thiết.</p>
+<p>Hai giao thức chính liên quan đến web server là <em>Hypertext Transfer Protocol</em> <em>(HTTP)</em> và <em>Transmission Control Protocol</em> <em>(TCP)</em>. Cả hai đều là các giao thức <em>yêu cầu-phản hồi</em>, nghĩa là <em>client</em> khởi tạo yêu cầu và <em>server</em> lắng nghe các yêu cầu và trả về phản hồi cho client. Nội dung của các yêu cầu và phản hồi được xác định bởi các giao thức này.</p>
+<p>TCP là giao thức cấp thấp hơn, mô tả chi tiết cách thông tin di chuyển từ server này sang server khác nhưng không xác định thông tin đó là gì. HTTP xây dựng trên TCP bằng cách xác định nội dung của các yêu cầu và phản hồi. Về mặt kỹ thuật, có thể sử dụng HTTP với các giao thức khác, nhưng trong phần lớn các trường hợp, HTTP gửi dữ liệu qua TCP. Chúng ta sẽ làm việc với các byte thô của yêu cầu và phản hồi TCP và HTTP.</p>
+<h3 id="lắng-nghe-kết-nối-tcp"><a class="header" href="#lắng-nghe-kết-nối-tcp">Lắng nghe Kết nối TCP</a></h3>
+<p>Web server của chúng ta cần lắng nghe kết nối TCP, đây là phần đầu tiên chúng ta sẽ thực hiện. Thư viện chuẩn cung cấp module <code>std::net</code> cho phép chúng ta làm điều này. Hãy tạo một dự án mới theo cách thông thường:</p>
+<pre><code class="language-console">$ cargo new hello
+     Created binary (application) `hello` project
+$ cd hello
+</code></pre>
+<p>Bây giờ, hãy nhập mã trong Listing 20-1 vào <em>src/main.rs</em> để bắt đầu. Mã này sẽ lắng nghe tại địa chỉ cục bộ <code>127.0.0.1:7878</code> cho các luồng TCP đến. Khi nhận được một luồng đến, nó sẽ in ra <code>Connection established!</code>.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust no_run edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch20-web-server/listing-20-01/src/main.rs}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 20-1: Lắng nghe các luồng đến và in thông báo khi nhận được luồng</span></p>
+<p>Sử dụng <code>TcpListener</code>, chúng ta có thể lắng nghe các kết nối TCP tại địa chỉ <code>127.0.0.1:7878</code>. Trong địa chỉ này, phần trước dấu hai chấm là địa chỉ IP đại diện cho máy tính của bạn (điều này giống nhau trên mọi máy và không đại diện cho máy của tác giả), và <code>7878</code> là cổng. Chúng ta chọn cổng này vì hai lý do: HTTP thường không được sử dụng trên cổng này nên server của chúng ta khó bị xung đột với bất kỳ web server nào đang chạy trên máy của bạn, và 7878 gợi nhớ đến từ <em>rust</em> khi bấm trên bàn phím số điện thoại.</p>
+<p>Hàm <code>bind</code> trong trường hợp này hoạt động giống như hàm <code>new</code> vì nó trả về một instance <code>TcpListener</code> mới. Hàm được gọi là <code>bind</code> vì trong mạng, việc kết nối đến một cổng để lắng nghe được gọi là “binding to a port”.</p>
+<p>Hàm <code>bind</code> trả về một <code>Result&lt;T, E&gt;</code>, điều này cho thấy việc binding có thể thất bại. Ví dụ, kết nối tới cổng 80 yêu cầu quyền quản trị (người dùng thường không có quyền có thể lắng nghe các cổng cao hơn 1023), nên nếu thử kết nối tới cổng 80 mà không có quyền quản trị, binding sẽ thất bại. Binding cũng sẽ không thành công nếu chạy hai instance của chương trình cùng lúc trên cùng một cổng. Vì chúng ta đang viết một server cơ bản cho mục đích học tập, chúng ta sẽ không xử lý những lỗi này; thay vào đó, sử dụng <code>unwrap</code> để dừng chương trình nếu có lỗi xảy ra.</p>
+<p>Phương thức <code>incoming</code> trên <code>TcpListener</code> trả về một iterator cung cấp một chuỗi các luồng (cụ thể là các luồng kiểu <code>TcpStream</code>). Một <em>stream</em> đại diện cho một kết nối mở giữa client và server. Một <em>connection</em> là tên gọi cho toàn bộ quá trình yêu cầu và phản hồi trong đó client kết nối đến server, server sinh ra phản hồi, và server đóng kết nối. Vì vậy, chúng ta sẽ đọc từ <code>TcpStream</code> để xem client gửi gì và sau đó ghi phản hồi vào luồng để gửi dữ liệu trở lại client. Nhìn chung, vòng lặp <code>for</code> này sẽ xử lý từng kết nối theo thứ tự và tạo ra một chuỗi các luồng để chúng ta xử lý.</p>
+<p>Hiện tại, cách xử lý luồng của chúng ta chỉ gồm việc gọi <code>unwrap</code> để kết thúc chương trình nếu luồng có lỗi; nếu không có lỗi, chương trình sẽ in ra thông báo. Chúng ta sẽ thêm nhiều chức năng hơn cho trường hợp thành công trong listing tiếp theo. Lý do có thể nhận được lỗi từ phương thức <code>incoming</code> khi client kết nối đến server là vì chúng ta không thực sự lặp qua các kết nối mà lặp qua <em>các nỗ lực kết nối</em>. Kết nối có thể không thành công vì nhiều lý do, nhiều lý do phụ thuộc vào hệ điều hành. Ví dụ, nhiều hệ điều hành giới hạn số lượng kết nối mở đồng thời mà chúng có thể hỗ trợ; các nỗ lực kết nối mới vượt quá số lượng đó sẽ gây lỗi cho đến khi một số kết nối mở được đóng.</p>
+<p>Hãy thử chạy đoạn mã này! Thực thi <code>cargo run</code> trong terminal và mở <em>127.0.0.1:7878</em> trong trình duyệt web. Trình duyệt sẽ hiển thị thông báo lỗi như “Connection reset,” vì server hiện tại chưa gửi dữ liệu trả về. Nhưng khi nhìn vào terminal, bạn sẽ thấy nhiều thông báo được in ra khi trình duyệt kết nối tới server!</p>
+<pre><code class="language-text">     Running `target/debug/hello`
+Connection established!
+Connection established!
+Connection established!
+</code></pre>
+<p>Đôi khi bạn sẽ thấy nhiều thông báo được in ra cho cùng một yêu cầu từ trình duyệt; lý do có thể là trình duyệt đang gửi yêu cầu cho trang chính cũng như cho các tài nguyên khác, chẳng hạn như biểu tượng <em>favicon.ico</em> xuất hiện trong tab trình duyệt.</p>
+<p>Cũng có thể trình duyệt đang cố gắng kết nối tới server nhiều lần vì server không phản hồi dữ liệu. Khi <code>stream</code> ra khỏi phạm vi và bị drop ở cuối vòng lặp, kết nối sẽ được đóng theo cách <code>drop</code> được triển khai. Trình duyệt đôi khi xử lý các kết nối bị đóng bằng cách thử lại, vì vấn đề có thể chỉ là tạm thời. Yếu tố quan trọng là chúng ta đã thành công trong việc lấy được handle tới một kết nối TCP!</p>
+<p>Hãy nhớ dừng chương trình bằng cách nhấn <span class="keystroke">ctrl-c</span> khi bạn hoàn tất việc chạy một phiên bản code. Sau đó khởi động lại chương trình bằng lệnh <code>cargo run</code> sau khi bạn thực hiện các thay đổi để đảm bảo bạn đang chạy phiên bản code mới nhất.</p>
+<h3 id="Đọc-request"><a class="header" href="#Đọc-request">Đọc Request</a></h3>
+<p>Hãy triển khai chức năng đọc request từ trình duyệt! Để tách biệt việc lấy kết nối và xử lý kết nối, chúng ta sẽ tạo một hàm mới để xử lý kết nối. Trong hàm <code>handle_connection</code> mới này, chúng ta sẽ đọc dữ liệu từ TCP stream và in ra để có thể quan sát dữ liệu được gửi từ trình duyệt. Thay đổi code để trông giống như Listing 20-2.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust no_run edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch20-web-server/listing-20-02/src/main.rs}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 20-2: Đọc từ <code>TcpStream</code> và in dữ liệu ra</span></p>
+<p>Chúng ta đưa <code>std::io::prelude</code> và <code>std::io::BufReader</code> vào phạm vi để có quyền truy cập vào các trait và kiểu giúp đọc và ghi từ stream. Trong vòng lặp <code>for</code> ở hàm <code>main</code>, thay vì in thông báo rằng chúng ta đã nhận được kết nối, giờ chúng ta gọi hàm <code>handle_connection</code> mới và truyền <code>stream</code> vào.</p>
+<p>Trong hàm <code>handle_connection</code>, chúng ta tạo một instance <code>BufReader</code> bao quanh tham chiếu mutable tới <code>stream</code>. <code>BufReader</code> thêm bộ đệm bằng cách quản lý các gọi tới các phương thức của trait <code>std::io::Read</code> cho chúng ta.</p>
+<p>Chúng ta tạo biến <code>http_request</code> để thu thập các dòng của request mà trình duyệt gửi đến server. Chúng ta chỉ định rằng muốn thu thập các dòng này trong một vector bằng cách thêm chú thích kiểu <code>Vec&lt;_&gt;</code>.</p>
+<p><code>BufReader</code> triển khai trait <code>std::io::BufRead</code>, trait này cung cấp phương thức <code>lines</code>. Phương thức <code>lines</code> trả về một iterator các giá trị <code>Result&lt;String, std::io::Error&gt;</code> bằng cách tách luồng dữ liệu mỗi khi gặp byte newline. Để lấy được từng <code>String</code>, chúng ta dùng <code>map</code> và <code>unwrap</code> mỗi <code>Result</code>. <code>Result</code> có thể là lỗi nếu dữ liệu không hợp lệ UTF-8 hoặc có vấn đề khi đọc từ stream. Trong chương trình sản xuất nên xử lý lỗi một cách mềm dẻo hơn, nhưng chúng ta chọn dừng chương trình trong trường hợp lỗi để đơn giản.</p>
+<p>Trình duyệt báo hiệu kết thúc một HTTP request bằng việc gửi hai ký tự newline liên tiếp, vì vậy để lấy một request từ stream, chúng ta lấy các dòng cho tới khi gặp một dòng trống. Khi đã thu thập xong các dòng vào vector, chúng ta in chúng ra sử dụng định dạng debug đẹp để có thể xem các lệnh mà trình duyệt gửi tới server.</p>
+<p>Hãy thử chạy code này! Khởi động chương trình và thực hiện một request từ trình duyệt lần nữa. Lưu ý rằng trình duyệt vẫn sẽ hiển thị trang lỗi, nhưng đầu ra của chương trình trong terminal sẽ trông giống như sau:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling hello v0.1.0 (file:///projects/hello)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.42s
+     Running `target/debug/hello`
+Request: [
+    "GET / HTTP/1.1",
+    "Host: 127.0.0.1:7878",
+    "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:99.0) Gecko/20100101 Firefox/99.0",
+    "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language: en-US,en;q=0.5",
+    "Accept-Encoding: gzip, deflate, br",
+    "DNT: 1",
+    "Connection: keep-alive",
+    "Upgrade-Insecure-Requests: 1",
+    "Sec-Fetch-Dest: document",
+    "Sec-Fetch-Mode: navigate",
+    "Sec-Fetch-Site: none",
+    "Sec-Fetch-User: ?1",
+    "Cache-Control: max-age=0",
+]
+</code></pre>
+<p>Tùy vào trình duyệt, bạn có thể thấy đầu ra hơi khác nhau. Giờ khi chúng ta đã in dữ liệu request ra, chúng ta có thể thấy lý do vì sao một request từ trình duyệt lại tạo ra nhiều kết nối bằng cách nhìn vào đường dẫn sau <code>GET</code> trong dòng đầu tiên của request. Nếu các kết nối lặp lại đều yêu cầu <code>/*</code>, chúng ta biết trình duyệt đang cố gắng lấy <code>/*</code> nhiều lần vì chưa nhận được phản hồi từ chương trình của chúng ta.</p>
+<p>Hãy phân tích dữ liệu request này để hiểu trình duyệt đang yêu cầu gì từ chương trình của chúng ta.</p>
+<h3 id="xem-kỹ-một-http-request"><a class="header" href="#xem-kỹ-một-http-request">Xem kỹ một HTTP Request</a></h3>
+<p>HTTP là một giao thức dựa trên văn bản, và một request có định dạng như sau:</p>
+<pre><code class="language-text">Method Request-URI HTTP-Version CRLF
+headers CRLF
+message-body
+</code></pre>
+<p>Dòng đầu tiên là <em>request line</em> chứa thông tin về yêu cầu mà client gửi tới. Phần đầu của request line chỉ ra <em>method</em> đang được sử dụng, chẳng hạn như <code>GET</code> hoặc <code>POST</code>, mô tả cách client thực hiện request này. Client của chúng ta sử dụng request <code>GET</code>, có nghĩa là nó đang yêu cầu lấy thông tin.</p>
+<p>Phần tiếp theo của request line là <code>/*</code>, chỉ ra <em>Uniform Resource Identifier</em> <em>(URI)</em> mà client đang yêu cầu: URI gần giống, nhưng không hoàn toàn giống, với <em>Uniform Resource Locator</em> <em>(URL)</em>. Sự khác biệt giữa URI và URL không quan trọng trong chương này, nhưng chuẩn HTTP dùng thuật ngữ URI, nên ta có thể tạm thay thế URL bằng URI trong suy nghĩ.</p>
+<p>Phần cuối cùng là phiên bản HTTP mà client đang sử dụng, và sau đó request line kết thúc bằng <em>CRLF sequence</em>. (CRLF là viết tắt của <em>carriage return</em> và <em>line feed</em>, các thuật ngữ từ thời máy đánh chữ!) Chuỗi CRLF cũng có thể viết là <code>\r\n</code>, trong đó <code>\r</code> là carriage return và <code>\n</code> là line feed. CRLF phân tách request line với phần dữ liệu request còn lại. Khi in ra, CRLF hiển thị như xuống dòng thay vì <code>\r\n</code>.</p>
+<p>Nhìn vào request line từ kết quả chương trình, ta thấy <code>GET</code> là method, <code>/*</code> là request URI, và <code>HTTP/1.1</code> là version.</p>
+<p>Sau request line, các dòng còn lại bắt đầu từ <code>Host:</code> trở đi là các header. Các request <code>GET</code> không có body.</p>
+<p>Hãy thử gửi request từ một trình duyệt khác hoặc yêu cầu một địa chỉ khác, ví dụ <em>127.0.0.1:7878/test</em>, để thấy dữ liệu request thay đổi như thế nào.</p>
+<p>Giờ khi đã biết trình duyệt đang yêu cầu gì, hãy gửi dữ liệu phản hồi lại!</p>
+<h3 id="viết-response"><a class="header" href="#viết-response">Viết Response</a></h3>
+<p>Chúng ta sẽ triển khai việc gửi dữ liệu phản hồi cho client. Response có định dạng như sau:</p>
+<pre><code class="language-text">HTTP-Version Status-Code Reason-Phrase CRLF
+headers CRLF
+message-body
+</code></pre>
+<p>Dòng đầu tiên là một <em>dòng trạng thái</em> chứa phiên bản HTTP được sử dụng trong
+phản hồi, một mã trạng thái dạng số tóm tắt kết quả của yêu cầu, và một
+cụm từ lý do cung cấp mô tả văn bản về mã trạng thái. Sau chuỗi CRLF là
+các header (nếu có), một chuỗi CRLF khác, và phần thân của phản hồi.</p>
+<p>Dưới đây là một ví dụ về phản hồi sử dụng HTTP phiên bản 1.1, có mã trạng
+thái 200, cụm từ lý do OK, không có header, và không có thân:</p>
+<pre><code class="language-text">HTTP/1.1 200 OK\r\n\r\n
+</code></pre>
+<p>Mã trạng thái 200 là phản hồi thành công chuẩn. Văn bản là một phản hồi HTTP
+nhỏ thành công. Hãy ghi điều này vào stream như phản hồi của chúng ta cho
+một yêu cầu thành công! Từ hàm <code>handle_connection</code>, xóa <code>println!</code> đang
+in dữ liệu yêu cầu và thay thế bằng mã trong Listing 20-3.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust no_run edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch20-web-server/listing-20-03/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 20-3: Ghi một phản hồi HTTP nhỏ thành công vào
+stream</span></p>
+<p>Dòng mới đầu tiên định nghĩa biến <code>response</code> chứa dữ liệu thông điệp thành
+công. Sau đó chúng ta gọi <code>as_bytes</code> trên <code>response</code> để chuyển dữ liệu
+chuỗi thành bytes. Phương thức <code>write_all</code> trên <code>stream</code> nhận một <code>&amp;[u8]</code>
+và gửi trực tiếp các byte đó xuống kết nối. Vì thao tác <code>write_all</code> có thể
+thất bại, chúng ta dùng <code>unwrap</code> trên kết quả lỗi như trước. Một lần nữa, trong
+ứng dụng thực tế bạn nên thêm xử lý lỗi ở đây.</p>
+<p>Với những thay đổi này, hãy chạy code và thực hiện một yêu cầu. Chúng ta
+không còn in dữ liệu ra terminal, nên sẽ không thấy bất kỳ output nào ngoài
+output từ Cargo. Khi bạn load <em>127.0.0.1:7878</em> trong trình duyệt web, bạn
+sẽ nhận được một trang trắng thay vì một lỗi. Bạn vừa tự tay viết code để
+nhận một yêu cầu HTTP và gửi một phản hồi!</p>
+<h3 id="trả-về-html-thực"><a class="header" href="#trả-về-html-thực">Trả về HTML thực</a></h3>
+<p>Hãy triển khai chức năng để trả về nhiều hơn một trang trắng. Tạo file mới
+<em>hello.html</em> ở thư mục gốc của dự án, không phải trong thư mục <em>src</em>. Bạn
+có thể nhập bất kỳ HTML nào bạn muốn; Listing 20-4 cho thấy một ví dụ
+khả thi.</p>
+<p><span class="filename">Filename: hello.html</span></p>
+<pre><code class="language-html">{{#include ../listings/ch20-web-server/listing-20-05/hello.html}}
+</code></pre>
+<p><span class="caption">Listing 20-4: Một file HTML mẫu để trả về trong phản hồi</span></p>
+<p>Đây là một tài liệu HTML5 tối giản với một tiêu đề và một vài đoạn văn bản.
+Để trả về file này từ server khi nhận được một yêu cầu, chúng ta sẽ chỉnh
+sửa <code>handle_connection</code> như trong Listing 20-5 để đọc file HTML, thêm nó vào
+phản hồi dưới dạng phần thân, và gửi đi.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust no_run edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch20-web-server/listing-20-05/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 20-5: Gửi nội dung của <em>hello.html</em> như phần
+thân của phản hồi</span></p>
+<p>Chúng ta đã thêm <code>fs</code> vào câu lệnh <code>use</code> để đưa module filesystem của thư viện
+chuẩn vào phạm vi sử dụng. Code để đọc nội dung của một file thành một
+chuỗi có thể sẽ quen thuộc; chúng ta đã dùng nó ở Chương 12 khi đọc
+nội dung file cho dự án I/O trong Listing 12-4.</p>
+<p>Tiếp theo, chúng ta sử dụng <code>format!</code> để thêm nội dung file làm phần thân của
+phản hồi thành công. Để đảm bảo một phản hồi HTTP hợp lệ, chúng ta thêm
+header <code>Content-Length</code>, được đặt bằng kích thước của phần thân phản hồi, trong
+trường hợp này là kích thước của <code>hello.html</code>.</p>
+<p>Chạy code này với <code>cargo run</code> và load <em>127.0.0.1:7878</em> trong trình duyệt;
+bạn sẽ thấy HTML của bạn được hiển thị!</p>
+<p>Hiện tại, chúng ta đang bỏ qua dữ liệu yêu cầu trong <code>http_request</code> và chỉ
+gửi lại nội dung của file HTML một cách vô điều kiện. Điều này có nghĩa là
+nếu bạn thử yêu cầu <em>127.0.0.1:7878/something-else</em> trong trình duyệt, bạn
+vẫn sẽ nhận được cùng phản hồi HTML này. Hiện tại, server của chúng ta rất
+hạn chế và không thực hiện những gì hầu hết các web server làm. Chúng ta
+muốn tùy chỉnh phản hồi dựa trên yêu cầu và chỉ gửi file HTML cho một yêu
+cầu hợp lệ tới <em>/</em>.</p>
+<h3 id="xác-thực-yêu-cầu-và-phản-hồi-có-chọn-lọc"><a class="header" href="#xác-thực-yêu-cầu-và-phản-hồi-có-chọn-lọc">Xác thực yêu cầu và phản hồi có chọn lọc</a></h3>
+<p>Hiện tại, web server của chúng ta sẽ trả về HTML trong file bất kể client
+yêu cầu gì. Hãy thêm chức năng kiểm tra rằng trình duyệt đang yêu cầu <em>/</em>
+trước khi trả về file HTML và trả lỗi nếu trình duyệt yêu cầu bất cứ thứ gì
+khác. Để làm điều này, chúng ta cần chỉnh sửa <code>handle_connection</code>, như
+trong Listing 20-6. Code mới này kiểm tra nội dung yêu cầu nhận được với
+cái mà chúng ta biết là một yêu cầu tới <em>/</em>, và thêm các khối <code>if</code> và <code>else</code>
+để xử lý các yêu cầu khác nhau.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust no_run edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch20-web-server/listing-20-06/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 20-6: Xử lý các yêu cầu tới <em>/</em> khác với các
+yêu cầu khác</span></p>
+<p>Chúng ta chỉ xem dòng đầu tiên của yêu cầu HTTP, vì vậy thay vì đọc toàn bộ
+yêu cầu vào một vector, chúng ta gọi <code>next</code> để lấy phần tử đầu tiên từ iterator.
+<code>unwrap</code> đầu tiên xử lý <code>Option</code> và dừng chương trình nếu iterator không có
+phần tử nào. <code>unwrap</code> thứ hai xử lý <code>Result</code> và có cùng hiệu ứng như <code>unwrap</code>
+trong <code>map</code> được thêm ở Listing 20-2.</p>
+<p>Tiếp theo, chúng ta kiểm tra <code>request_line</code> xem nó có bằng dòng yêu cầu của
+một GET request tới đường dẫn <em>/</em> hay không. Nếu có, khối <code>if</code> trả về
+nội dung file HTML của chúng ta.</p>
+<p>Nếu <code>request_line</code> <em>không</em> bằng GET request tới đường dẫn <em>/</em>, điều đó
+có nghĩa là chúng ta nhận được một yêu cầu khác. Chúng ta sẽ thêm code vào
+khối <code>else</code> trong một lúc để phản hồi tất cả các yêu cầu khác.</p>
+<p>Chạy code này ngay và yêu cầu <em>127.0.0.1:7878</em>; bạn sẽ nhận được HTML trong
+<em>hello.html</em>. Nếu bạn thực hiện bất kỳ yêu cầu nào khác, chẳng hạn như
+<em>127.0.0.1:7878/something-else</em>, bạn sẽ nhận được lỗi kết nối giống như khi
+chạy code ở Listing 20-1 và Listing 20-2.</p>
+<p>Bây giờ hãy thêm code trong Listing 20-7 vào khối <code>else</code> để trả về phản hồi
+với mã trạng thái 404, báo hiệu rằng nội dung cho yêu cầu không tìm thấy.
+Chúng ta cũng sẽ trả về một số HTML cho một trang hiển thị trong trình duyệt
+để báo phản hồi tới người dùng cuối.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust no_run edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch20-web-server/listing-20-07/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 20-7: Phản hồi với mã trạng thái 404 và trang
+lỗi nếu có yêu cầu khác ngoài <em>/</em></span></p>
+<p>Ở đây, phản hồi của chúng ta có một dòng trạng thái với mã 404 và cụm từ lý
+do <code>NOT FOUND</code>. Phần thân của phản hồi sẽ là HTML trong file <em>404.html</em>. Bạn
+sẽ cần tạo một file <em>404.html</em> bên cạnh <em>hello.html</em> cho trang lỗi; một lần
+nữa, bạn có thể sử dụng bất kỳ HTML nào bạn muốn hoặc dùng ví dụ HTML trong
+Listing 20-8.</p>
+<p><span class="filename">Filename: 404.html</span></p>
+<pre><code class="language-html">{{#include ../listings/ch20-web-server/listing-20-07/404.html}}
+</code></pre>
+<p><span class="caption">Listing 20-8: Nội dung mẫu cho trang trả về với
+bất kỳ phản hồi 404 nào</span></p>
+<p>Với những thay đổi này, hãy chạy lại server của bạn. Yêu cầu <em>127.0.0.1:7878</em>
+sẽ trả về nội dung của <em>hello.html</em>, và bất kỳ yêu cầu nào khác, như
+<em>127.0.0.1:7878/foo</em>, sẽ trả về HTML lỗi từ <em>404.html</em>.</p>
+<h3 id="một-chút-refactoring"><a class="header" href="#một-chút-refactoring">Một chút refactoring</a></h3>
+<p>Hiện tại, các khối <code>if</code> và <code>else</code> có nhiều đoạn lặp lại: cả hai đều đọc file
+và ghi nội dung file vào stream. Sự khác biệt duy nhất là dòng trạng thái
+và tên file. Hãy làm code ngắn gọn hơn bằng cách tách những khác biệt đó
+ra các dòng <code>if</code> và <code>else</code> riêng, gán giá trị dòng trạng thái và tên file
+vào các biến; sau đó chúng ta có thể sử dụng các biến này một cách
+vô điều kiện trong code để đọc file và ghi phản hồi. Listing 20-9 cho thấy
+code kết quả sau khi thay thế các khối <code>if</code> và <code>else</code> lớn.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust no_run edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch20-web-server/listing-20-09/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 20-9: Refactoring các khối <code>if</code> và <code>else</code> chỉ
+chứa code khác nhau giữa hai trường hợp</span></p>
+<p>Bây giờ các khối <code>if</code> và <code>else</code> chỉ trả về các giá trị thích hợp cho dòng
+trạng thái và tên file dưới dạng một tuple; sau đó chúng ta dùng
+destructuring để gán hai giá trị này vào <code>status_line</code> và <code>filename</code>
+sử dụng pattern trong câu lệnh <code>let</code>, như đã thảo luận trong Chương 18.</p>
+<p>Code bị lặp trước đó giờ nằm ngoài các khối <code>if</code> và <code>else</code> và sử dụng
+các biến <code>status_line</code> và <code>filename</code>. Điều này giúp dễ nhìn thấy sự khác
+biệt giữa hai trường hợp, và có nghĩa là chúng ta chỉ có một chỗ để
+cập nhật code nếu muốn thay đổi cách đọc file và ghi phản hồi. Hành vi
+của code trong Listing 20-9 sẽ giống với Listing 20-8.</p>
+<p>Tuyệt vời! Bây giờ chúng ta có một web server đơn giản với khoảng 40 dòng
+code Rust, phản hồi một yêu cầu với một trang nội dung và phản hồi tất cả
+các yêu cầu khác với phản hồi 404.</p>
+<p>Hiện tại, server của chúng ta chạy trong một thread duy nhất, nghĩa là
+chỉ có thể phục vụ một yêu cầu tại một thời điểm. Hãy xem điều này có thể
+gây ra vấn đề như thế nào bằng cách mô phỏng một số yêu cầu chậm. Sau đó
+chúng ta sẽ sửa để server có thể xử lý nhiều yêu cầu cùng lúc.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch20-00-final-project-a-web-server.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch20-02-multithreaded.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch20-00-final-project-a-web-server.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch20-02-multithreaded.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

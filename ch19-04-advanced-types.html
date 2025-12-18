@@ -1,0 +1,372 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Advanced Types - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="kiểu-nâng-cao"><a class="header" href="#kiểu-nâng-cao">Kiểu nâng cao</a></h2>
+<p>Hệ thống kiểu của Rust có một số tính năng mà chúng ta đã đề cập nhưng chưa bàn chi tiết. Chúng ta sẽ bắt đầu bằng việc thảo luận về newtypes nói chung và xem tại sao newtypes hữu ích như các kiểu. Sau đó, chúng ta sẽ chuyển sang type aliases, một tính năng tương tự newtypes nhưng có ngữ nghĩa hơi khác. Chúng ta cũng sẽ thảo luận về kiểu <code>!</code> và các kiểu có kích thước động (dynamically sized types).</p>
+<h3 id="sử-dụng-newtype-pattern-để-đảm-bảo-an-toàn-kiểu-và-trừu-tượng-hóa"><a class="header" href="#sử-dụng-newtype-pattern-để-đảm-bảo-an-toàn-kiểu-và-trừu-tượng-hóa">Sử dụng Newtype Pattern để đảm bảo an toàn kiểu và trừu tượng hóa</a></h3>
+<blockquote>
+<p>Lưu ý: Phần này giả định bạn đã đọc phần trước <a href="ch19-03-advanced-traits.html#using-the-newtype-pattern-to-implement-external-traits-on-external-types">“Using the Newtype Pattern to Implement External Traits on External Types.”</a><!-- ignore --></p>
+</blockquote>
+<p>Newtype pattern cũng hữu ích cho các nhiệm vụ vượt ra ngoài những gì chúng ta đã thảo luận, bao gồm việc đảm bảo tại thời gian biên dịch rằng các giá trị không bị nhầm lẫn và chỉ định đơn vị của một giá trị. Bạn đã thấy một ví dụ về việc sử dụng newtypes để chỉ định đơn vị trong Listing 19-15: nhớ rằng các struct <code>Millimeters</code> và <code>Meters</code> bọc các giá trị <code>u32</code> trong một newtype. Nếu chúng ta viết một hàm với tham số kiểu <code>Millimeters</code>, chúng ta sẽ không thể biên dịch một chương trình mà vô tình cố gọi hàm đó với giá trị kiểu <code>Meters</code> hoặc một <code>u32</code> thông thường.</p>
+<p>Chúng ta cũng có thể sử dụng newtype pattern để trừu tượng hóa một số chi tiết triển khai của một kiểu: kiểu mới có thể cung cấp một API công khai khác với API của kiểu bên trong riêng tư.</p>
+<p>Newtypes cũng có thể che giấu triển khai bên trong. Ví dụ, chúng ta có thể cung cấp kiểu <code>People</code> để bọc một <code>HashMap&lt;i32, String&gt;</code> lưu trữ ID của một người liên kết với tên của họ. Mã sử dụng <code>People</code> chỉ tương tác với API công khai mà chúng ta cung cấp, chẳng hạn như một phương thức thêm tên vào tập hợp <code>People</code>; mã đó không cần biết rằng chúng ta gán một ID <code>i32</code> cho tên bên trong. Newtype pattern là một cách nhẹ để đạt được đóng gói (encapsulation) nhằm che giấu chi tiết triển khai, như chúng ta đã thảo luận trong phần <a href="ch17-01-what-is-oo.html#encapsulation-that-hides-implementation-details">“Encapsulation that Hides Implementation Details”</a><!-- ignore --> của Chương 17.</p>
+<h3 id="tạo-bí-danh-kiểu-với-type-aliases"><a class="header" href="#tạo-bí-danh-kiểu-với-type-aliases">Tạo bí danh kiểu với Type Aliases</a></h3>
+<p>Rust cung cấp khả năng khai báo một <em>type alias</em> để đặt một tên khác cho một kiểu hiện có. Chúng ta sử dụng từ khóa <code>type</code> cho việc này. Ví dụ, chúng ta có thể tạo bí danh <code>Kilometers</code> cho <code>i32</code> như sau:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/no-listing-04-kilometers-alias/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<p>Bây giờ, bí danh <code>Kilometers</code> là một <em>tên đồng nghĩa</em> với <code>i32</code>; khác với các kiểu <code>Millimeters</code> và <code>Meters</code> mà chúng ta đã tạo trong Listing 19-15, <code>Kilometers</code> không phải là một kiểu mới, riêng biệt. Các giá trị có kiểu <code>Kilometers</code> sẽ được xử lý giống như các giá trị kiểu <code>i32</code>:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/no-listing-04-kilometers-alias/src/main.rs:there}}
+<span class="boring">}</span></code></pre></pre>
+<p>Vì <code>Kilometers</code> và <code>i32</code> là cùng một kiểu, chúng ta có thể cộng các giá trị của cả hai kiểu và có thể truyền các giá trị <code>Kilometers</code> vào các hàm nhận tham số kiểu <code>i32</code>. Tuy nhiên, sử dụng phương pháp này, chúng ta không có lợi ích kiểm tra kiểu (type checking) như khi sử dụng newtype pattern đã thảo luận trước đó. Nói cách khác, nếu chúng ta nhầm lẫn giữa các giá trị <code>Kilometers</code> và <code>i32</code> ở đâu đó, trình biên dịch sẽ không báo lỗi.</p>
+<p>Trường hợp sử dụng chính của các bí danh kiểu là giảm sự lặp lại. Ví dụ, chúng ta có thể có một kiểu dài như sau:</p>
+<pre><code class="language-rust ignore">Box&lt;dyn Fn() + Send + 'static&gt;</code></pre>
+<p>Việc viết kiểu dài này trong các chữ ký hàm và chú thích kiểu khắp nơi trong mã có thể gây mệt mỏi và dễ sai sót. Hãy tưởng tượng một dự án đầy các đoạn mã như trong Listing 19-24.</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-24/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 19-24: Sử dụng một kiểu dài ở nhiều nơi</span></p>
+<p>Một bí danh kiểu giúp mã này dễ quản lý hơn bằng cách giảm sự lặp lại. Trong Listing 19-25, chúng ta đã tạo một bí danh tên là <code>Thunk</code> cho kiểu dài dòng và có thể thay thế tất cả các lần sử dụng kiểu này bằng bí danh ngắn hơn <code>Thunk</code>.</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-25/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 19-25: Giới thiệu bí danh kiểu <code>Thunk</code> để giảm sự lặp lại</span></p>
+<p>Mã này dễ đọc và viết hơn rất nhiều! Việc chọn một tên có ý nghĩa cho một bí danh kiểu cũng giúp truyền đạt ý định của bạn (<em>thunk</em> là một từ chỉ đoạn mã sẽ được đánh giá sau, nên nó là tên phù hợp cho một closure được lưu trữ).</p>
+<p>Các bí danh kiểu cũng thường được sử dụng với kiểu <code>Result&lt;T, E&gt;</code> để giảm sự lặp lại. Hãy xem xét module <code>std::io</code> trong thư viện chuẩn. Các thao tác I/O thường trả về <code>Result&lt;T, E&gt;</code> để xử lý các tình huống khi thao tác không thành công. Thư viện này có struct <code>std::io::Error</code> đại diện cho tất cả các lỗi I/O có thể xảy ra. Nhiều hàm trong <code>std::io</code> sẽ trả về <code>Result&lt;T, E&gt;</code> với <code>E</code> là <code>std::io::Error</code>, ví dụ như các hàm trong trait <code>Write</code>:</p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch19-advanced-features/no-listing-05-write-trait/src/lib.rs}}</code></pre>
+<p>Kiểu <code>Result&lt;..., Error&gt;</code> được lặp lại rất nhiều. Do đó, <code>std::io</code> có khai báo bí danh kiểu như sau:</p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch19-advanced-features/no-listing-06-result-alias/src/lib.rs:here}}</code></pre>
+<p>Vì khai báo này nằm trong module <code>std::io</code>, chúng ta có thể sử dụng bí danh kiểu đầy đủ <code>std::io::Result&lt;T&gt;</code>; nghĩa là một <code>Result&lt;T, E&gt;</code> với <code>E</code> được điền là <code>std::io::Error</code>. Chữ ký các hàm trong trait <code>Write</code> sẽ trông như sau:</p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch19-advanced-features/no-listing-06-result-alias/src/lib.rs:there}}</code></pre>
+<p>Bí danh kiểu hữu ích theo hai cách: nó làm cho mã dễ viết hơn <em>và</em> cung cấp một giao diện nhất quán trên toàn bộ <code>std::io</code>. Vì nó chỉ là một bí danh, nó vẫn là <code>Result&lt;T, E&gt;</code>, nghĩa là chúng ta có thể sử dụng bất kỳ phương thức nào hoạt động trên <code>Result&lt;T, E&gt;</code> với nó, cũng như các cú pháp đặc biệt như toán tử <code>?</code>.</p>
+<h3 id="kiểu-never-không-bao-giờ-trả-về"><a class="header" href="#kiểu-never-không-bao-giờ-trả-về">Kiểu Never không bao giờ trả về</a></h3>
+<p>Rust có một kiểu đặc biệt tên là <code>!</code>, trong lý thuyết kiểu được gọi là <em>kiểu rỗng</em> vì nó không có giá trị nào. Chúng ta thích gọi nó là <em>never type</em> vì nó đứng ở vị trí kiểu trả về khi một hàm sẽ không bao giờ trả về. Đây là một ví dụ:</p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch19-advanced-features/no-listing-07-never-type/src/lib.rs:here}}</code></pre>
+<p>Mã này được đọc là “hàm <code>bar</code> không bao giờ trả về.” Các hàm trả về kiểu never được gọi là <em>diverging functions</em>. Chúng ta không thể tạo giá trị của kiểu <code>!</code>, nên <code>bar</code> sẽ không bao giờ có thể trả về.</p>
+<p>Nhưng một kiểu mà bạn không bao giờ có thể tạo giá trị của nó có tác dụng gì? Hãy nhớ lại mã từ Listing 2-5, một phần của trò chơi đoán số; chúng tôi đã tái hiện một phần ở đây trong Listing 19-26.</p>
+<pre><code class="language-rust ignore"><span class="boring">use std::cmp::Ordering;
+</span><span class="boring">use std::io;
+</span><span class="boring">
+</span><span class="boring">use rand::Rng;
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    println!("Guess the number!");
+</span><span class="boring">
+</span><span class="boring">    let secret_number = rand::thread_rng().gen_range(1..=100);
+</span><span class="boring">
+</span><span class="boring">    println!("The secret number is: {secret_number}");
+</span><span class="boring">
+</span><span class="boring">    loop {
+</span><span class="boring">        println!("Please input your guess.");
+</span><span class="boring">
+</span><span class="boring">        let mut guess = String::new();
+</span><span class="boring">
+</span><span class="boring">        // --snip--
+</span><span class="boring">
+</span><span class="boring">        io::stdin()
+</span><span class="boring">            .read_line(&amp;mut guess)
+</span><span class="boring">            .expect("Failed to read line");
+</span><span class="boring">
+</span>        let guess: u32 = match guess.trim().parse() {
+            Ok(num) =&gt; num,
+            Err(_) =&gt; continue,
+        };
+<span class="boring">
+</span><span class="boring">        println!("You guessed: {guess}");
+</span><span class="boring">
+</span><span class="boring">        // --snip--
+</span><span class="boring">
+</span><span class="boring">        match guess.cmp(&amp;secret_number) {
+</span><span class="boring">            Ordering::Less =&gt; println!("Too small!"),
+</span><span class="boring">            Ordering::Greater =&gt; println!("Too big!"),
+</span><span class="boring">            Ordering::Equal =&gt; {
+</span><span class="boring">                println!("You win!");
+</span><span class="boring">                break;
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">}</span></code></pre>
+<p><span class="caption">Listing 19-26: Một <code>match</code> với nhánh kết thúc bằng <code>continue</code></span></p>
+<p>Lúc đó, chúng ta đã bỏ qua một số chi tiết trong mã này. Trong Chương 6, trong phần <a href="ch06-02-match.html#the-match-control-flow-operator">“Toán tử điều khiển luồng <code>match</code>”</a><!-- ignore -->, chúng ta đã thảo luận rằng tất cả các nhánh của <code>match</code> phải trả về cùng một kiểu. Vì vậy, ví dụ, mã sau đây sẽ không hoạt động:</p>
+<pre><code class="language-rust ignore does_not_compile">{{#rustdoc_include ../listings/ch19-advanced-features/no-listing-08-match-arms-different-types/src/main.rs:here}}</code></pre>
+<p>Kiểu của <code>guess</code> trong mã này sẽ phải vừa là một số nguyên <em>vừa</em> là một chuỗi, và Rust yêu cầu <code>guess</code> chỉ có một kiểu duy nhất. Vậy <code>continue</code> trả về gì? Làm sao chúng ta được phép trả về một <code>u32</code> từ một nhánh và có một nhánh khác kết thúc bằng <code>continue</code> trong Listing 19-26?</p>
+<p>Như bạn có thể đoán, <code>continue</code> có giá trị kiểu <code>!</code>. Nghĩa là khi Rust tính toán kiểu của <code>guess</code>, nó nhìn vào cả hai nhánh của <code>match</code>, nhánh trước có giá trị là <code>u32</code> và nhánh sau có giá trị là <code>!</code>. Vì <code>!</code> không bao giờ có giá trị, Rust quyết định rằng kiểu của <code>guess</code> là <code>u32</code>.</p>
+<p>Cách chính thức để mô tả hành vi này là các biểu thức có kiểu <code>!</code> có thể được ép sang bất kỳ kiểu nào khác. Chúng ta được phép kết thúc nhánh <code>match</code> này bằng <code>continue</code> vì <code>continue</code> không trả về giá trị; thay vào đó, nó đưa luồng điều khiển quay trở lại đầu vòng lặp, nên trong trường hợp <code>Err</code>, chúng ta không bao giờ gán giá trị cho <code>guess</code>.</p>
+<p>Kiểu never cũng hữu ích với macro <code>panic!</code>. Hãy nhớ lại hàm <code>unwrap</code> mà chúng ta gọi trên các giá trị <code>Option&lt;T&gt;</code> để tạo ra một giá trị hoặc gây panic với định nghĩa sau:</p>
+<pre><code class="language-rust ignore">{{#rustdoc_include ../listings/ch19-advanced-features/no-listing-09-unwrap-definition/src/lib.rs:here}}</code></pre>
+<p>Trong mã này, điều tương tự xảy ra như trong <code>match</code> ở Listing 19-26: Rust thấy rằng <code>val</code> có kiểu <code>T</code> và <code>panic!</code> có kiểu <code>!</code>, nên kết quả của toàn bộ biểu thức <code>match</code> là <code>T</code>. Mã này hoạt động vì <code>panic!</code> không tạo ra giá trị; nó kết thúc chương trình. Trong trường hợp <code>None</code>, chúng ta sẽ không trả về giá trị từ <code>unwrap</code>, nên mã này là hợp lệ.</p>
+<p>Một biểu thức cuối cùng có kiểu <code>!</code> là <code>loop</code>:</p>
+<pre><code class="language-rust ignore">{{#rustdoc_include ../listings/ch19-advanced-features/no-listing-10-loop-returns-never/src/main.rs:here}}</code></pre>
+<p>Ở đây, vòng lặp không bao giờ kết thúc, nên <code>!</code> là giá trị của biểu thức. Tuy nhiên, điều này sẽ không đúng nếu chúng ta bao gồm một <code>break</code>, vì vòng lặp sẽ kết thúc khi gặp <code>break</code>.</p>
+<h3 id="kiểu-có-kích-thước-Động-và-trait-sized"><a class="header" href="#kiểu-có-kích-thước-Động-và-trait-sized">Kiểu có Kích thước Động và Trait <code>Sized</code></a></h3>
+<p>Rust cần biết một số chi tiết về các kiểu của nó, chẳng hạn như bao nhiêu bộ nhớ cần cấp phát cho một giá trị của kiểu cụ thể. Điều này để lại một khía cạnh hơi khó hiểu lúc đầu trong hệ thống kiểu của Rust: khái niệm <em>các kiểu có kích thước động</em>. Đôi khi được gọi là <em>DSTs</em> hoặc <em>unsized types</em>, các kiểu này cho phép chúng ta viết mã với các giá trị mà kích thước chỉ biết được khi chạy chương trình.</p>
+<p>Hãy đi sâu vào chi tiết về một kiểu có kích thước động gọi là <code>str</code>, mà chúng ta đã sử dụng trong suốt cuốn sách. Đúng vậy, không phải <code>&amp;str</code>, mà chính <code>str</code> là một DST. Chúng ta không thể biết độ dài của chuỗi cho đến khi chạy chương trình, nghĩa là chúng ta không thể tạo biến có kiểu <code>str</code>, cũng không thể nhận đối số kiểu <code>str</code>. Xem xét mã sau, mã này không hoạt động:</p>
+<pre><code class="language-rust ignore does_not_compile">{{#rustdoc_include ../listings/ch19-advanced-features/no-listing-11-cant-create-str/src/main.rs:here}}</code></pre>
+<p>Rust cần biết lượng bộ nhớ cần cấp phát cho bất kỳ giá trị nào của một kiểu cụ thể, và tất cả các giá trị của một kiểu phải sử dụng cùng một lượng bộ nhớ. Nếu Rust cho phép chúng ta viết đoạn mã này, hai giá trị <code>str</code> này sẽ cần chiếm cùng một lượng không gian. Nhưng chúng có độ dài khác nhau: <code>s1</code> cần 12 byte bộ nhớ và <code>s2</code> cần 15 byte. Đây là lý do tại sao không thể tạo một biến chứa kiểu có kích thước động.</p>
+<p>Vậy chúng ta làm gì? Trong trường hợp này, bạn đã biết câu trả lời: chúng ta đặt kiểu của <code>s1</code> và <code>s2</code> là <code>&amp;str</code> thay vì <code>str</code>. Nhớ lại từ phần <a href="ch04-03-slices.html#string-slices">“String Slices”</a><!-- ignore --> trong Chương 4 rằng cấu trúc dữ liệu slice chỉ lưu vị trí bắt đầu và độ dài của slice. Vì vậy, mặc dù một <code>&amp;T</code> là một giá trị duy nhất lưu địa chỉ bộ nhớ nơi <code>T</code> nằm, một <code>&amp;str</code> lại là <em>hai</em> giá trị: địa chỉ của <code>str</code> và độ dài của nó. Như vậy, chúng ta có thể biết kích thước của một giá trị <code>&amp;str</code> tại thời gian biên dịch: nó gấp đôi kích thước của một <code>usize</code>. Tức là, chúng ta luôn biết kích thước của <code>&amp;str</code>, bất kể chuỗi mà nó tham chiếu dài bao nhiêu. Nói chung, đây là cách các kiểu có kích thước động được sử dụng trong Rust: chúng có một phần metadata bổ sung lưu kích thước của thông tin động. Quy tắc vàng của các kiểu có kích thước động là chúng ta phải luôn đặt các giá trị của kiểu có kích thước động sau một con trỏ nào đó.</p>
+<p>Chúng ta có thể kết hợp <code>str</code> với tất cả các loại con trỏ: ví dụ, <code>Box&lt;str&gt;</code> hoặc <code>Rc&lt;str&gt;</code>. Thực tế, bạn đã thấy điều này trước đây nhưng với một kiểu có kích thước động khác: traits. Mỗi trait là một kiểu có kích thước động mà chúng ta có thể tham chiếu bằng cách sử dụng tên của trait. Trong Chương 17, phần <a href="ch17-02-trait-objects.html#using-trait-objects-that-allow-for-values-of-different-types">“Using Trait Objects That Allow for Values of Different Types”</a><!-- ignore -->, chúng ta đã đề cập rằng để sử dụng trait như trait objects, chúng ta phải đặt chúng sau một con trỏ, chẳng hạn như <code>&amp;dyn Trait</code> hoặc <code>Box&lt;dyn Trait&gt;</code> (<code>Rc&lt;dyn Trait&gt;</code> cũng được).</p>
+<p>Để làm việc với DSTs, Rust cung cấp trait <code>Sized</code> để xác định xem kích thước của một kiểu có được biết tại thời gian biên dịch hay không. Trait này được triển khai tự động cho mọi thứ có kích thước được biết tại thời gian biên dịch. Ngoài ra, Rust ngầm thêm một ràng buộc <code>Sized</code> vào mọi hàm generic. Tức là, một định nghĩa hàm generic như sau:</p>
+<pre><code class="language-rust ignore">{{#rustdoc_include ../listings/ch19-advanced-features/no-listing-12-generic-fn-definition/src/lib.rs}}</code></pre>
+<p>thực ra được coi như chúng ta đã viết như sau:</p>
+<pre><code class="language-rust ignore">{{#rustdoc_include ../listings/ch19-advanced-features/no-listing-13-generic-implicit-sized-bound/src/lib.rs}}</code></pre>
+<p>Mặc định, các hàm generic chỉ hoạt động trên các kiểu có kích thước được biết tại thời gian biên dịch. Tuy nhiên, bạn có thể sử dụng cú pháp đặc biệt sau để nới lỏng hạn chế này:</p>
+<pre><code class="language-rust ignore">{{#rustdoc_include ../listings/ch19-advanced-features/no-listing-14-generic-maybe-sized/src/lib.rs}}</code></pre>
+<p>Một ràng buộc trait với <code>?Sized</code> có nghĩa là “<code>T</code> có thể có hoặc không có kích thước xác định” và ký hiệu này ghi đè mặc định rằng các kiểu generic phải có kích thước được biết tại thời gian biên dịch. Cú pháp <code>?Trait</code> với ý nghĩa này chỉ áp dụng cho <code>Sized</code>, không áp dụng cho bất kỳ trait nào khác.</p>
+<p>Cũng lưu ý rằng chúng ta đã chuyển kiểu của tham số <code>t</code> từ <code>T</code> sang <code>&amp;T</code>. Vì kiểu này có thể không phải là <code>Sized</code>, chúng ta cần sử dụng nó thông qua một loại con trỏ nào đó. Trong trường hợp này, chúng ta đã chọn sử dụng một reference.</p>
+<p>Tiếp theo, chúng ta sẽ nói về các hàm và closures!</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch19-03-advanced-traits.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch19-05-advanced-functions-and-closures.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch19-03-advanced-traits.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch19-05-advanced-functions-and-closures.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

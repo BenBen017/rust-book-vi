@@ -1,0 +1,658 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Generic Data Types - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="các-kiểu-dữ-liệu-generic"><a class="header" href="#các-kiểu-dữ-liệu-generic">Các kiểu dữ liệu Generic</a></h2>
+<p>Chúng ta sử dụng generics để tạo định nghĩa cho các mục như chữ ký hàm hoặc
+các struct, mà chúng ta sau đó có thể sử dụng với nhiều loại dữ liệu cụ thể
+khác nhau. Hãy trước hết xem cách định nghĩa hàm, struct, enum và các phương
+thức bằng generics. Sau đó, chúng ta sẽ thảo luận về cách generics ảnh hưởng
+đến hiệu suất của code.</p>
+<h3 id="trong-Định-nghĩa-hàm"><a class="header" href="#trong-Định-nghĩa-hàm">Trong Định nghĩa Hàm</a></h3>
+<p>Khi định nghĩa một hàm sử dụng generics, chúng ta đặt generics trong chữ ký
+của hàm nơi chúng ta thường chỉ định loại dữ liệu của các tham số và giá trị
+trả về. Việc này làm cho code của chúng ta linh hoạt hơn và cung cấp thêm chức
+năng cho người gọi hàm của chúng ta trong khi ngăn chặn việc trùng lặp code.</p>
+<p>Tiếp tục với hàm <code>largest</code> của chúng ta, Listing 10-4 hiển thị hai hàm cả hai
+đều tìm giá trị lớn nhất trong một slice. Sau đó, chúng ta sẽ kết hợp chúng
+thành một hàm duy nhất sử dụng generics.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">fn largest_i32(list: &amp;[i32]) -&gt; &amp;i32 {
+    let mut largest = &amp;list[0];
+
+    for item in list {
+        if item &gt; largest {
+            largest = item;
+        }
+    }
+
+    largest
+}
+
+fn largest_char(list: &amp;[char]) -&gt; &amp;char {
+    let mut largest = &amp;list[0];
+
+    for item in list {
+        if item &gt; largest {
+            largest = item;
+        }
+    }
+
+    largest
+}
+
+fn main() {
+    let number_list = vec![34, 50, 25, 100, 65];
+
+    let result = largest_i32(&amp;number_list);
+    println!("The largest number is {result}");
+<span class="boring">    assert_eq!(*result, 100);
+</span>
+    let char_list = vec!['y', 'm', 'a', 'q'];
+
+    let result = largest_char(&amp;char_list);
+    println!("The largest char is {result}");
+<span class="boring">    assert_eq!(*result, 'y');
+</span>}</code></pre></pre>
+<p><span class="caption">Listing 10-4: Two functions that differ only in their
+names and the types in their signatures</span></p>
+<p>Hàm <code>largest_i32</code> là hàm chúng ta đã trích xuất ở Listing 10-3 để tìm giá trị
+lớn nhất của <code>i32</code> trong một slice. Hàm <code>largest_char</code> tìm giá trị lớn nhất của <code>char</code>
+trong một slice. Cả hai hàm có cùng code nguồn, vì vậy hãy loại bỏ sự trùng lặp
+bằng cách giới thiệu một tham số kiểu generic trong một hàm duy nhất.</p>
+<p>Để tham số hóa các loại trong một hàm mới, chúng ta cần đặt tên tham số kiểu,
+giống như chúng ta làm với các tham số giá trị của một hàm. Bạn có thể sử dụng
+bất kỳ định danh nào làm tên tham số kiểu. Nhưng chúng ta sẽ sử dụng <code>T</code> vì theo
+quy ước, tên tham số kiểu trong Rust ngắn gọn, thường chỉ là một chữ cái, và
+quy ước đặt tên kiểu của Rust là CamelCase. Rút gọn từ “type,” <code>T</code> là lựa chọn
+mặc định của hầu hết các lập trình viên Rust.</p>
+<p>Khi chúng ta sử dụng một tham số trong thân của hàm, chúng ta phải khai báo tên
+tham số trong chữ ký để trình biên dịch biết nghĩa của tên đó là gì. Tương tự, khi
+chúng ta sử dụng tên tham số kiểu trong chữ ký hàm, chúng ta phải khai báo tên
+tham số kiểu trước khi sử dụng nó. Để định nghĩa hàm generic <code>largest</code>, đặt khai
+báo tên kiểu bên trong dấu ngoặc nhọn, <code>&lt;&gt;</code>, giữa tên hàm và danh sách tham số, như sau:</p>
+<pre><code class="language-rust ignore">fn largest&lt;T&gt;(list: &amp;[T]) -&gt; &amp;T {</code></pre>
+<p>Chúng ta đọc định nghĩa này như sau: hàm <code>largest</code> là generic qua một loại T
+nào đó. Hàm này có một tham số có tên là <code>list</code>, là một slice của các giá trị
+kiểu <code>T</code>. Hàm <code>largest</code> sẽ trả về một tham chiếu đến một giá trị cùng kiểu <code>T</code>.</p>
+<p>Listing 10-5 cho thấy định nghĩa hàm <code>largest</code> kết hợp sử dụng kiểu dữ liệu
+generic trong chữ ký của nó. Listing cũng cho thấy cách chúng ta có thể gọi
+hàm với một slice của giá trị <code>i32</code> hoặc giá trị <code>char</code>. Lưu ý rằng đoạn code này
+chưa thể biên dịch được, nhưng chúng ta sẽ sửa nó sau trong chương này.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile">fn largest&lt;T&gt;(list: &amp;[T]) -&gt; &amp;T {
+    let mut largest = &amp;list[0];
+
+    for item in list {
+        if item &gt; largest {
+            largest = item;
+        }
+    }
+
+    largest
+}
+
+fn main() {
+    let number_list = vec![34, 50, 25, 100, 65];
+
+    let result = largest(&amp;number_list);
+    println!("The largest number is {result}");
+
+    let char_list = vec!['y', 'm', 'a', 'q'];
+
+    let result = largest(&amp;char_list);
+    println!("The largest char is {result}");
+}</code></pre>
+<p><span class="caption">Listing 10-5: Hàm <code>largest</code> sử dụng các tham số kiểu
+generic; code này hiện chưa thể biên dịch được</span></p>
+<p>Nếu chúng ta biên dịch đoạn code này ngay bây giờ, chúng ta sẽ nhận được lỗi này:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling chapter10 v0.1.0 (file:///projects/chapter10)
+error[E0369]: binary operation `&gt;` cannot be applied to type `&amp;T`
+ --&gt; src/main.rs:5:17
+  |
+5 |         if item &gt; largest {
+  |            ---- ^ ------- &amp;T
+  |            |
+  |            &amp;T
+  |
+help: consider restricting type parameter `T` with trait `PartialOrd`
+  |
+1 | fn largest&lt;T: std::cmp::PartialOrd&gt;(list: &amp;[T]) -&gt; &amp;T {
+  |             ++++++++++++++++++++++
+
+For more information about this error, try `rustc --explain E0369`.
+error: could not compile `chapter10` (bin "chapter10") due to 1 previous error
+</code></pre>
+<p>Phần trợ giúp chỉ đến <code>std::cmp::PartialOrd</code>, đó là một <em>trait</em>, và chúng ta
+sẽ nói về các traits trong phần tiếp theo. Hiện tại, hãy biết rằng lỗi này
+nói rằng thân của <code>largest</code> không hoạt động với tất cả các loại <code>T</code> có thể có.
+Vì chúng ta muốn so sánh giá trị của kiểu <code>T</code> trong thân hàm, chúng ta chỉ có
+thể sử dụng các loại mà giá trị của chúng có thể được so sánh. Để kích hoạt so
+sánh, thư viện chuẩn có trait <code>std::cmp::PartialOrd</code> mà bạn có thể triển khai cho
+các loại (xem Phụ lục C để biết thêm về trait này). Bằng cách tuân theo gợi ý
+của văn bản trợ giúp, chúng ta giới hạn các loại hợp lệ cho <code>T</code> chỉ đến những
+loại triển khai PartialOrd, và ví dụ này sẽ biên dịch được, vì thư viện chuẩn
+triển khai <code>PartialOrd</code> cho cả <code>i32</code> và <code>char</code>.</p>
+<h3 id="trong-các-Định-nghĩa-struct"><a class="header" href="#trong-các-Định-nghĩa-struct">Trong Các Định Nghĩa Struct</a></h3>
+<p>Chúng ta cũng có thể định nghĩa các structs để sử dụng một tham số kiểu generic
+trong một hoặc nhiều trường bằng cú pháp <code>&lt;&gt;</code>. Listing 10-6 định nghĩa một
+struct <code>Point&lt;T&gt;</code> để chứa các giá trị tọa độ <code>x</code> và <code>y</code> của bất kỳ kiểu nào.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">struct Point&lt;T&gt; {
+    x: T,
+    y: T,
+}
+
+fn main() {
+    let integer = Point { x: 5, y: 10 };
+    let float = Point { x: 1.0, y: 4.0 };
+}</code></pre></pre>
+<p><span class="caption">Listing 10-6: Một struct <code>Point&lt;T&gt;</code> chứa các giá trị x
+và y của kiểu <code>T</code></span></p>
+<p>Cú pháp sử dụng generics trong định nghĩa struct tương tự như cú pháp
+được sử dụng trong định nghĩa hàm. Trước tiên, chúng ta khai báo tên
+của tham số kiểu bên trong dấu ngoặc nhọn ngay sau tên của struct. Sau
+đó, chúng ta sử dụng kiểu generic trong định nghĩa struct ở những nơi
+chúng ta thông thường sẽ chỉ định kiểu dữ liệu cụ thể.</p>
+<p>Lưu ý rằng vì chúng ta đã sử dụng chỉ một kiểu generic để định nghĩa <code>Point&lt;T&gt;</code>,
+định nghĩa này nói rằng struct <code>Point&lt;T&gt;</code> là generic trên một loại <code>T</code>, và các
+trường <code>x</code> và <code>y</code> đều là cùng một kiểu đó, bất kể kiểu đó là gì. Nếu chúng ta
+tạo một thể hiện của <code>Point&lt;T&gt;</code> có giá trị của các kiểu khác nhau, như trong
+Listing 10-7, code nguồn của chúng ta sẽ không biên dịch được.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile">struct Point&lt;T&gt; {
+    x: T,
+    y: T,
+}
+
+fn main() {
+    let wont_work = Point { x: 5, y: 4.0 };
+}</code></pre>
+<p><span class="caption">Listing 10-7: Các trường <code>x</code> and <code>y</code> phải có cùng kiểu vì chúng
+sử dụng cùng kiểu generic T</span></p>
+<p>Trong ví dụ này, khi chúng ta gán giá trị số nguyên 5 cho <code>x</code>, chúng ta thông
+báo cho trình biên dịch biết rằng kiểu generic T sẽ là một số nguyên cho
+instance này của <code>Point&lt;T&gt;</code>. Sau đó, khi chúng ta chỉ định giá trị 4.0 cho
+<code>y</code>, mà chúng ta đã định nghĩa có cùng kiểu với x, chúng ta sẽ nhận được một
+lỗi không khớp kiểu như sau:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling chapter10 v0.1.0 (file:///projects/chapter10)
+error[E0308]: mismatched types
+ --&gt; src/main.rs:7:38
+  |
+7 |     let wont_work = Point { x: 5, y: 4.0 };
+  |                                      ^^^ expected integer, found floating-point number
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `chapter10` (bin "chapter10") due to 1 previous error
+</code></pre>
+<p>To define a <code>Point</code> struct where <code>x</code> and <code>y</code> are both generics but could have
+different types, we can use multiple generic type parameters. For example, in
+Listing 10-8, we change the definition of <code>Point</code> to be generic over types <code>T</code>
+and <code>U</code> where <code>x</code> is of type <code>T</code> and <code>y</code> is of type <code>U</code>.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">struct Point&lt;T, U&gt; {
+    x: T,
+    y: U,
+}
+
+fn main() {
+    let both_integer = Point { x: 5, y: 10 };
+    let both_float = Point { x: 1.0, y: 4.0 };
+    let integer_and_float = Point { x: 5, y: 4.0 };
+}</code></pre></pre>
+<p><span class="caption">Listing 10-8: Một struct <code>Point&lt;T, U&gt;</code> generic trên hai
+kiểu để <code>x</code> và <code>y</code> có thể là giá trị của các kiểu khác nhau</span></p>
+<p>Bây giờ tất cả các thể hiện của <code>Point</code> được hiển thị đều được chấp nhận!
+Bạn có thể sử dụng nhiều tham số kiểu generic trong định nghĩa càng nhiều
+càng tốt, nhưng sử dụng quá nhiều có thể làm cho code nguồn của bạn khó đọc.
+Nếu bạn phát hiện bạn cần nhiều kiểu generic trong code nguồn của mình,
+điều này có thể là dấu hiệu cho thấy code nguồn của bạn cần được tổ chức
+lại thành các phần nhỏ hơn.</p>
+<h3 id="trong-Định-nghĩa-enum"><a class="header" href="#trong-Định-nghĩa-enum">Trong Định Nghĩa Enum</a></h3>
+<p>Như chúng ta đã làm với các struct, chúng ta có thể định nghĩa các enum để giữ
+các kiểu dữ liệu chung trong các biến khác nhau của chúng. Hãy xem xét
+lại enum <code>Option&lt;T&gt;</code> mà thư viện chuẩn cung cấp, mà chúng ta đã sử dụng trong Chương 6:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum Option&lt;T&gt; {
+    Some(T),
+    None,
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Bây giờ, định nghĩa này sẽ rõ hơn đối với bạn. Như bạn có thể thấy, enum <code>Option&lt;T&gt;</code>
+là chung cho kiểu T và có hai biến thể: Some, giữ một giá trị của kiểu T, và
+một biến thể None không giữ bất kỳ giá trị nào. Bằng cách sử dụng enum <code>Option&lt;T&gt;</code>,
+chúng ta có thể diễn đạt khái niệm trừu tượng của giá trị tùy chọn, và do enum
+Option<T> là chung, chúng ta có thể sử dụng trừu tượng này không phụ thuộc vào
+kiểu giá trị tùy chọn là gì.</p>
+<p>Enum cũng có thể sử dụng nhiều kiểu chung. Định nghĩa enum Result mà chúng ta sử
+dụng trong Chương 9 là một ví dụ:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum Result&lt;T, E&gt; {
+    Ok(T),
+    Err(E),
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Enum Result là chung cho hai kiểu T và E, và có hai biến thể: Ok, giữ một giá
+trị của kiểu T, và Err, giữ một giá trị của kiểu E. Định nghĩa này làm cho
+việc sử dụng enum Result thuận lợi ở bất kỳ nơi nào chúng ta có một hoạt động có
+thể thành công (trả về một giá trị của một kiểu T) hoặc thất bại (trả về một lỗi
+của một kiểu E). Trong thực tế, đây là điều chúng ta đã sử dụng để mở một tập tin
+trong Listing 9-3, trong đó T được điền bằng kiểu std::fs::File khi tập tin được
+mở thành công và E được điền bằng kiểu std::io::Error khi có vấn đề khi mở tập tin.</p>
+<p>Khi bạn nhận diện các tình huống trong code của bạn với nhiều định nghĩa struct hoặc
+enum khác nhau chỉ khác nhau ở các kiểu giá trị chúng giữ, bạn có thể tránh sự
+trùng lặp bằng cách sử dụng các kiểu chung.</p>
+<h3 id="trong-Định-nghĩa-phương-thức"><a class="header" href="#trong-Định-nghĩa-phương-thức">Trong Định Nghĩa Phương Thức</a></h3>
+<p>Chúng ta có thể triển khai các phương thức trên các struct và enums (như chúng
+ta đã làm trong Chương 5) và sử dụng các kiểu generic trong định nghĩa của chúng
+cũng. Listing 10-9 hiển thị struct <code>Point&lt;T&gt;</code> mà chúng ta đã định nghĩa trong
+Listing 10-6 với một phương thức có tên là <code>x</code>.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">struct Point&lt;T&gt; {
+    x: T,
+    y: T,
+}
+
+impl&lt;T&gt; Point&lt;T&gt; {
+    fn x(&amp;self) -&gt; &amp;T {
+        &amp;self.x
+    }
+}
+
+fn main() {
+    let p = Point { x: 5, y: 10 };
+
+    println!("p.x = {}", p.x());
+}</code></pre></pre>
+<p><span clas	s="caption">Listing 10-9: Triển khai một phương thức có tên <code>x</code> trên cấu trúc
+<code>Point&lt;T&gt;</code> sẽ trả về một tham chiếu đến trường <code>x</code> kiểu <code>T</code>.</span></p>
+<p>Ở đây, chúng ta đã định nghĩa một phương thức có tên x trên <code>Point&lt;T&gt;</code> trả về một
+tham chiếu đến dữ liệu trong trường <code>x</code>.</p>
+<p>Lưu ý rằng chúng ta phải khai báo <code>T</code> ngay sau <code>impl</code> để chúng ta có thể sử dụng <code>T</code>
+để chỉ định rằng chúng ta đang triển khai các phương thức trên kiểu <code>Point&lt;T&gt;</code>. Bằng
+cách khai báo <code>T</code> làm một loại generic sau impl, Rust có thể xác định rằng kiểu
+trong ngoặc nhọn ở <code>Point</code> là một kiểu generic thay vì một kiểu cụ thể. Chúng ta
+có thể chọn một tên khác cho tham số generic này so với tham số generic được
+khai báo trong định nghĩa struct, nhưng việc sử dụng cùng một tên là phổ biến.
+Các phương thức được viết trong một <code>impl</code> khai báo tham số generic sẽ được định
+nghĩa cho bất kỳ thể hiện nào của kiểu đó, không phụ thuộc vào kiểu cụ thể nào
+thay thế cho kiểu generic.</p>
+<p>Chúng ta cũng có thể chỉ định ràng buộc trên các kiểu generic khi định nghĩa
+các phương thức trên kiểu. Ví dụ, chúng ta có thể triển khai các phương thức
+chỉ trên các thể hiện <code>Point&lt;f32&gt;</code> thay vì trên các thể hiện <code>Point&lt;T&gt;</code> với bất kỳ
+kiểu generic nào. Trong Listing 10-10, chúng ta sử dụng kiểu cụ thể <code>f32</code>, có
+nghĩa là chúng ta không khai báo bất kỳ kiểu nào sau impl.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">struct Point&lt;T&gt; {
+</span><span class="boring">    x: T,
+</span><span class="boring">    y: T,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl&lt;T&gt; Point&lt;T&gt; {
+</span><span class="boring">    fn x(&amp;self) -&gt; &amp;T {
+</span><span class="boring">        &amp;self.x
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span>impl Point&lt;f32&gt; {
+    fn distance_from_origin(&amp;self) -&gt; f32 {
+        (self.x.powi(2) + self.y.powi(2)).sqrt()
+    }
+}
+<span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    let p = Point { x: 5, y: 10 };
+</span><span class="boring">
+</span><span class="boring">    println!("p.x = {}", p.x());
+</span><span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 10-10: Một khối <code>impl</code> chỉ áp dụng cho một struct
+với một kiểu cụ thể cho tham số kiểu generic <code>T</code>.</span></p>
+<p>Mã này có nghĩa là kiểu <code>Point&lt;f32&gt;</code> sẽ có một phương thức <code>distance_from_origin</code>;
+các phiên bản khác của <code>Point&lt;T&gt;</code> nơi <code>T</code> không phải là kiểu f32 sẽ không có phương thức
+này được định nghĩa. Phương thức này đo lường khoảng cách từ điểm của chúng ta
+đến điểm tại tọa độ (0.0, 0.0) và sử dụng các phép toán toán học chỉ có sẵn cho
+các kiểu số thực.</p>
+<p>Các tham số kiểu generic trong định nghĩa struct không luôn giống nhau so với các
+tham số kiểu bạn sử dụng trong các chữ ký phương thức của cùng struct đó. Mã ở
+Listing 10-11 sử dụng các kiểu generic <code>X1</code> và <code>Y1</code> cho struct <code>Point</code> và <code>X2</code> <code>Y2</code> cho
+chữ ký phương thức mixup để làm cho ví dụ trở nên rõ ràng hơn. Phương thức này
+tạo một thể hiện mới của <code>Point</code> với giá trị x từ <code>self</code> <code>Point</code> (kiểu <code>X1</code>) và giá trị
+<code>y</code> từ <code>Point</code> được chuyển vào (kiểu <code>Y2</code>).</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">struct Point&lt;X1, Y1&gt; {
+    x: X1,
+    y: Y1,
+}
+
+impl&lt;X1, Y1&gt; Point&lt;X1, Y1&gt; {
+    fn mixup&lt;X2, Y2&gt;(self, other: Point&lt;X2, Y2&gt;) -&gt; Point&lt;X1, Y2&gt; {
+        Point {
+            x: self.x,
+            y: other.y,
+        }
+    }
+}
+
+fn main() {
+    let p1 = Point { x: 5, y: 10.4 };
+    let p2 = Point { x: "Hello", y: 'c' };
+
+    let p3 = p1.mixup(p2);
+
+    println!("p3.x = {}, p3.y = {}", p3.x, p3.y);
+}</code></pre></pre>
+<p><span class="caption">Listing 10-11: Một phương thức sử dụng các kiểu generic
+khác so với định nghĩa struct của nó.</span></p>
+<p>Trong <code>main</code>, chúng ta đã định nghĩa một <code>Point</code> có kiểu <code>i32</code> cho <code>x</code> (giá trị là <code>5</code>)
+và kiểu <code>f64</code> cho <code>y</code> (giá trị là <code>10.4</code>). Biến <code>p2</code> là một struct <code>Point</code> có một chuỗi
+(“Hello”) cho <code>x</code> và một ký tự (c) cho <code>y</code>. Gọi mixup trên p1 với đối số là <code>p2</code>
+cho chúng ta <code>p3</code>, nơi có kiểu <code>i32</code> cho <code>x</code>, vì <code>x</code> đến từ <code>p1</code>. Biến <code>p3</code> sẽ có kiểu
+char cho <code>y</code>, vì <code>y</code> đến từ <code>p2</code>. Cuộc gọi macro println! sẽ in ra <code>p3.x = 5, p3.y = c</code>.</p>
+<p>Mục đích của ví dụ này là để minh họa một tình huống trong đó một số tham
+số generic được khai báo với <code>impl</code> và một số được khai báo với định nghĩa
+phương thức. Ở đây, các tham số generic <code>X1</code> và <code>Y1</code> được khai báo sau impl vì
+chúng đi kèm với định nghĩa <code>struct</code>. Các tham số generic <code>X2</code> và <code>Y2</code> được
+khai báo sau <code>fn mixup</code>, vì chúng chỉ liên quan đến phương thức.</p>
+<h3 id="hiệu-năng-của-code-sử-dụng-generic"><a class="header" href="#hiệu-năng-của-code-sử-dụng-generic">Hiệu năng của code sử dụng Generic</a></h3>
+<p>Bạn có thể tự hỏi liệu có chi phí thời gian chạy khi sử dụng các tham số kiểu
+generic hay không. Tin tốt là việc sử dụng các kiểu generic sẽ không làm
+chương trình của bạn chạy chậm hơn so với việc sử dụng các kiểu cụ thể.</p>
+<p>Rust đạt được điều này bằng cách thực hiện <em>monomorphization</em> của mã nguồn
+sử dụng generics trong quá trình biên dịch. <em>Monomorphization</em> là quá trình
+chuyển đổi mã nguồn generic thành mã nguồn cụ thể bằng cách điền vào các kiểu cụ
+thể được sử dụng khi biên dịch. Trong quá trình này, trình biên dịch thực hiện
+theo chiều ngược lại so với các bước chúng ta đã sử dụng để tạo hàm generic
+trong Listing 10-5: trình biên dịch xem xét tất cả các điểm mà mã nguồn generic
+được gọi và tạo mã nguồn cho các kiểu cụ thể mà mã nguồn generic được gọi với.</p>
+<p>Hãy xem cách điều này hoạt động bằng cách sử dụng generic <code>Option&lt;T&gt;</code> enum từ
+thư viện chuẩn:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let integer = Some(5);
+let float = Some(5.0);
+<span class="boring">}</span></code></pre></pre>
+<p>Khi Rust biên dịch mã nguồn này, nó thực hiện monomorphization.
+Trong quá trình đó, trình biên dịch đọc các giá trị đã được sử dụng
+trong các trường hợp của <code>Option&lt;T&gt;</code> và xác định hai loại <code>Option&lt;T&gt;</code>: một
+là <code>i32</code> và một là <code>f64</code>. Do đó, nó mở rộng định nghĩa generic của <code>Option&lt;T&gt;</code>
+thành hai định nghĩa được tối ưu hóa cho <code>i32</code> và <code>f64</code>, thay thế định nghĩa
+generic bằng những định nghĩa cụ thể này.</p>
+<p>Phiên bản đã được tối ưu hóa bằng monomorphization của mã nguồn trông
+giống như sau (trình biên dịch sử dụng tên khác với những gì chúng ta sử
+dụng ở đây cho mục đích minh họa):</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">enum Option_i32 {
+    Some(i32),
+    None,
+}
+
+enum Option_f64 {
+    Some(f64),
+    None,
+}
+
+fn main() {
+    let integer = Option_i32::Some(5);
+    let float = Option_f64::Some(5.0);
+}</code></pre></pre>
+<p>Cấu trúc tổng quát Option<T> được thay thế bằng các định nghĩa cụ thể được
+tạo ra bởi trình biên dịch. Vì Rust biên dịch mã tổng quát thành mã xác định
+kiểu trong từng trường hợp cụ thể, nên chúng ta không phải chịu chi phí
+thực thi tại thời gian chạy khi sử dụng generics. Khi mã được thực thi,
+nó hoạt động giống hệt như thể chúng ta đã sao chép từng định nghĩa thủ công.
+Quá trình đơn hình hóa (monomorphization) khiến generics của Rust cực kỳ
+hiệu quả khi chạy.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch10-00-generics.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch10-02-traits.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch10-00-generics.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch10-02-traits.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

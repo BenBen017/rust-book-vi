@@ -1,0 +1,578 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Shared-State Concurrency - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="shared-state-concurrency"><a class="header" href="#shared-state-concurrency">Shared-State Concurrency</a></h2>
+<p>Concurrency dựa trên việc truyền thông điệp (message passing) là một cách tốt để
+xử lý đồng thời, nhưng đó không phải là cách duy nhất. Một phương pháp khác là
+cho nhiều thread cùng truy cập vào một vùng dữ liệu được chia sẻ. Hãy xem lại
+một phần trong khẩu hiệu của tài liệu ngôn ngữ Go: “do not communicate by sharing
+memory.”</p>
+<p>Vậy việc giao tiếp bằng cách chia sẻ bộ nhớ sẽ trông như thế nào? Ngoài ra, tại
+sao những người ủng hộ message passing lại cảnh báo không nên sử dụng việc chia
+sẻ bộ nhớ?</p>
+<p>Ở một khía cạnh nào đó, channel trong bất kỳ ngôn ngữ lập trình nào cũng tương tự
+như single ownership, bởi vì một khi bạn đã chuyển một giá trị qua channel, bạn
+không nên sử dụng lại giá trị đó nữa. Concurrency dựa trên bộ nhớ dùng chung
+(shared memory concurrency) thì giống với multiple ownership: nhiều thread có
+thể truy cập cùng một vị trí bộ nhớ tại cùng một thời điểm. Như bạn đã thấy trong
+Chương 15, nơi smart pointer cho phép multiple ownership, thì multiple ownership
+có thể làm tăng độ phức tạp vì các “chủ sở hữu” khác nhau này cần được quản lý.
+Hệ thống kiểu dữ liệu và các quy tắc ownership của Rust hỗ trợ rất nhiều trong
+việc quản lý này một cách chính xác. Để lấy ví dụ, chúng ta hãy cùng xem mutex,
+một trong những primitive đồng thời phổ biến nhất cho bộ nhớ dùng chung.</p>
+<h3 id="sử-dụng-mutex-Để-cho-phép-truy-cập-dữ-liệu-từ-một-thread-tại-một-thời-Điểm"><a class="header" href="#sử-dụng-mutex-Để-cho-phép-truy-cập-dữ-liệu-từ-một-thread-tại-một-thời-Điểm">Sử Dụng Mutex Để Cho Phép Truy Cập Dữ Liệu Từ Một Thread Tại Một Thời Điểm</a></h3>
+<p><em>Mutex</em> là từ viết tắt của <em>mutual exclusion</em> (loại trừ lẫn nhau), nghĩa là mutex
+chỉ cho phép <strong>một thread</strong> truy cập vào một phần dữ liệu tại bất kỳ thời điểm
+nào. Để truy cập dữ liệu bên trong mutex, một thread trước hết phải báo hiệu
+rằng nó muốn truy cập bằng cách yêu cầu chiếm giữ (<em>acquire</em>) <em>lock</em> của mutex.
+Lock là một cấu trúc dữ liệu thuộc về mutex, dùng để theo dõi thread nào hiện
+đang có quyền truy cập độc quyền vào dữ liệu. Vì vậy, mutex được mô tả là đang
+<em>canh giữ</em> (guarding) dữ liệu mà nó nắm giữ thông qua cơ chế khóa.</p>
+<p>Mutex nổi tiếng là khó sử dụng vì bạn phải ghi nhớ hai quy tắc:</p>
+<ul>
+<li>Bạn phải cố gắng acquire lock trước khi sử dụng dữ liệu.</li>
+<li>Khi đã sử dụng xong dữ liệu mà mutex đang canh giữ, bạn phải mở khóa (unlock)
+dữ liệu đó để các thread khác có thể acquire lock.</li>
+</ul>
+<p>Để lấy một phép ẩn dụ trong đời thực cho mutex, hãy tưởng tượng một buổi thảo
+luận tại hội nghị chỉ có một chiếc micro. Trước khi một diễn giả có thể phát
+biểu, họ phải xin hoặc ra hiệu rằng họ muốn sử dụng micro. Khi đã có micro, họ
+có thể nói bao lâu tùy thích, rồi chuyển micro cho diễn giả tiếp theo đang muốn
+phát biểu. Nếu một diễn giả quên không chuyển micro sau khi nói xong, sẽ không ai
+khác có thể nói được. Nếu việc quản lý chiếc micro dùng chung này xảy ra sai
+sót, buổi thảo luận sẽ không thể diễn ra như dự kiến!</p>
+<p>Việc quản lý mutex có thể cực kỳ phức tạp để làm cho đúng, đó là lý do vì sao rất
+nhiều người hứng thú với channel. Tuy nhiên, nhờ hệ thống kiểu dữ liệu và các
+quy tắc ownership của Rust, bạn không thể khóa và mở khóa sai được.</p>
+<h4 id="api-của-mutext"><a class="header" href="#api-của-mutext">API của <code>Mutex&lt;T&gt;</code></a></h4>
+<p>Để minh họa cách sử dụng mutex, chúng ta hãy bắt đầu bằng việc dùng mutex trong
+bối cảnh single-thread, như được minh họa trong Listing 16-12:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">use std::sync::Mutex;
+
+fn main() {
+    let m = Mutex::new(5);
+
+    {
+        let mut num = m.lock().unwrap();
+        *num = 6;
+    }
+
+    println!("m = {m:?}");
+}</code></pre></pre>
+<p><span class="caption">Listing 16-12: Khám phá API của <code>Mutex&lt;T&gt;</code> trong bối cảnh
+single-thread để đơn giản hóa</span></p>
+<p>Cũng như nhiều kiểu dữ liệu khác, chúng ta tạo một <code>Mutex&lt;T&gt;</code> bằng cách sử dụng
+hàm liên kết (associated function) <code>new</code>. Để truy cập dữ liệu bên trong mutex,
+chúng ta dùng phương thức <code>lock</code> để acquire lock. Lời gọi này sẽ chặn (block)
+thread hiện tại, khiến nó không thể làm việc gì cho đến khi tới lượt nó nắm giữ
+lock.</p>
+<p>Lời gọi <code>lock</code> sẽ thất bại nếu một thread khác đang giữ lock bị panic. Trong
+trường hợp đó, sẽ không ai có thể lấy được lock nữa, vì vậy chúng ta đã chọn
+cách gọi <code>unwrap</code> và để thread hiện tại panic nếu rơi vào tình huống này.</p>
+<p>Sau khi đã acquire được lock, chúng ta có thể coi giá trị trả về—trong trường
+hợp này được đặt tên là <code>num</code>—như một mutable reference tới dữ liệu bên trong.
+Hệ thống kiểu dữ liệu đảm bảo rằng chúng ta phải acquire lock trước khi sử dụng
+giá trị bên trong <code>m</code>. Kiểu của <code>m</code> là <code>Mutex&lt;i32&gt;</code>, chứ không phải <code>i32</code>, nên
+chúng ta <em>bắt buộc</em> phải gọi <code>lock</code> thì mới có thể sử dụng giá trị <code>i32</code>. Chúng
+ta không thể quên bước này; hệ thống kiểu dữ liệu sẽ không cho phép truy cập vào
+<code>i32</code> bên trong nếu không làm như vậy.</p>
+<p>Như bạn có thể đoán, <code>Mutex&lt;T&gt;</code> là một smart pointer. Chính xác hơn, lời gọi
+<code>lock</code> <em>trả về</em> một smart pointer có tên là <code>MutexGuard</code>, được bọc trong một
+<code>LockResult</code> mà chúng ta đã xử lý bằng cách gọi <code>unwrap</code>. Smart pointer
+<code>MutexGuard</code> triển khai trait <code>Deref</code> để trỏ tới dữ liệu bên trong; đồng thời nó
+cũng có một implementation của <code>Drop</code> để tự động giải phóng lock khi
+<code>MutexGuard</code> đi ra khỏi scope, điều này xảy ra ở cuối scope bên trong. Kết quả
+là chúng ta không có nguy cơ quên giải phóng lock và chặn mutex không cho các
+thread khác sử dụng, bởi vì việc mở khóa diễn ra một cách tự động.</p>
+<p>Sau khi lock được drop, chúng ta có thể in giá trị của mutex ra và thấy rằng
+chúng ta đã thay đổi được giá trị <code>i32</code> bên trong thành 6.</p>
+<h4 id="chia-sẻ-mutext-giữa-nhiều-thread"><a class="header" href="#chia-sẻ-mutext-giữa-nhiều-thread">Chia Sẻ <code>Mutex&lt;T&gt;</code> Giữa Nhiều Thread</a></h4>
+<p>Bây giờ, hãy thử chia sẻ một giá trị giữa nhiều thread bằng cách sử dụng
+<code>Mutex&lt;T&gt;</code>. Chúng ta sẽ tạo ra 10 thread và để mỗi thread tăng giá trị của một
+counter lên 1, để counter đi từ 0 lên 10. Ví dụ tiếp theo trong Listing 16-13
+sẽ gây ra một lỗi biên dịch, và chúng ta sẽ dùng lỗi đó để tìm hiểu thêm về cách
+sử dụng <code>Mutex&lt;T&gt;</code> cũng như cách Rust giúp chúng ta dùng nó một cách chính xác.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile">use std::sync::Mutex;
+use std::thread;
+
+fn main() {
+    let counter = Mutex::new(0);
+    let mut handles = vec![];
+
+    for _ in 0..10 {
+        let handle = thread::spawn(move || {
+            let mut num = counter.lock().unwrap();
+
+            *num += 1;
+        });
+        handles.push(handle);
+    }
+
+    for handle in handles {
+        handle.join().unwrap();
+    }
+
+    println!("Result: {}", *counter.lock().unwrap());
+}</code></pre>
+<p><span class="caption">Listing 16-13: Mười thread, mỗi thread tăng một counter
+được canh giữ bởi <code>Mutex&lt;T&gt;</code></span></p>
+<p>Chúng ta tạo một biến <code>counter</code> để chứa một giá trị <code>i32</code> bên trong một
+<code>Mutex&lt;T&gt;</code>, giống như đã làm trong Listing 16-12. Tiếp theo, chúng ta tạo ra
+10 thread bằng cách lặp qua một khoảng số. Chúng ta sử dụng <code>thread::spawn</code> và
+truyền cho tất cả các thread cùng một closure: closure này move <code>counter</code> vào
+trong thread, acquire lock trên <code>Mutex&lt;T&gt;</code> bằng cách gọi phương thức <code>lock</code>,
+sau đó cộng thêm 1 vào giá trị bên trong mutex. Khi một thread chạy xong
+closure của nó, <code>num</code> sẽ đi ra khỏi scope và giải phóng lock để thread khác có
+thể acquire nó.</p>
+<p>Trong thread chính, chúng ta thu thập tất cả các join handle. Sau đó, giống như
+đã làm trong Listing 16-2, chúng ta gọi <code>join</code> trên từng handle để đảm bảo tất
+cả các thread đều kết thúc. Tại thời điểm đó, thread chính sẽ acquire lock và
+in ra kết quả của chương trình này.</p>
+<p>Chúng ta đã gợi ý rằng ví dụ này sẽ không biên dịch được. Bây giờ hãy cùng tìm
+hiểu lý do vì sao!</p>
+<pre><code class="language-console">$ cargo run
+   Compiling shared-state v0.1.0 (file:///projects/shared-state)
+error[E0382]: borrow of moved value: `counter`
+  --&gt; src/main.rs:21:29
+   |
+5  |     let counter = Mutex::new(0);
+   |         ------- move occurs because `counter` has type `Mutex&lt;i32&gt;`, which does not implement the `Copy` trait
+...
+8  |     for _ in 0..10 {
+   |     -------------- inside of this loop
+9  |         let handle = thread::spawn(move || {
+   |                                    ------- value moved into closure here, in previous iteration of loop
+...
+21 |     println!("Result: {}", *counter.lock().unwrap());
+   |                             ^^^^^^^ value borrowed here after move
+   |
+help: consider moving the expression out of the loop so it is only moved once
+   |
+8  ~     let mut value = counter.lock();
+9  ~     for _ in 0..10 {
+10 |         let handle = thread::spawn(move || {
+11 ~             let mut num = value.unwrap();
+   |
+
+For more information about this error, try `rustc --explain E0382`.
+error: could not compile `shared-state` (bin "shared-state") due to 1 previous error
+</code></pre>
+<p>Thông báo lỗi cho biết rằng giá trị <code>counter</code> đã bị move ở lần lặp trước đó của
+vòng lặp. Rust đang nói với chúng ta rằng chúng ta không thể move quyền sở hữu
+của <code>counter</code> vào nhiều thread khác nhau. Hãy sửa lỗi biên dịch này bằng một
+phương pháp multiple ownership mà chúng ta đã thảo luận trong Chương 15.</p>
+<h4 id="multiple-ownership-với-nhiều-thread"><a class="header" href="#multiple-ownership-với-nhiều-thread">Multiple Ownership với Nhiều Thread</a></h4>
+<p>Trong Chương 15, chúng ta đã tạo cho một giá trị nhiều owner bằng cách sử dụng
+smart pointer <code>Rc&lt;T&gt;</code> để tạo ra một giá trị được đếm tham chiếu (reference
+counted). Hãy làm điều tương tự ở đây và xem điều gì sẽ xảy ra. Chúng ta sẽ bọc
+<code>Mutex&lt;T&gt;</code> bên trong <code>Rc&lt;T&gt;</code> trong Listing 16-14 và clone <code>Rc&lt;T&gt;</code> trước khi move
+quyền sở hữu vào thread.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile">use std::rc::Rc;
+use std::sync::Mutex;
+use std::thread;
+
+fn main() {
+    let counter = Rc::new(Mutex::new(0));
+    let mut handles = vec![];
+
+    for _ in 0..10 {
+        let counter = Rc::clone(&amp;counter);
+        let handle = thread::spawn(move || {
+            let mut num = counter.lock().unwrap();
+
+            *num += 1;
+        });
+        handles.push(handle);
+    }
+
+    for handle in handles {
+        handle.join().unwrap();
+    }
+
+    println!("Result: {}", *counter.lock().unwrap());
+}</code></pre>
+<p><span class="caption">Listing 16-14: Thử sử dụng <code>Rc&lt;T&gt;</code> để cho phép
+nhiều thread cùng sở hữu <code>Mutex&lt;T&gt;</code></span></p>
+<p>Một lần nữa, chúng ta biên dịch và lại nhận được… những lỗi khác! Trình biên
+dịch đang dạy chúng ta rất nhiều điều.</p>
+<pre><code class="language-console">$ cargo run
+   Compiling shared-state v0.1.0 (file:///projects/shared-state)
+error[E0277]: `Rc&lt;Mutex&lt;i32&gt;&gt;` cannot be sent between threads safely
+  --&gt; src/main.rs:11:36
+   |
+11 |           let handle = thread::spawn(move || {
+   |                        ------------- ^------
+   |                        |             |
+   |  ______________________|_____________within this `{closure@src/main.rs:11:36: 11:43}`
+   | |                      |
+   | |                      required by a bound introduced by this call
+12 | |             let mut num = counter.lock().unwrap();
+13 | |
+14 | |             *num += 1;
+15 | |         });
+   | |_________^ `Rc&lt;Mutex&lt;i32&gt;&gt;` cannot be sent between threads safely
+   |
+   = help: within `{closure@src/main.rs:11:36: 11:43}`, the trait `Send` is not implemented for `Rc&lt;Mutex&lt;i32&gt;&gt;`
+note: required because it's used within this closure
+  --&gt; src/main.rs:11:36
+   |
+11 |         let handle = thread::spawn(move || {
+   |                                    ^^^^^^^
+note: required by a bound in `spawn`
+  --&gt; /rustc/4eb161250e340c8f48f66e2b929ef4a5bed7c181/library/std/src/thread/mod.rs:728:1
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `shared-state` (bin "shared-state") due to 1 previous error
+</code></pre>
+<p>Wow, thông báo lỗi này thật là dài dòng! Đây là phần quan trọng cần tập trung:
+<code>`Rc&lt;Mutex&lt;i32&gt;&gt;` cannot be sent between threads safely</code>. Trình biên dịch
+cũng cho chúng ta biết lý do vì sao: <code>the trait `Send` is not implemented for `Rc&lt;Mutex&lt;i32&gt;&gt;` </code>. Chúng ta sẽ nói về <code>Send</code> trong phần tiếp theo: đây là một
+trong những trait đảm bảo rằng các kiểu dữ liệu chúng ta dùng với thread là
+được thiết kế để sử dụng trong các tình huống đồng thời.</p>
+<p>Đáng tiếc là <code>Rc&lt;T&gt;</code> không an toàn để chia sẻ giữa các thread. Khi <code>Rc&lt;T&gt;</code> quản
+lý bộ đếm tham chiếu (reference count), nó tăng bộ đếm mỗi khi <code>clone</code> được gọi
+và giảm bộ đếm khi mỗi bản clone bị drop. Tuy nhiên, nó không sử dụng bất kỳ
+primitive đồng thời nào để đảm bảo rằng các thay đổi đối với bộ đếm không bị
+ngắt quãng bởi thread khác. Điều này có thể dẫn đến bộ đếm sai—những lỗi tinh vi
+mà sau đó có thể gây ra rò rỉ bộ nhớ hoặc khiến một giá trị bị drop trước khi
+chúng ta dùng xong nó. Thứ chúng ta cần là một kiểu dữ liệu giống hệt <code>Rc&lt;T&gt;</code>
+nhưng thực hiện các thay đổi đối với bộ đếm tham chiếu theo cách an toàn với
+thread.</p>
+<h4 id="Đếm-tham-chiếu-nguyên-tử-với-arct"><a class="header" href="#Đếm-tham-chiếu-nguyên-tử-với-arct">Đếm Tham Chiếu Nguyên Tử với <code>Arc&lt;T&gt;</code></a></h4>
+<p>May mắn thay, <code>Arc&lt;T&gt;</code> <em>là</em> một kiểu dữ liệu giống như <code>Rc&lt;T&gt;</code> nhưng an toàn để
+sử dụng trong các tình huống đồng thời. Chữ <em>a</em> là viết tắt của <em>atomic</em>, nghĩa
+là đây là một kiểu <em>được đếm tham chiếu một cách nguyên tử</em> (atomically
+reference counted). Atomics là một loại primitive đồng thời bổ sung mà chúng ta
+sẽ không đi sâu vào chi tiết ở đây: hãy xem tài liệu thư viện chuẩn cho
+<a href="../std/sync/atomic/index.html"><code>std::sync::atomic</code></a><!-- ignore --> để biết thêm chi tiết. Ở thời điểm
+này, bạn chỉ cần biết rằng atomics hoạt động giống như các kiểu primitive
+thông thường nhưng an toàn để chia sẻ giữa các thread.</p>
+<p>Lúc này bạn có thể thắc mắc vì sao tất cả các kiểu primitive không phải đều là
+atomic, và vì sao các kiểu trong thư viện chuẩn không được triển khai để dùng
+<code>Arc&lt;T&gt;</code> theo mặc định. Lý do là vì tính an toàn với thread đi kèm với một chi
+phí hiệu năng, và bạn chỉ nên trả chi phí đó khi thực sự cần thiết. Nếu bạn chỉ
+thực hiện các thao tác trên giá trị trong phạm vi một thread duy nhất, chương
+trình của bạn có thể chạy nhanh hơn nếu không phải áp đặt các đảm bảo mà
+atomics cung cấp.</p>
+<p>Hãy quay lại ví dụ của chúng ta: <code>Arc&lt;T&gt;</code> và <code>Rc&lt;T&gt;</code> có cùng API, vì vậy chúng ta
+sửa chương trình bằng cách thay đổi dòng <code>use</code>, lời gọi <code>new</code>, và lời gọi
+<code>clone</code>. Đoạn mã trong Listing 16-15 cuối cùng cũng sẽ biên dịch và chạy được:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">use std::sync::{Arc, Mutex};
+use std::thread;
+
+fn main() {
+    let counter = Arc::new(Mutex::new(0));
+    let mut handles = vec![];
+
+    for _ in 0..10 {
+        let counter = Arc::clone(&amp;counter);
+        let handle = thread::spawn(move || {
+            let mut num = counter.lock().unwrap();
+
+            *num += 1;
+        });
+        handles.push(handle);
+    }
+
+    for handle in handles {
+        handle.join().unwrap();
+    }
+
+    println!("Result: {}", *counter.lock().unwrap());
+}</code></pre></pre>
+<p><span class="caption">Listing 16-15: Sử dụng <code>Arc&lt;T&gt;</code> để bọc <code>Mutex&lt;T&gt;</code>
+nhằm có thể chia sẻ quyền sở hữu giữa nhiều thread</span></p>
+<p>Đoạn mã này sẽ in ra kết quả sau:</p>
+<!-- Không trích xuất output vì những thay đổi trong output này không đáng kể;
+các thay đổi nhiều khả năng là do các thread chạy khác nhau, thay vì do
+những thay đổi trong trình biên dịch -->
+<pre><code class="language-text">Result: 10
+</code></pre>
+<p>Chúng ta đã làm được rồi! Chúng ta đã đếm từ 0 lên 10 — nghe có vẻ không mấy ấn
+tượng, nhưng nó đã dạy cho chúng ta rất nhiều điều về <code>Mutex&lt;T&gt;</code> và tính an toàn
+với thread. Bạn cũng có thể sử dụng cấu trúc của chương trình này để thực hiện
+những thao tác phức tạp hơn nhiều so với việc chỉ tăng một counter. Với chiến
+lược này, bạn có thể chia một phép tính thành các phần độc lập, phân chia các
+phần đó cho nhiều thread, và sau đó sử dụng <code>Mutex&lt;T&gt;</code> để mỗi thread cập nhật
+kết quả cuối cùng bằng phần việc của mình.</p>
+<p>Lưu ý rằng nếu bạn chỉ thực hiện các phép toán số học đơn giản, thì có những
+kiểu dữ liệu đơn giản hơn <code>Mutex&lt;T&gt;</code> được cung cấp bởi module
+<a href="../std/sync/atomic/index.html"><code>std::sync::atomic</code> của thư viện chuẩn</a><!-- ignore -->. Những kiểu dữ
+liệu này cung cấp khả năng truy cập đồng thời, an toàn và nguyên tử (atomic)
+đối với các kiểu primitive. Chúng tôi chọn sử dụng <code>Mutex&lt;T&gt;</code> với một kiểu
+primitive trong ví dụ này để có thể tập trung vào cách <code>Mutex&lt;T&gt;</code> hoạt động.</p>
+<h3 id="sự-tương-Đồng-giữa-refcelltrct-và-mutextarct"><a class="header" href="#sự-tương-Đồng-giữa-refcelltrct-và-mutextarct">Sự Tương Đồng Giữa <code>RefCell&lt;T&gt;</code>/<code>Rc&lt;T&gt;</code> và <code>Mutex&lt;T&gt;</code>/<code>Arc&lt;T&gt;</code></a></h3>
+<p>Bạn có thể đã nhận ra rằng <code>counter</code> là immutable nhưng chúng ta vẫn có thể lấy
+được một mutable reference tới giá trị bên trong nó; điều này có nghĩa là
+<code>Mutex&lt;T&gt;</code> cung cấp <em>interior mutability</em>, tương tự như họ kiểu <code>Cell</code>. Cũng
+giống như cách chúng ta đã dùng <code>RefCell&lt;T&gt;</code> trong Chương 15 để cho phép mutate
+nội dung bên trong một <code>Rc&lt;T&gt;</code>, thì ở đây chúng ta dùng <code>Mutex&lt;T&gt;</code> để mutate nội
+dung bên trong một <code>Arc&lt;T&gt;</code>.</p>
+<p>Một chi tiết khác cần lưu ý là Rust không thể bảo vệ bạn khỏi mọi loại lỗi logic
+khi bạn sử dụng <code>Mutex&lt;T&gt;</code>. Hãy nhớ lại trong Chương 15 rằng việc sử dụng
+<code>Rc&lt;T&gt;</code> đi kèm với rủi ro tạo ra các chu trình tham chiếu (reference cycles), khi
+hai giá trị <code>Rc&lt;T&gt;</code> tham chiếu lẫn nhau, dẫn đến rò rỉ bộ nhớ. Tương tự như vậy,
+<code>Mutex&lt;T&gt;</code> cũng đi kèm với rủi ro tạo ra <em>deadlock</em>. Deadlock xảy ra khi một thao
+tác cần khóa hai tài nguyên và hai thread mỗi bên đã chiếm giữ một lock, khiến
+chúng chờ nhau vô thời hạn. Nếu bạn quan tâm đến deadlock, hãy thử viết một
+chương trình Rust có deadlock; sau đó tìm hiểu các chiến lược giảm thiểu
+deadlock cho mutex trong bất kỳ ngôn ngữ nào và thử triển khai chúng bằng Rust.
+Tài liệu API của thư viện chuẩn cho <code>Mutex&lt;T&gt;</code> và <code>MutexGuard</code> cung cấp nhiều
+thông tin hữu ích.</p>
+<p>Chúng ta sẽ khép lại chương này bằng việc nói về các trait <code>Send</code> và <code>Sync</code>, và
+cách chúng ta có thể sử dụng chúng với các kiểu dữ liệu tự định nghĩa.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch16-02-message-passing.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch16-04-extensible-concurrency-sync-and-send.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch16-02-message-passing.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch16-04-extensible-concurrency-sync-and-send.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

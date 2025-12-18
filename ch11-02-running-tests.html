@@ -1,0 +1,506 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Controlling How Tests Are Run - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="kiểm-soát-cách-chạy-các-hàm-kiểm-tra"><a class="header" href="#kiểm-soát-cách-chạy-các-hàm-kiểm-tra">Kiểm soát cách chạy các hàm kiểm tra</a></h2>
+<p>Cũng giống như <code>cargo run</code> biên dịch mã của bạn và sau đó chạy file nhị phân kết quả, <code>cargo test</code> biên dịch mã của bạn ở chế độ kiểm tra và chạy file nhị phân kiểm tra tạo ra. Hành vi mặc định của file nhị phân do <code>cargo test</code> tạo ra là chạy tất cả các hàm kiểm tra song song và bắt giữ output được tạo ra trong quá trình chạy kiểm tra, ngăn không cho output hiển thị và giúp dễ đọc các kết quả liên quan đến kiểm tra. Tuy nhiên, bạn có thể chỉ định các tùy chọn dòng lệnh để thay đổi hành vi mặc định này.</p>
+<p>Một số tùy chọn dòng lệnh dành cho <code>cargo test</code>, và một số dành cho file nhị phân kiểm tra tạo ra. Để tách hai loại đối số này, bạn liệt kê các đối số dành cho <code>cargo test</code>, theo sau là dấu phân tách <code>--</code>, rồi mới đến các đối số dành cho file nhị phân kiểm tra. Chạy <code>cargo test --help</code> sẽ hiển thị các tùy chọn bạn có thể dùng với <code>cargo test</code>, và chạy <code>cargo test -- --help</code> sẽ hiển thị các tùy chọn bạn có thể dùng sau dấu phân tách.</p>
+<h3 id="chạy-các-hàm-kiểm-tra-song-song-hoặc-tuần-tự"><a class="header" href="#chạy-các-hàm-kiểm-tra-song-song-hoặc-tuần-tự">Chạy các hàm kiểm tra song song hoặc tuần tự</a></h3>
+<p>Khi bạn chạy nhiều hàm kiểm tra, theo mặc định chúng chạy song song bằng các thread, nghĩa là chúng hoàn thành nhanh hơn và bạn nhận phản hồi nhanh hơn. Vì các hàm kiểm tra chạy cùng lúc, bạn phải đảm bảo rằng các hàm kiểm tra không phụ thuộc vào nhau hoặc vào bất kỳ trạng thái chung nào, bao gồm môi trường chung, chẳng hạn như thư mục làm việc hiện tại hoặc biến môi trường.</p>
+<p>Ví dụ, giả sử mỗi hàm kiểm tra của bạn chạy một đoạn mã tạo một file trên ổ đĩa tên <em>test-output.txt</em> và ghi một số dữ liệu vào file đó. Sau đó mỗi hàm kiểm tra đọc dữ liệu trong file và xác nhận rằng file chứa một giá trị nhất định, khác nhau ở mỗi hàm kiểm tra. Vì các hàm kiểm tra chạy cùng lúc, một hàm kiểm tra có thể ghi đè file trong lúc một hàm kiểm tra khác đang ghi và đọc file. Hàm kiểm tra thứ hai sẽ thất bại, không phải vì mã sai mà vì các hàm kiểm tra đã can thiệp lẫn nhau khi chạy song song. Một giải pháp là đảm bảo mỗi hàm kiểm tra ghi vào một file khác; giải pháp khác là chạy các hàm kiểm tra một lần mỗi lần.</p>
+<p>Nếu bạn không muốn chạy các hàm kiểm tra song song hoặc muốn kiểm soát chi tiết hơn số lượng thread sử dụng, bạn có thể gửi flag <code>--test-threads</code> kèm số lượng thread muốn dùng cho file nhị phân kiểm tra. Xem ví dụ sau:</p>
+<pre><code class="language-console">$ cargo test -- --test-threads=1
+</code></pre>
+<p>Chúng ta đặt số lượng thread kiểm tra là <code>1</code>, thông báo cho chương trình không sử dụng song song. Chạy các hàm kiểm tra bằng một thread sẽ mất nhiều thời gian hơn so với chạy song song, nhưng các hàm kiểm tra sẽ không can thiệp lẫn nhau nếu chúng chia sẻ trạng thái.</p>
+<h3 id="hiển-thị-output-của-hàm"><a class="header" href="#hiển-thị-output-của-hàm">Hiển thị output của hàm</a></h3>
+<p>Theo mặc định, nếu một hàm kiểm tra thành công, thư viện kiểm tra của Rust sẽ bắt giữ mọi thứ in ra standard output. Ví dụ, nếu chúng ta gọi <code>println!</code> trong một hàm kiểm tra và hàm kiểm tra thành công, chúng ta sẽ không thấy output của <code>println!</code> trên terminal; chúng ta chỉ thấy dòng báo rằng hàm kiểm tra đã thành công. Nếu một hàm kiểm tra thất bại, chúng ta sẽ thấy mọi thứ được in ra standard output kèm với thông báo thất bại.</p>
+<p>Ví dụ, Listing 11-10 có một hàm ngớ ngẩn in giá trị của tham số và trả về 10, cùng với một hàm kiểm tra thành công và một hàm kiểm tra thất bại.</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust panics noplayground">fn prints_and_returns_10(a: i32) -&gt; i32 {
+    println!("I got the value {a}");
+    10
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn this_test_will_pass() {
+        let value = prints_and_returns_10(4);
+        assert_eq!(value, 10);
+    }
+
+    #[test]
+    fn this_test_will_fail() {
+        let value = prints_and_returns_10(8);
+        assert_eq!(value, 5);
+    }
+}</code></pre>
+<p><span class="caption">Listing 11-10: Các hàm kiểm tra cho một hàm gọi <code>println!</code></span></p>
+<p>Khi chúng ta chạy các hàm kiểm tra này với <code>cargo test</code>, chúng ta sẽ thấy output như sau:</p>
+<pre><code class="language-console">$ cargo test
+   Compiling silly-function v0.1.0 (file:///projects/silly-function)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.58s
+     Running unittests src/lib.rs (target/debug/deps/silly_function-160869f38cff9166)
+
+running 2 tests
+test tests::this_test_will_fail ... FAILED
+test tests::this_test_will_pass ... ok
+
+failures:
+
+---- tests::this_test_will_fail stdout ----
+I got the value 8
+
+thread 'tests::this_test_will_fail' panicked at src/lib.rs:19:9:
+assertion `left == right` failed
+  left: 10
+ right: 5
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tests::this_test_will_fail
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`
+</code></pre>
+<p>Lưu ý rằng ở đâu trong output này chúng ta cũng không thấy <code>I got the value 4</code>, đây là giá trị được in ra khi hàm kiểm tra thành công chạy. Output này đã bị bắt giữ. Output từ hàm kiểm tra thất bại, <code>I got the value 8</code>, xuất hiện trong phần tóm tắt kết quả kiểm tra, cùng với nguyên nhân thất bại của hàm kiểm tra.</p>
+<p>Nếu chúng ta muốn thấy giá trị được in ra của các hàm kiểm tra thành công, chúng ta có thể yêu cầu Rust hiển thị output của các kiểm tra thành công bằng <code>--show-output</code>.</p>
+<pre><code class="language-console">$ cargo test -- --show-output
+</code></pre>
+<p>When we run the tests in Listing 11-10 again with the <code>--show-output</code> flag, we
+see the following output:</p>
+<pre><code class="language-console">$ cargo test -- --show-output
+   Compiling silly-function v0.1.0 (file:///projects/silly-function)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.60s
+     Running unittests src/lib.rs (target/debug/deps/silly_function-160869f38cff9166)
+
+running 2 tests
+test tests::this_test_will_fail ... FAILED
+test tests::this_test_will_pass ... ok
+
+successes:
+
+---- tests::this_test_will_pass stdout ----
+I got the value 4
+
+
+successes:
+    tests::this_test_will_pass
+
+failures:
+
+---- tests::this_test_will_fail stdout ----
+I got the value 8
+
+thread 'tests::this_test_will_fail' panicked at src/lib.rs:19:9:
+assertion `left == right` failed
+  left: 10
+ right: 5
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tests::this_test_will_fail
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`
+</code></pre>
+<h3 id="chạy-một-tập-con-các-hàm-kiểm-tra-theo-tên"><a class="header" href="#chạy-một-tập-con-các-hàm-kiểm-tra-theo-tên">Chạy một tập con các hàm kiểm tra theo tên</a></h3>
+<p>Đôi khi, chạy toàn bộ bộ kiểm tra có thể mất nhiều thời gian. Nếu bạn đang làm việc trên một phần cụ thể của mã, bạn có thể chỉ muốn chạy các hàm kiểm tra liên quan đến phần đó. Bạn có thể chọn các hàm kiểm tra để chạy bằng cách truyền tên hoặc các tên của hàm kiểm tra muốn chạy làm đối số cho <code>cargo test</code>.</p>
+<p>Để minh họa cách chạy một tập con các hàm kiểm tra, trước tiên chúng ta sẽ tạo ba hàm kiểm tra cho hàm <code>add_two</code> của mình, như hiển thị trong Listing 11-11, và chọn những hàm nào sẽ chạy.</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">pub fn add_two(a: u64) -&gt; u64 {
+    a + 2
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn add_two_and_two() {
+        let result = add_two(2);
+        assert_eq!(result, 4);
+    }
+
+    #[test]
+    fn add_three_and_two() {
+        let result = add_two(3);
+        assert_eq!(result, 5);
+    }
+
+    #[test]
+    fn one_hundred() {
+        let result = add_two(100);
+        assert_eq!(result, 102);
+    }
+}</code></pre>
+<p><span class="caption">Listing 11-11: Ba hàm kiểm tra với ba tên khác nhau</span></p>
+<p>Nếu chúng ta chạy các hàm kiểm tra mà không truyền bất kỳ đối số nào, như đã thấy trước đó, tất cả các hàm kiểm tra sẽ chạy song song:</p>
+<pre><code class="language-console">$ cargo test
+   Compiling adder v0.1.0 (file:///projects/adder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.62s
+     Running unittests src/lib.rs (target/debug/deps/adder-92948b65e88960b4)
+
+running 3 tests
+test tests::add_three_and_two ... ok
+test tests::add_two_and_two ... ok
+test tests::one_hundred ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests adder
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+</code></pre>
+<h4 id="chạy-một-hàm-kiểm-tra-riêng-lẻ"><a class="header" href="#chạy-một-hàm-kiểm-tra-riêng-lẻ">Chạy một hàm kiểm tra riêng lẻ</a></h4>
+<p>Chúng ta có thể truyền tên bất kỳ hàm kiểm tra nào cho <code>cargo test</code> để chỉ chạy hàm kiểm tra đó:</p>
+<pre><code class="language-console">$ cargo test one_hundred
+   Compiling adder v0.1.0 (file:///projects/adder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.69s
+     Running unittests src/lib.rs (target/debug/deps/adder-92948b65e88960b4)
+
+running 1 test
+test tests::one_hundred ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+</code></pre>
+<p>Chỉ hàm kiểm tra có tên <code>one_hundred</code> được chạy; hai hàm kiểm tra còn lại không khớp với tên đó. Output của hàm kiểm tra thông báo cho chúng ta rằng còn nhiều hàm kiểm tra khác không chạy bằng cách hiển thị <code>2 filtered out</code> ở cuối.</p>
+<p>Chúng ta không thể chỉ định tên nhiều hàm kiểm tra theo cách này; chỉ giá trị đầu tiên truyền cho <code>cargo test</code> sẽ được sử dụng. Nhưng vẫn có cách để chạy nhiều hàm kiểm tra.</p>
+<h4 id="lọc-để-chạy-nhiều-hàm-kiểm-tra"><a class="header" href="#lọc-để-chạy-nhiều-hàm-kiểm-tra">Lọc để chạy nhiều hàm kiểm tra</a></h4>
+<p>Chúng ta có thể chỉ định một phần của tên hàm kiểm tra, và bất kỳ hàm kiểm tra nào có tên khớp với giá trị đó sẽ được chạy. Ví dụ, vì hai trong số các hàm kiểm tra của chúng ta có tên chứa <code>add</code>, chúng ta có thể chạy hai hàm đó bằng cách chạy <code>cargo test add</code>:</p>
+<pre><code class="language-console">$ cargo test add
+   Compiling adder v0.1.0 (file:///projects/adder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.61s
+     Running unittests src/lib.rs (target/debug/deps/adder-92948b65e88960b4)
+
+running 2 tests
+test tests::add_three_and_two ... ok
+test tests::add_two_and_two ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+</code></pre>
+<p>Lệnh này chạy tất cả các hàm kiểm tra có <code>add</code> trong tên và loại bỏ hàm kiểm tra có tên <code>one_hundred</code>. Cũng lưu ý rằng module chứa hàm kiểm tra trở thành một phần của tên hàm kiểm tra, vì vậy chúng ta có thể chạy tất cả các hàm kiểm tra trong một module bằng cách lọc theo tên module.</p>
+<h3 id="bỏ-qua-một-số-hàm-kiểm-tra-trừ-khi-được-yêu-cầu-cụ-thể"><a class="header" href="#bỏ-qua-một-số-hàm-kiểm-tra-trừ-khi-được-yêu-cầu-cụ-thể">Bỏ qua một số hàm kiểm tra trừ khi được yêu cầu cụ thể</a></h3>
+<p>Đôi khi một vài hàm kiểm tra cụ thể có thể mất nhiều thời gian để thực thi, vì vậy bạn có thể muốn loại chúng ra trong hầu hết các lần chạy <code>cargo test</code>. Thay vì liệt kê tất cả các hàm kiểm tra bạn muốn chạy làm đối số, bạn có thể chú thích các hàm kiểm tra tốn thời gian bằng attribute <code>ignore</code> để loại chúng ra, như minh họa dưới đây:</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">pub fn add(left: u64, right: u64) -&gt; u64 {
+    left + right
+}
+
+// ANCHOR: here
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        let result = add(2, 2);
+        assert_eq!(result, 4);
+    }
+
+    #[test]
+    #[ignore]
+    fn expensive_test() {
+        // code that takes an hour to run
+    }
+}
+// ANCHOR_END: here</code></pre>
+<p>Sau <code>#[test]</code>, chúng ta thêm dòng <code>#[ignore]</code> vào hàm kiểm tra mà chúng ta muốn loại ra. Bây giờ khi chạy các hàm kiểm tra, <code>it_works</code> sẽ chạy, nhưng <code>expensive_test</code> thì không:</p>
+<pre><code class="language-console">$ cargo test
+   Compiling adder v0.1.0 (file:///projects/adder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.60s
+     Running unittests src/lib.rs (target/debug/deps/adder-92948b65e88960b4)
+
+running 2 tests
+test tests::expensive_test ... ignored
+test tests::it_works ... ok
+
+test result: ok. 1 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests adder
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+</code></pre>
+<p>Hàm <code>expensive_test</code> được liệt kê là <code>ignored</code>. Nếu chúng ta chỉ muốn chạy các hàm kiểm tra bị bỏ qua, có thể dùng <code>cargo test -- --ignored</code>:</p>
+<pre><code class="language-console">$ cargo test -- --ignored
+   Compiling adder v0.1.0 (file:///projects/adder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.61s
+     Running unittests src/lib.rs (target/debug/deps/adder-92948b65e88960b4)
+
+running 1 test
+test tests::expensive_test ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+   Doc-tests adder
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+</code></pre>
+<p>Bằng cách kiểm soát các hàm kiểm tra được chạy, bạn có thể đảm bảo rằng kết quả <code>cargo test</code> sẽ nhanh. Khi đến lúc bạn muốn kiểm tra kết quả của các hàm kiểm tra bị <code>ignored</code> và có thời gian chờ kết quả, bạn có thể chạy <code>cargo test -- --ignored</code>. Nếu bạn muốn chạy tất cả các hàm kiểm tra, bất kể chúng có bị bỏ qua hay không, bạn có thể chạy <code>cargo test -- --include-ignored</code>.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch11-01-writing-tests.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch11-03-test-organization.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch11-01-writing-tests.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch11-03-test-organization.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

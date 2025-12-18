@@ -1,0 +1,809 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Closures: Anonymous Functions that Can Capture Their Environment - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <!-- Old heading. Do not remove or links may break. -->
+<p><a id="closures-anonymous-functions-that-can-capture-their-environment"></a></p>
+<h2 id="closures-hàm-Ẩn-danh-có-khả-năng-bắt-giá-trị-môi-trường"><a class="header" href="#closures-hàm-Ẩn-danh-có-khả-năng-bắt-giá-trị-môi-trường">Closures: Hàm Ẩn Danh Có Khả Năng Bắt Giá Trị Môi Trường</a></h2>
+<p>Closures trong Rust là các hàm ẩn danh mà bạn có thể lưu vào biến hoặc
+truyền làm đối số cho các hàm khác. Bạn có thể định nghĩa closure ở một
+nơi và sau đó gọi nó ở nơi khác để thực thi trong một ngữ cảnh khác.
+Khác với các hàm thông thường, closures có thể “bắt” các giá trị từ phạm
+vi nơi chúng được tạo. Chúng ta sẽ minh họa cách các tính năng này của
+closures giúp tái sử dụng code và tùy chỉnh hành vi chương trình.</p>
+<!-- Old headings. Do not remove or links may break. -->
+<p><a id="creating-an-abstraction-of-behavior-with-closures"></a>
+<a id="refactoring-using-functions"></a>
+<a id="refactoring-with-closures-to-store-code"></a></p>
+<h3 id="bắt-giá-trị-môi-trường-với-closures"><a class="header" href="#bắt-giá-trị-môi-trường-với-closures">Bắt Giá Trị Môi Trường với Closures</a></h3>
+<p>Trước tiên, chúng ta sẽ xem cách closures có thể “bắt” các giá trị từ môi
+trường nơi chúng được định nghĩa để dùng sau này. Ví dụ sau đây: Thỉnh
+thoảng, công ty áo thun của chúng ta sẽ tặng một chiếc áo phiên bản giới
+hạn cho một người trong danh sách email như một chương trình khuyến mãi.
+Người trong danh sách email có thể tùy chọn thêm màu áo yêu thích vào hồ
+sơ của họ. Nếu người được chọn đã có màu yêu thích, họ sẽ nhận áo màu
+đó. Nếu chưa, họ sẽ nhận màu áo mà công ty đang còn nhiều nhất trong kho.</p>
+<p>Có nhiều cách để triển khai điều này. Trong ví dụ này, chúng ta sẽ dùng
+enum <code>ShirtColor</code> với hai biến thể <code>Red</code> và <code>Blue</code> (giới hạn số màu cho
+đơn giản). Kho hàng được biểu diễn bằng struct <code>Inventory</code>, có trường
+<code>shirts</code> chứa <code>Vec&lt;ShirtColor&gt;</code> đại diện cho các màu áo hiện có trong kho.
+Phương thức <code>giveaway</code> của <code>Inventory</code> nhận tùy chọn màu áo của người
+thắng cuộc và trả về màu áo mà họ sẽ nhận. Cấu trúc này được minh họa
+trong Listing 13-1:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust noplayground">#[derive(Debug, PartialEq, Copy, Clone)]
+enum ShirtColor {
+    Red,
+    Blue,
+}
+
+struct Inventory {
+    shirts: Vec&lt;ShirtColor&gt;,
+}
+
+impl Inventory {
+    fn giveaway(&amp;self, user_preference: Option&lt;ShirtColor&gt;) -&gt; ShirtColor {
+        user_preference.unwrap_or_else(|| self.most_stocked())
+    }
+
+    fn most_stocked(&amp;self) -&gt; ShirtColor {
+        let mut num_red = 0;
+        let mut num_blue = 0;
+
+        for color in &amp;self.shirts {
+            match color {
+                ShirtColor::Red =&gt; num_red += 1,
+                ShirtColor::Blue =&gt; num_blue += 1,
+            }
+        }
+        if num_red &gt; num_blue {
+            ShirtColor::Red
+        } else {
+            ShirtColor::Blue
+        }
+    }
+}
+
+fn main() {
+    let store = Inventory {
+        shirts: vec![ShirtColor::Blue, ShirtColor::Red, ShirtColor::Blue],
+    };
+
+    let user_pref1 = Some(ShirtColor::Red);
+    let giveaway1 = store.giveaway(user_pref1);
+    println!(
+        "The user with preference {:?} gets {:?}",
+        user_pref1, giveaway1
+    );
+
+    let user_pref2 = None;
+    let giveaway2 = store.giveaway(user_pref2);
+    println!(
+        "The user with preference {:?} gets {:?}",
+        user_pref2, giveaway2
+    );
+}</code></pre>
+<p><span class="caption">Listing 13-1: Tình huống tặng áo của công ty</span></p>
+<p><code>store</code> được định nghĩa trong <code>main</code> còn hai áo màu xanh và một áo màu đỏ
+để phân phát trong chương trình khuyến mãi phiên bản giới hạn này. Chúng
+ta gọi phương thức <code>giveaway</code> cho một người dùng có sở thích áo màu đỏ
+và một người không có sở thích nào.</p>
+<p>Lại một lần nữa, đoạn code này có thể được triển khai theo nhiều cách,
+và ở đây, để tập trung vào closures, chúng ta chỉ sử dụng những khái niệm
+bạn đã học, ngoại trừ phần thân của phương thức <code>giveaway</code> sử dụng closure.
+Trong phương thức <code>giveaway</code>, chúng ta nhận sở thích của người dùng dưới
+dạng tham số kiểu <code>Option&lt;ShirtColor&gt;</code> và gọi phương thức <code>unwrap_or_else</code>
+trên <code>user_preference</code>. Phương thức <a href="../std/option/enum.Option.html#method.unwrap_or_else"><code>unwrap_or_else</code> trên <code>Option&lt;T&gt;</code></a><!-- ignore -->
+được định nghĩa bởi thư viện chuẩn. Nó nhận một đối số: một closure không
+có tham số và trả về giá trị kiểu <code>T</code> (cùng kiểu được lưu trong biến thể
+<code>Some</code> của <code>Option&lt;T&gt;</code>, trong trường hợp này là <code>ShirtColor</code>). Nếu <code>Option&lt;T&gt;</code>
+là biến thể <code>Some</code>, <code>unwrap_or_else</code> trả về giá trị bên trong <code>Some</code>. Nếu
+<code>Option&lt;T&gt;</code> là biến thể <code>None</code>, <code>unwrap_or_else</code> sẽ gọi closure và trả về
+giá trị mà closure trả về.</p>
+<p>Chúng ta chỉ định biểu thức closure <code>|| self.most_stocked()</code> làm đối số
+cho <code>unwrap_or_else</code>. Đây là một closure không nhận tham số nào (nếu closure
+có tham số, chúng sẽ xuất hiện giữa hai dấu gạch đứng). Thân của closure
+gọi <code>self.most_stocked()</code>. Chúng ta định nghĩa closure ở đây, và
+cài đặt của <code>unwrap_or_else</code> sẽ thực thi closure sau nếu kết quả được
+cần thiết.</p>
+<p>Chạy đoạn code này sẽ in ra:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling shirt-company v0.1.0 (file:///projects/shirt-company)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.27s
+     Running `target/debug/shirt-company`
+The user with preference Some(Red) gets Red
+The user with preference None gets Blue
+</code></pre>
+<p>Một điểm thú vị ở đây là chúng ta đã truyền một closure gọi <code>self.most_stocked()</code>
+trên instance <code>Inventory</code> hiện tại. Thư viện chuẩn không cần biết gì về các
+kiểu <code>Inventory</code> hay <code>ShirtColor</code> mà chúng ta định nghĩa, cũng như logic mà
+chúng ta muốn sử dụng trong tình huống này. Closure sẽ bắt một tham chiếu
+bất biến đến instance <code>self</code> của <code>Inventory</code> và truyền nó cùng với đoạn code
+chúng ta chỉ định đến phương thức <code>unwrap_or_else</code>. Ngược lại, các hàm
+thường không thể bắt môi trường của chúng theo cách này.</p>
+<h3 id="suy-luận-kiểu-và-ghi-chú-kiểu-cho-closures"><a class="header" href="#suy-luận-kiểu-và-ghi-chú-kiểu-cho-closures">Suy Luận Kiểu và Ghi Chú Kiểu cho Closures</a></h3>
+<p>Còn có nhiều khác biệt giữa hàm và closures. Closures thường không yêu cầu
+bạn phải ghi chú kiểu cho các tham số hoặc giá trị trả về như các hàm <code>fn</code>.
+Ghi chú kiểu là cần thiết cho hàm vì các kiểu là một phần của giao diện
+rõ ràng được cung cấp cho người dùng. Định nghĩa giao diện này một cách
+cứng nhắc giúp đảm bảo mọi người đều hiểu các kiểu giá trị mà hàm sử dụng
+và trả về. Closures, ngược lại, không được dùng trong một giao diện lộ ra
+như vậy: chúng được lưu trong biến và sử dụng mà không cần đặt tên hay
+tiếp cận bởi người dùng thư viện.</p>
+<p>Closures thường ngắn gọn và chỉ liên quan trong một ngữ cảnh hẹp, thay vì
+trong bất kỳ tình huống tùy ý nào. Trong những ngữ cảnh hạn chế này,
+compiler có thể suy luận kiểu của các tham số và kiểu trả về, tương tự
+như cách nó suy luận kiểu hầu hết các biến (có những trường hợp hiếm
+rằng compiler cũng cần ghi chú kiểu cho closure).</p>
+<p>Giống như với biến, chúng ta có thể thêm ghi chú kiểu nếu muốn tăng tính
+rõ ràng và minh bạch, mặc dù sẽ làm code dài hơn mức cần thiết. Việc ghi
+chú kiểu cho một closure sẽ trông như định nghĩa trong Listing 13-2. Trong
+ví dụ này, chúng ta định nghĩa một closure và lưu nó vào biến thay vì định
+nghĩa closure ngay tại chỗ truyền làm đối số như trong Listing 13-1.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">use std::thread;
+</span><span class="boring">use std::time::Duration;
+</span><span class="boring">
+</span><span class="boring">fn generate_workout(intensity: u32, random_number: u32) {
+</span>    let expensive_closure = |num: u32| -&gt; u32 {
+        println!("calculating slowly...");
+        thread::sleep(Duration::from_secs(2));
+        num
+    };
+<span class="boring">
+</span><span class="boring">    if intensity &lt; 25 {
+</span><span class="boring">        println!("Today, do {} pushups!", expensive_closure(intensity));
+</span><span class="boring">        println!("Next, do {} situps!", expensive_closure(intensity));
+</span><span class="boring">    } else {
+</span><span class="boring">        if random_number == 3 {
+</span><span class="boring">            println!("Take a break today! Remember to stay hydrated!");
+</span><span class="boring">        } else {
+</span><span class="boring">            println!(
+</span><span class="boring">                "Today, run for {} minutes!",
+</span><span class="boring">                expensive_closure(intensity)
+</span><span class="boring">            );
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    let simulated_user_specified_value = 10;
+</span><span class="boring">    let simulated_random_number = 7;
+</span><span class="boring">
+</span><span class="boring">    generate_workout(simulated_user_specified_value, simulated_random_number);
+</span><span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 13-2: Thêm ghi chú kiểu tùy chọn cho các kiểu
+tham số và giá trị trả về trong closure</span></p>
+<p>Khi thêm ghi chú kiểu, cú pháp của closures trông giống hơn với cú pháp
+của các hàm. Ở đây, chúng ta định nghĩa một hàm cộng 1 vào tham số của
+nó và một closure có cùng hành vi, để so sánh. Chúng ta đã thêm một số
+dấu cách để căn các phần liên quan. Điều này minh họa cách cú pháp
+closure tương tự cú pháp hàm, ngoại trừ việc sử dụng các dấu ống (<code>| |</code>)
+và mức độ cú pháp tùy chọn.</p>
+<pre><code class="language-rust ignore">fn  add_one_v1   (x: u32) -&gt; u32 { x + 1 }
+let add_one_v2 = |x: u32| -&gt; u32 { x + 1 };
+let add_one_v3 = |x|             { x + 1 };
+let add_one_v4 = |x|               x + 1  ;</code></pre>
+<p>Dòng đầu tiên hiển thị định nghĩa một hàm, và dòng thứ hai hiển thị định
+nghĩa một closure với đầy đủ ghi chú kiểu. Ở dòng thứ ba, chúng ta loại
+bỏ ghi chú kiểu khỏi định nghĩa closure. Ở dòng thứ tư, chúng ta bỏ
+cặp dấu ngoặc nhọn, vốn tùy chọn vì thân closure chỉ có một biểu thức.
+Tất cả các định nghĩa này đều hợp lệ và sẽ cho cùng một hành vi khi
+được gọi. Các dòng <code>add_one_v3</code> và <code>add_one_v4</code> yêu cầu các closure được
+đánh giá trước khi biên dịch vì các kiểu sẽ được suy luận từ cách chúng
+được sử dụng. Điều này tương tự như <code>let v = Vec::new();</code> cần ghi chú
+kiểu hoặc các giá trị của một kiểu nào đó được thêm vào <code>Vec</code> để Rust
+có thể suy luận kiểu.</p>
+<p>Đối với định nghĩa closure, compiler sẽ suy luận một kiểu cụ thể cho mỗi
+tham số và cho giá trị trả về của chúng. Ví dụ, Listing 13-3 hiển thị
+định nghĩa một closure ngắn chỉ trả về giá trị mà nó nhận làm tham số.
+Closure này không hữu ích lắm ngoài mục đích minh họa. Lưu ý rằng chúng
+ta không thêm bất kỳ ghi chú kiểu nào cho định nghĩa. Vì không có ghi
+chú kiểu, chúng ta có thể gọi closure với bất kỳ kiểu nào, như lần đầu
+chúng ta gọi với <code>String</code>. Nếu sau đó thử gọi <code>example_closure</code> với một
+số nguyên, chúng ta sẽ nhận được lỗi.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile"><span class="boring">fn main() {
+</span>    let example_closure = |x| x;
+
+    let s = example_closure(String::from("hello"));
+    let n = example_closure(5);
+<span class="boring">}</span></code></pre>
+<p><span class="caption">Listing 13-3: Thử gọi một closure có kiểu được suy luận
+với hai kiểu khác nhau</span></p>
+<p>Compiler sẽ đưa ra lỗi sau:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling closure-example v0.1.0 (file:///projects/closure-example)
+error[E0308]: mismatched types
+ --&gt; src/main.rs:5:29
+  |
+5 |     let n = example_closure(5);
+  |             --------------- ^- help: try using a conversion method: `.to_string()`
+  |             |               |
+  |             |               expected `String`, found integer
+  |             arguments to this function are incorrect
+  |
+note: expected because the closure was earlier called with an argument of type `String`
+ --&gt; src/main.rs:4:29
+  |
+4 |     let s = example_closure(String::from("hello"));
+  |             --------------- ^^^^^^^^^^^^^^^^^^^^^ expected because this argument is of type `String`
+  |             |
+  |             in this closure call
+note: closure parameter defined here
+ --&gt; src/main.rs:2:28
+  |
+2 |     let example_closure = |x| x;
+  |                            ^
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `closure-example` (bin "closure-example") due to 1 previous error
+</code></pre>
+<p>Lần đầu tiên chúng ta gọi <code>example_closure</code> với giá trị <code>String</code>, compiler
+suy luận kiểu của <code>x</code> và kiểu trả về của closure là <code>String</code>. Những kiểu
+này sau đó được “khóa” trong closure ở <code>example_closure</code>, và chúng ta sẽ
+nhận được lỗi kiểu khi cố gắng sử dụng một kiểu khác với cùng closure.</p>
+<h3 id="bắt-tham-chiếu-hoặc-chuyển-quyền-sở-hữu"><a class="header" href="#bắt-tham-chiếu-hoặc-chuyển-quyền-sở-hữu">Bắt Tham Chiếu hoặc Chuyển Quyền Sở Hữu</a></h3>
+<p>Closures có thể bắt các giá trị từ môi trường của chúng theo ba cách, tương
+ứng trực tiếp với ba cách một hàm có thể nhận tham số: mượn bất biến,
+mượn có thể thay đổi, và nhận quyền sở hữu. Closure sẽ quyết định sử dụng
+cách nào dựa trên những gì thân hàm làm với các giá trị bị bắt.</p>
+<p>Trong Listing 13-4, chúng ta định nghĩa một closure bắt một tham chiếu
+bất biến đến vector có tên <code>list</code> vì nó chỉ cần tham chiếu bất biến để in
+giá trị:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">fn main() {
+    let list = vec![1, 2, 3];
+    println!("Before defining closure: {list:?}");
+
+    let only_borrows = || println!("From closure: {list:?}");
+
+    println!("Before calling closure: {list:?}");
+    only_borrows();
+    println!("After calling closure: {list:?}");
+}</code></pre></pre>
+<p><span class="caption">Listing 13-4: Định nghĩa và gọi một closure bắt tham chiếu bất biến</span></p>
+<p>Ví dụ này cũng minh họa rằng một biến có thể liên kết với một định nghĩa
+closure, và chúng ta có thể gọi closure sau này bằng cách sử dụng tên
+biến và dấu ngoặc, như thể tên biến là tên hàm.</p>
+<p>Vì chúng ta có thể có nhiều tham chiếu bất biến đến <code>list</code> cùng lúc,
+<code>list</code> vẫn có thể truy cập được từ code trước khi định nghĩa closure,
+sau khi định nghĩa closure nhưng trước khi gọi closure, và sau khi gọi
+closure. Đoạn code này biên dịch được, chạy được và in ra:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling closure-example v0.1.0 (file:///projects/closure-example)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.43s
+     Running `target/debug/closure-example`
+Before defining closure: [1, 2, 3]
+Before calling closure: [1, 2, 3]
+From closure: [1, 2, 3]
+After calling closure: [1, 2, 3]
+</code></pre>
+<p>Tiếp theo, trong Listing 13-5, chúng ta thay đổi thân closure sao cho nó
+thêm một phần tử vào vector <code>list</code>. Closure bây giờ bắt một tham chiếu
+có thể thay đổi:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">fn main() {
+    let mut list = vec![1, 2, 3];
+    println!("Before defining closure: {list:?}");
+
+    let mut borrows_mutably = || list.push(7);
+
+    borrows_mutably();
+    println!("After calling closure: {list:?}");
+}</code></pre></pre>
+<p><span class="caption">Listing 13-5: Định nghĩa và gọi một closure bắt tham chiếu có thể thay đổi</span></p>
+<p>Đoạn code này biên dịch được, chạy được và in ra:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling closure-example v0.1.0 (file:///projects/closure-example)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.43s
+     Running `target/debug/closure-example`
+Before defining closure: [1, 2, 3]
+After calling closure: [1, 2, 3, 7]
+</code></pre>
+<p>Lưu ý rằng không còn <code>println!</code> nào giữa định nghĩa và gọi closure
+<code>borrows_mutably</code>: khi <code>borrows_mutably</code> được định nghĩa, nó bắt một
+tham chiếu có thể thay đổi đến <code>list</code>. Chúng ta không sử dụng closure
+nữa sau khi gọi, nên việc mượn có thể thay đổi kết thúc. Giữa định
+nghĩa closure và gọi closure, việc mượn bất biến để in ra không được
+cho phép vì khi có một tham chiếu có thể thay đổi, không có mượn nào
+khác được phép. Hãy thử thêm một <code>println!</code> vào đó để xem thông báo
+lỗi bạn nhận được!</p>
+<p>Nếu bạn muốn buộc closure nhận quyền sở hữu các giá trị nó sử dụng
+trong môi trường mặc dù thân closure không nhất thiết phải cần quyền
+sở hữu, bạn có thể dùng từ khóa <code>move</code> trước danh sách tham số.</p>
+<p>Kỹ thuật này chủ yếu hữu ích khi truyền một closure vào một luồng mới
+để chuyển dữ liệu sao cho nó thuộc sở hữu của luồng mới. Chúng ta sẽ
+thảo luận chi tiết về luồng và lý do muốn dùng chúng trong Chương 16
+khi bàn về concurrency, nhưng bây giờ, hãy cùng khám phá ngắn gọn việc
+khởi tạo một luồng mới sử dụng closure cần từ khóa <code>move</code>. Listing 13-6
+hiển thị Listing 13-4 được chỉnh sửa để in vector trong một luồng mới
+thay vì luồng chính:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">use std::thread;
+
+fn main() {
+    let list = vec![1, 2, 3];
+    println!("Before defining closure: {list:?}");
+
+    thread::spawn(move || println!("From thread: {list:?}"))
+        .join()
+        .unwrap();
+}</code></pre></pre>
+<p><span class="caption">Listing 13-6: Sử dụng <code>move</code> để buộc closure của luồng mới nhận quyền sở hữu <code>list</code></span></p>
+<p>Chúng ta khởi tạo một luồng mới, truyền cho luồng một closure để chạy
+như một đối số. Thân closure in ra <code>list</code>. Trong Listing 13-4, closure chỉ
+bắt <code>list</code> bằng một tham chiếu bất biến vì đó là mức truy cập tối thiểu
+cần thiết để in. Trong ví dụ này, mặc dù thân closure vẫn chỉ cần
+một tham chiếu bất biến, chúng ta cần chỉ định rằng <code>list</code> nên được
+chuyển vào closure bằng cách đặt từ khóa <code>move</code> ở đầu định nghĩa closure.
+Luồng mới có thể kết thúc trước khi luồng chính kết thúc, hoặc luồng chính
+có thể kết thúc trước. Nếu luồng chính vẫn giữ quyền sở hữu <code>list</code> nhưng
+kết thúc trước luồng mới và hủy <code>list</code>, tham chiếu bất biến trong luồng mới
+sẽ không còn hợp lệ. Do đó, compiler yêu cầu <code>list</code> phải được chuyển vào
+closure của luồng mới để tham chiếu được hợp lệ. Hãy thử bỏ từ khóa <code>move</code>
+hoặc sử dụng <code>list</code> trong luồng chính sau khi định nghĩa closure để xem
+các lỗi compiler bạn nhận được!</p>
+<!-- Old headings. Do not remove or links may break. -->
+<p><a id="storing-closures-using-generic-parameters-and-the-fn-traits"></a>
+<a id="limitations-of-the-cacher-implementation"></a>
+<a id="moving-captured-values-out-of-the-closure-and-the-fn-traits"></a></p>
+<h3 id="chuyển-giá-trị-bắt-Được-ra-khỏi-closures-và-các-trait-fn"><a class="header" href="#chuyển-giá-trị-bắt-Được-ra-khỏi-closures-và-các-trait-fn">Chuyển Giá Trị Bắt Được Ra Khỏi Closures và Các Trait <code>Fn</code></a></h3>
+<p>Khi một closure đã bắt một tham chiếu hoặc quyền sở hữu của một giá trị
+từ môi trường nơi closure được định nghĩa (ảnh hưởng đến việc có gì,
+nếu có, được chuyển <em>vào</em> closure), thì đoạn code trong thân closure sẽ
+xác định điều gì xảy ra với các tham chiếu hoặc giá trị khi closure được
+thực thi sau này (ảnh hưởng đến việc có gì, nếu có, được chuyển <em>ra khỏi</em>
+closure). Thân closure có thể thực hiện bất kỳ điều nào sau đây: chuyển
+giá trị bắt được ra khỏi closure, thay đổi giá trị bắt được, không chuyển
+không thay đổi giá trị, hoặc không bắt gì từ môi trường ngay từ đầu.</p>
+<p>Cách closure bắt và xử lý các giá trị từ môi trường ảnh hưởng đến các trait
+mà closure thực thi, và traits là cách các hàm và struct có thể chỉ định
+loại closures mà chúng có thể sử dụng. Closures sẽ tự động triển khai một,
+hai, hoặc cả ba trait <code>Fn</code> này, theo cách cộng dồn, tùy thuộc vào cách thân
+closure xử lý các giá trị:</p>
+<ol>
+<li><code>FnOnce</code> áp dụng cho các closures chỉ có thể được gọi một lần. Tất cả
+closures đều triển khai ít nhất trait này, vì tất cả closures có thể được
+gọi. Một closure mà chuyển các giá trị bắt được ra khỏi thân của nó
+sẽ chỉ triển khai <code>FnOnce</code> và không triển khai các trait <code>Fn</code> khác,
+vì nó chỉ có thể được gọi một lần.</li>
+<li><code>FnMut</code> áp dụng cho các closures không chuyển giá trị bắt được ra khỏi
+thân, nhưng có thể thay đổi các giá trị bắt được. Những closures này
+có thể được gọi nhiều lần.</li>
+<li><code>Fn</code> áp dụng cho các closures không chuyển giá trị bắt được ra khỏi thân
+và không thay đổi các giá trị bắt được, cũng như các closures không bắt
+gì từ môi trường. Những closures này có thể được gọi nhiều lần mà không
+làm thay đổi môi trường, điều này quan trọng trong các trường hợp như
+gọi closure nhiều lần đồng thời.</li>
+</ol>
+<p>Hãy xem định nghĩa của phương thức <code>unwrap_or_else</code> trên <code>Option&lt;T&gt;</code> mà
+chúng ta đã sử dụng trong Listing 13-1:</p>
+<pre><code class="language-rust ignore">impl&lt;T&gt; Option&lt;T&gt; {
+    pub fn unwrap_or_else&lt;F&gt;(self, f: F) -&gt; T
+    where
+        F: FnOnce() -&gt; T
+    {
+        match self {
+            Some(x) =&gt; x,
+            None =&gt; f(),
+        }
+    }
+}</code></pre>
+<p>Nhớ rằng <code>T</code> là kiểu tổng quát đại diện cho kiểu giá trị trong biến thể
+<code>Some</code> của một <code>Option</code>. Kiểu <code>T</code> cũng là kiểu trả về của hàm
+<code>unwrap_or_else</code>: ví dụ, code gọi <code>unwrap_or_else</code> trên một
+<code>Option&lt;String&gt;</code> sẽ nhận về một <code>String</code>.</p>
+<p>Tiếp theo, lưu ý rằng hàm <code>unwrap_or_else</code> có thêm tham số kiểu tổng quát
+<code>F</code>. Kiểu <code>F</code> là kiểu của tham số <code>f</code>, chính là closure mà chúng ta cung
+cấp khi gọi <code>unwrap_or_else</code>.</p>
+<p>Ràng buộc trait được chỉ định trên kiểu tổng quát <code>F</code> là <code>FnOnce() -&gt; T</code>,
+có nghĩa <code>F</code> phải có thể được gọi một lần, không nhận tham số, và trả
+về một <code>T</code>. Việc dùng <code>FnOnce</code> trong ràng buộc trait thể hiện hạn chế
+rằng <code>unwrap_or_else</code> chỉ gọi <code>f</code> tối đa một lần. Trong thân hàm
+<code>unwrap_or_else</code>, nếu <code>Option</code> là <code>Some</code>, <code>f</code> sẽ không được gọi.
+Nếu <code>Option</code> là <code>None</code>, <code>f</code> sẽ được gọi một lần. Vì tất cả closures
+triển khai <code>FnOnce</code>, <code>unwrap_or_else</code> chấp nhận đa dạng nhất các loại
+closures và linh hoạt tối đa.</p>
+<blockquote>
+<p>Lưu ý: Các hàm cũng có thể triển khai cả ba trait <code>Fn</code>. Nếu việc
+chúng ta muốn làm không yêu cầu bắt giá trị từ môi trường, chúng ta
+có thể sử dụng tên hàm thay vì closure nơi cần một thứ triển khai
+một trong các trait <code>Fn</code>. Ví dụ, trên một giá trị <code>Option&lt;Vec&lt;T&gt;&gt;</code>,
+ta có thể gọi <code>unwrap_or_else(Vec::new)</code> để nhận một vector mới rỗng
+nếu giá trị là <code>None</code>.</p>
+</blockquote>
+<p>Bây giờ, hãy xem phương thức thư viện chuẩn <code>sort_by_key</code> định nghĩa
+trên các slices, để thấy sự khác biệt với <code>unwrap_or_else</code> và lý do
+tại sao <code>sort_by_key</code> dùng <code>FnMut</code> thay vì <code>FnOnce</code> cho ràng buộc trait.
+Closure nhận một tham số dưới dạng tham chiếu đến phần tử hiện tại
+trong slice đang xét, và trả về một giá trị kiểu <code>K</code> có thể sắp xếp.
+Hàm này hữu ích khi muốn sắp xếp slice theo một thuộc tính cụ thể
+của mỗi phần tử. Trong Listing 13-7, chúng ta có một danh sách
+các instance <code>Rectangle</code> và dùng <code>sort_by_key</code> để sắp xếp theo
+thuộc tính <code>width</code> từ nhỏ đến lớn:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let mut list = [
+        Rectangle { width: 10, height: 1 },
+        Rectangle { width: 3, height: 5 },
+        Rectangle { width: 7, height: 12 },
+    ];
+
+    list.sort_by_key(|r| r.width);
+    println!("{list:#?}");
+}</code></pre></pre>
+<p><span class="caption">Listing 13-7: Sử dụng <code>sort_by_key</code> để sắp xếp các hình chữ nhật theo chiều rộng</span></p>
+<p>Đoạn code này in ra:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling rectangles v0.1.0 (file:///projects/rectangles)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.41s
+     Running `target/debug/rectangles`
+[
+    Rectangle {
+        width: 3,
+        height: 5,
+    },
+    Rectangle {
+        width: 7,
+        height: 12,
+    },
+    Rectangle {
+        width: 10,
+        height: 1,
+    },
+]
+</code></pre>
+<p>Lý do <code>sort_by_key</code> được định nghĩa để nhận một closure <code>FnMut</code> là vì
+nó gọi closure nhiều lần: một lần cho mỗi phần tử trong slice. Closure
+<code>|r| r.width</code> không bắt, thay đổi, hay chuyển ra bất kỳ giá trị nào
+từ môi trường, nên nó thỏa mãn các yêu cầu của ràng buộc trait.</p>
+<p>Ngược lại, Listing 13-8 cho thấy một ví dụ về closure chỉ triển khai
+trait <code>FnOnce</code>, vì nó chuyển một giá trị ra khỏi môi trường. Compiler
+sẽ không cho phép chúng ta sử dụng closure này với <code>sort_by_key</code>:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile">#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let mut list = [
+        Rectangle { width: 10, height: 1 },
+        Rectangle { width: 3, height: 5 },
+        Rectangle { width: 7, height: 12 },
+    ];
+
+    let mut sort_operations = vec![];
+    let value = String::from("closure called");
+
+    list.sort_by_key(|r| {
+        sort_operations.push(value);
+        r.width
+    });
+    println!("{list:#?}");
+}</code></pre>
+<p><span class="caption">Listing 13-8: Thử sử dụng một closure <code>FnOnce</code> với <code>sort_by_key</code></span></p>
+<p>Đây là một cách dựng lên rườm rà và phức tạp (không hoạt động) để cố
+gắng đếm số lần <code>sort_by_key</code> được gọi khi sắp xếp <code>list</code>. Đoạn code
+này cố gắng đếm bằng cách đẩy <code>value</code>—một <code>String</code> từ môi trường của
+closure—vào vector <code>sort_operations</code>. Closure bắt <code>value</code> rồi chuyển
+<code>value</code> ra khỏi closure bằng cách chuyển quyền sở hữu của <code>value</code> vào
+vector <code>sort_operations</code>. Closure này chỉ có thể được gọi một lần;
+nếu cố gọi lần thứ hai sẽ không được vì <code>value</code> không còn trong
+môi trường để đẩy vào <code>sort_operations</code> nữa! Do đó, closure này chỉ
+triển khai <code>FnOnce</code>. Khi cố biên dịch đoạn code này, chúng ta nhận được
+lỗi rằng <code>value</code> không thể được chuyển ra khỏi closure vì closure
+phải triển khai <code>FnMut</code>:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling rectangles v0.1.0 (file:///projects/rectangles)
+error[E0507]: cannot move out of `value`, a captured variable in an `FnMut` closure
+  --&gt; src/main.rs:18:30
+   |
+15 |     let value = String::from("closure called");
+   |         ----- captured outer variable
+16 |
+17 |     list.sort_by_key(|r| {
+   |                      --- captured by this `FnMut` closure
+18 |         sort_operations.push(value);
+   |                              ^^^^^ move occurs because `value` has type `String`, which does not implement the `Copy` trait
+   |
+help: consider cloning the value if the performance cost is acceptable
+   |
+18 |         sort_operations.push(value.clone());
+   |                                   ++++++++
+
+For more information about this error, try `rustc --explain E0507`.
+error: could not compile `rectangles` (bin "rectangles") due to 1 previous error
+</code></pre>
+<p>Lỗi này chỉ ra dòng trong thân closure chuyển <code>value</code> ra khỏi môi trường.
+Để khắc phục, chúng ta cần thay đổi thân closure sao cho không chuyển
+giá trị ra khỏi môi trường. Để đếm số lần <code>sort_by_key</code> được gọi, việc
+giữ một biến đếm trong môi trường và tăng giá trị của nó trong thân
+closure là cách trực quan hơn để tính toán. Closure trong Listing 13-9
+hoạt động với <code>sort_by_key</code> vì nó chỉ bắt một tham chiếu có thể thay
+đổi đến biến đếm <code>num_sort_operations</code> và do đó có thể được gọi nhiều
+lần:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let mut list = [
+        Rectangle { width: 10, height: 1 },
+        Rectangle { width: 3, height: 5 },
+        Rectangle { width: 7, height: 12 },
+    ];
+
+    let mut num_sort_operations = 0;
+    list.sort_by_key(|r| {
+        num_sort_operations += 1;
+        r.width
+    });
+    println!("{list:#?}, sorted in {num_sort_operations} operations");
+}</code></pre></pre>
+<p><span class="caption">Listing 13-9: Sử dụng closure <code>FnMut</code> với <code>sort_by_key</code> được phép</span></p>
+<p>Các trait <code>Fn</code> rất quan trọng khi định nghĩa hoặc sử dụng các hàm
+hoặc kiểu dữ liệu có dùng closures. Trong phần tiếp theo, chúng ta sẽ
+thảo luận về iterators. Nhiều phương thức của iterator nhận đối số
+là closure, nên hãy nhớ các chi tiết về closure này khi tiếp tục!</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch13-00-functional-features.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch13-02-iterators.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch13-00-functional-features.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch13-02-iterators.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

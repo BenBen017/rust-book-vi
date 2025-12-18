@@ -1,0 +1,10 @@
+D:\rust-project\rust-book-vi\packages\mdbook-trpl\target\release\deps\libanstyle_wincon-cb129fd03c8c8088.rmeta: C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-wincon-3.0.6\src\lib.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-wincon-3.0.6\src\ansi.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-wincon-3.0.6\src\stream.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-wincon-3.0.6\src\windows.rs
+
+D:\rust-project\rust-book-vi\packages\mdbook-trpl\target\release\deps\libanstyle_wincon-cb129fd03c8c8088.rlib: C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-wincon-3.0.6\src\lib.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-wincon-3.0.6\src\ansi.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-wincon-3.0.6\src\stream.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-wincon-3.0.6\src\windows.rs
+
+D:\rust-project\rust-book-vi\packages\mdbook-trpl\target\release\deps\anstyle_wincon-cb129fd03c8c8088.d: C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-wincon-3.0.6\src\lib.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-wincon-3.0.6\src\ansi.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-wincon-3.0.6\src\stream.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-wincon-3.0.6\src\windows.rs
+
+C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-wincon-3.0.6\src\lib.rs:
+C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-wincon-3.0.6\src\ansi.rs:
+C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-wincon-3.0.6\src\stream.rs:
+C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-wincon-3.0.6\src\windows.rs:

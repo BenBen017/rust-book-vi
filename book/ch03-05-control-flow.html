@@ -1,0 +1,672 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Các khối điều khiển - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <p><a id="control-flow"></a></p>
+<h2 id="các-khối-điều-khiển"><a class="header" href="#các-khối-điều-khiển">Các khối điều khiển</a></h2>
+<p>Khả năng chạy một số đoạn lệnh dựa khi một điều kiện nào đó là <code>true</code>, hoặc chạy lặp lại một
+lệnh khi một điều kiện nào đó là <code>true</code>, là các khối điều khiển cơ bản có trong hầu
+hết các ngôn ngữ lập trình. Khối điều khiển phổ biến nhất cho phép bạn kiểm soát việc
+thực thi các đoạn code trong Rust là các biểu thức <code>if</code> và các lệnh lặp.</p>
+<h3 id="biểu-thức-if"><a class="header" href="#biểu-thức-if">Biểu thức <code>if</code></a></h3>
+<p>Một biểu thức <code>if</code> cho phép bạn rẽ nhánh thực thi dựa trên các điều kiện nào đó.
+Bạn cung cấp một điều kiện và phát biểu: “Nếu điều kiện này đúng, hãy chạy đoạn lệnh
+này. Nếu không đạt, đừng chạy nó”.</p>
+<p>Tạo một dự án mới được gọi là <em>branches</em> trong thư mục <em>projects</em> để khảo sát biểu
+thức <code>if</code>. Trong file <em>src/main.rs</em>, hãy nhập vào nội dung sau:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">fn main() {
+    let number = 3;
+
+    if number &lt; 5 {
+        println!("condition was true");
+    } else {
+        println!("condition was false");
+    }
+}</code></pre></pre>
+<p>Tất cả các phát biểu <code>if</code> sẽ bắt đầu bằng từ khóa <code>if</code>, theo sau bởi một điều kiện.
+Trong trường hợp này, điều kiện là kiểm tra xem liệu biến <code>number</code> có giá trị nhỏ
+hơn 5 hay không. Chúng ta đặt khối lệnh để thực thi nếu điều kiện là đúng ngay sau
+dấu ngoặc đóng của điều kiện. Các khối lệnh kết hợp với <code>if</code> đôi khi được gọi là
+<em>arm</em>, giống như <em>arms</em> trong phát biểu <code>match</code> mà ta đã thảo luận trong phần
+<a href="ch02-00-guessing-game-tutorial.html#comparing-the-guess-to-the-secret-number">“Comparing the Guess to the Secret Number”</a><!--
+ignore --> section of Chapter 2.</p>
+<p>Chúng ta cũng có thể tùy chọn thêm một phát biểu <code>else</code>, giống như chúng ta đã
+làm ở đây, để cung cấp một đoạn code mà sẽ được thực thi nếu điều kiện trả về
+giá trị false. Nếu bạn không cung cấp <code>else</code>, chương trình sẽ chỉ đơn giản bỏ qua
+khối lệnh <code>if</code> và tiếp tục thực thi các lệnh tiếp sau đó.</p>
+<p>Thử chạy đoạn lệnh này, bạn sẽ thấy kết xuất như sau:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling branches v0.1.0 (file:///projects/branches)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.31s
+     Running `target/debug/branches`
+condition was true
+</code></pre>
+<p>Hãy thử thay đổi <code>number</code> sang một giá trị làm cho điều kiện trả về kết quả false
+để xem điều gì xảy ra:</p>
+<pre><code class="language-rust ignore"><span class="boring">fn main() {
+</span>    let number = 7;
+<span class="boring">
+</span><span class="boring">    if number &lt; 5 {
+</span><span class="boring">        println!("condition was true");
+</span><span class="boring">    } else {
+</span><span class="boring">        println!("condition was false");
+</span><span class="boring">    }
+</span><span class="boring">}</span></code></pre>
+<p>Chạy lại chương trình, và xem kết xuất:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling branches v0.1.0 (file:///projects/branches)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.31s
+     Running `target/debug/branches`
+condition was false
+</code></pre>
+<p>Một điểm quan trọng cần lưu ý là điều kiện trong đoạn code này bắt buộc <em>phải</em> có
+kiểu <code>bool</code>. Nếu điều kiện này không phải là bool, bạn sẽ nhận một lỗi. Ví dụ, thử
+chạy đoạn lệnh sau:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile">fn main() {
+    let number = 3;
+
+    if number {
+        println!("number was three");
+    }
+}</code></pre>
+<p>Trong trường hợp này biểu thức trong <code>if</code> trả về giá trị <code>3</code>, và Rust phát ra một
+lỗi:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling branches v0.1.0 (file:///projects/branches)
+error[E0308]: mismatched types
+ --&gt; src/main.rs:4:8
+  |
+4 |     if number {
+  |        ^^^^^^ expected `bool`, found integer
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `branches` (bin "branches") due to 1 previous error
+</code></pre>
+<p>Lỗi này chỉ ra Rust cần một <code>bool</code> nhưng lại nhận được một integer. Không như
+các ngôn ngữ như Ruby hay JavaScript, Rust không tự động thử chuyển các giá trị
+không phải boolean sang boolean. Nếu bạn muốn đoạn <code>if</code> chỉ chạy khi một số bằng
+với <code>0</code>, bạn có thể viết lại như sau:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">fn main() {
+    let number = 3;
+
+    if number != 0 {
+        println!("number was something other than zero");
+    }
+}</code></pre></pre>
+<p>Chạy đoạn code này sẽ trả về kết xuất sau: <code>number was something other than zero</code>.</p>
+<h4 id="xử-lý-nhiều-điều-kiện-với-else-if"><a class="header" href="#xử-lý-nhiều-điều-kiện-với-else-if">Xử lý nhiều điều kiện với <code>else if</code></a></h4>
+<p>Bạn có thể dùng nhiều điều kiện khác nhau bằng cách kết hợp <code>if</code> với <code>else</code> trong
+một biểu thức <code>else if</code>. Ví dụ:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">fn main() {
+    let number = 6;
+
+    if number % 4 == 0 {
+        println!("number is divisible by 4");
+    } else if number % 3 == 0 {
+        println!("number is divisible by 3");
+    } else if number % 2 == 0 {
+        println!("number is divisible by 2");
+    } else {
+        println!("number is not divisible by 4, 3, or 2");
+    }
+}</code></pre></pre>
+<p>Chương trình này có bốn nhánh có thể thực thi. Sau khi chạy bạn sẽ thấy kết xuất sau:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling branches v0.1.0 (file:///projects/branches)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.31s
+     Running `target/debug/branches`
+number is divisible by 3
+</code></pre>
+<p>Khi chạy chương trình này, nó sẽ kiểm tra lần lượt mỗi biểu thức <code>if</code> và thực
+thi thân <code>if</code> đầu tiên mà biểu thức trả về <code>true</code>. Lưu ý rằng tuy 6 chia hết cho 2,
+chúng ta vẫn không thấy câu <code>number is divisible by 2</code> được in ra, cũng như không
+thấy câu <code>number is not divisible by 4, 3, or 2</code> trong khối <code>else</code>. Đó là vì Rust
+chỉ thực thi đoạn lệnh trong thân <code>if</code> đầu tiên mà nó thấy trả về true, và một khi
+tìm thấy, nó sẽ thậm chí không kiểm tra các biểu thức phía sau.</p>
+<p>Sử dụng quá nhiều <code>else if</code> làm cho code của bạn lộn xộn, do vậy nếu bạn có nhiều
+hơn một, bạn có thể sẽ cần refactor code. Chương 6 mô tả một cấu trúc rẽ nhánh mạnh
+mẽ trong Rust được gọi là <code>match</code> phù hợp với trường hợp này.</p>
+<h4 id="sử-dụng-if-bên-trong-phát-biểu-let"><a class="header" href="#sử-dụng-if-bên-trong-phát-biểu-let">Sử dụng <code>if</code> bên trong phát biểu <code>let</code></a></h4>
+<p>Vì <code>if</code> là một biểu thức, vậy nên ta có thể dùng nó bên phải của một phát biểu <code>let</code>
+để gán giá trị trả về cho một biến, như trong Listing 3-2.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">fn main() {
+    let condition = true;
+    let number = if condition { 5 } else { 6 };
+
+    println!("The value of number is: {number}");
+}</code></pre></pre>
+<p><span class="caption">Listing 3-2: Gán kết quả của một biểu thức <code>if</code> vào một biến</span></p>
+<p>Biến <code>number</code> sẽ được gán một giá trị dựa trên kết quả của một biểu thức <code>if</code>. Chạy
+đoạn code sau để xem điều gì xảy ra:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling branches v0.1.0 (file:///projects/branches)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.30s
+     Running `target/debug/branches`
+The value of number is: 5
+</code></pre>
+<p>Hãy nhớ là các khối lệnh sẽ được định giá trị bằng với giá trị của biểu thức cuối
+cùng bên trong nó, và bản thân các con số cũng là các biểu thức. Trong trường hợp này,
+giá trị của toàn bộ biểu thức <code>if</code> phụ thuộc vào nhánh nào được thực thi. Có nghĩa là
+các nhánh của <code>if</code> phải có cùng kiểu; trong Listing 3-2, kết quả của cả hai nhánh
+của <code>if</code> đều có kiểu số nguyên <code>i32</code>. Nếu các kiểu không khớp nhau, như trong ví dụ
+dưới đây, chúng ta sẽ nhận về một lỗi.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile">fn main() {
+    let condition = true;
+
+    let number = if condition { 5 } else { "six" };
+
+    println!("The value of number is: {number}");
+}</code></pre>
+<p>Khi chúng ta thử dịch đoạn code này, chúng ta sẽ nhận về một lỗi. Các nhánh <code>if</code>
+và <code>else</code> có các kiểu không tương thích, và Rust chỉ ra chính xác vị trí nơi phát
+sinh lỗi trong chương trình:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling branches v0.1.0 (file:///projects/branches)
+error[E0308]: `if` and `else` have incompatible types
+ --&gt; src/main.rs:4:44
+  |
+4 |     let number = if condition { 5 } else { "six" };
+  |                                 -          ^^^^^ expected integer, found `&amp;str`
+  |                                 |
+  |                                 expected because of this
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `branches` (bin "branches") due to 1 previous error
+</code></pre>
+<p>Biểu thức trong khối <code>if</code> trả về một giá trị integer, trong khi biểu thức trong khối <code>else</code>
+trả về một string. Điều này không thể hoạt động được vì các biến chỉ có thể có một kiểu
+duy nhất, và Rust cần biết kiểu của biến <code>number</code> là gì ngay khi dịch. Việc biết
+kiểu của biến <code>number</code> cho phép trình dịch xác định tính hợp lệ về kiểu bất cứ khi nào
+ta truy xuất đến nó. Rust sẽ không thể làm được điều này nếu nó chỉ có thể xác định kiểu
+của <code>number</code> vào lúc chạy chương trình; trình dịch có lẽ sẽ phức tạp hơn nhiều cũng như
+khó đảm bảo về đoạn code hơn nếu nó phải lưu giữ thông tin về tất cả các kiểu dữ liệu
+<code>giả tưởng</code> cho bất kỳ biến nào.</p>
+<h3 id="sử-dụng-vòng-lặp-loops"><a class="header" href="#sử-dụng-vòng-lặp-loops">Sử dụng vòng lặp (loops)</a></h3>
+<p>Chúng ta thường xuyên phải thực thi một đoạn code nào đó nhiều lần. Để làm điều này,
+Rust cung cấp một số dạng <em>vòng lặp</em>, nó cho phép chạy đến cuối đoạn code bên trong
+thân vòng lặp , sau đó quay trở lại vị trí bắt đầu. Để trải nghiệm thử các vòng lặp,
+chúng ta sẽ cùng tạo một dự án mới có tên <em>loops</em>.</p>
+<p>Rust có ba dạng lặp: <code>loop</code>, <code>while</code>, và <code>for</code>. Hãy cùng thử qua từng cái.</p>
+<h4 id="lặp-lại-một-đoạn-code-sử-dụng-loop"><a class="header" href="#lặp-lại-một-đoạn-code-sử-dụng-loop">Lặp lại một đoạn code sử dụng <code>loop</code></a></h4>
+<p>Từ khóa <code>loop</code> sẽ yêu cầu Rust thực thi một đoạn code lặp đi lặp lại cho đến
+khi bạn yêu cầu nó kết thúc.</p>
+<p>Để ví dụ, hãy thay đổi file <em>src/main.rs</em> trong thư mục <em>loops</em> của bạn để nó trông
+như sau:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore">fn main() {
+    loop {
+        println!("again!");
+    }
+}</code></pre>
+<p>Khi chạy chương trình này, chúng ta sẽ thấy dòng <code>again!</code> được in lên màn hình
+liên tục cho đến khi bạn ngừng chạy chương trình. Hầu hết các terminal hỗ trợ
+tổ hợp phím <span class="keystroke">ctrl-c</span> để ngắt một chương trình đang
+bị kẹt trong một vòng lặp. Hãy cùng chạy thử:</p>
+<!-- manual-regeneration
+cd listings/ch03-common-programming-concepts/no-listing-32-loop
+cargo run
+CTRL-C
+-->
+<pre><code class="language-console">$ cargo run
+   Compiling loops v0.1.0 (file:///projects/loops)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.29s
+     Running `target/debug/loops`
+again!
+again!
+again!
+again!
+^Cagain!
+</code></pre>
+<p>Ký hiệu <code>^C</code> đại diện cho vị trí bạn nhấn <span class="keystroke">ctrl-c
+</span>. Bạn có thể nhìn thấy dòng <code>again!</code> được in phía sau <code>^C</code> hoặc không,
+phụ thuộc vào nơi đoạn code đang thực thi bên trong vòng lặp khi nó nhận được
+tín hiệu ngắt.</p>
+<p>May mắn là Rust cũng cung cấp một cách để thoát khỏi vòng lặp bằng code. Bạn có
+thể đặt một từ khóa <code>break</code> bên trong vòng lặp để nói với chương trình khi nào
+cần thoát khỏi vòng lặp. Hãy nhớ lại chúng ta đã làm điều này trong <a href="ch02-00-guessing-game-tutorial.html#quitting-after-a-correct-guess">“Quitting
+After a Correct Guess”</a><!-- ignore --> trong
+chương 2 để thoát khỏi chương trình khi người dùng chiến thắng bằng cách đoán đúng
+con số.</p>
+<p>Chúng ta cũng dùng <code>continue</code> trong trò chơi đoán số, để yêu cầu chương trình bỏ
+qua phần còn lại trong thân vòng lặp hiện tại và bắt đầu một vòng lặp mới.</p>
+<h4 id="trả-kết-quả-về-từ-vòng-lặp"><a class="header" href="#trả-kết-quả-về-từ-vòng-lặp">Trả kết quả về từ vòng lặp</a></h4>
+<p>Một trong những lý do dùng <code>loop</code> là để thực thi lại một tác vụ nào đó bạn biết
+có thể sẽ thất bại, kiểu như khi kiểm tra xem một thread đã hoàn thành công việc
+hay chưa. Bạn cũng cần trả về kết quả của tác vụ đó cho phần còn lại của chương
+trình khi kết thúc vòng lặp. Để làm điểu này bạn có thể thêm giá trị muốn trả về
+sau phát biểu <code>break</code> mà bạn dùng để kết thúc vòng lặp; giá trị đó sẽ được trả
+về ra ngoài vòng lặp và bạn có thể dùng được nó như trong ví dụ dưới đây:</p>
+<pre><pre class="playground"><code class="language-rust edition2024">fn main() {
+    let mut counter = 0;
+
+    let result = loop {
+        counter += 1;
+
+        if counter == 10 {
+            break counter * 2;
+        }
+    };
+
+    println!("The result is {result}");
+}</code></pre></pre>
+<p>Trước khi lặp, bạn khai báo một biến tên <code>counter</code> và khởi tạo giá trị của nó là
+<code>0</code>. Sau đó bạn khai báo tiếp một biến tên là <code>result</code> để lưu lại giá trị trả về
+từ vòng lặp. Cứ mỗi lần lặp ta lại cộng thêm <code>1</code> vào biến <code>counter</code> và kiểm tra
+giá trị của <code>counter</code> với <code>10</code>, khi điểu này xảy ra, ta dùng từ khóa <code>break</code> với
+giá trị trả về là <code>counter </code>* 2<code>. Sau vòng lặp, ta dùng một dấu chấm phẩy để kết  thúc phát biểu gán giá trị vào cho </code>result<code>. Cuối cùng, ta in ra giá trị của </code>result`,
+trong trường hợp này sẽ là 20.</p>
+<h4 id="gán-nhãn-để-phân-biệt-giữa-các-vòng-lặp"><a class="header" href="#gán-nhãn-để-phân-biệt-giữa-các-vòng-lặp">Gán nhãn để phân biệt giữa các vòng lặp</a></h4>
+<p>Nếu bạn có nhiều vòng lặp lồng nhau, <code>break</code> và <code>continue</code> được áp dụng cho vòng
+lặp bên trong nhất tại nơi bạn gọi. Bạn cũng có thể đặt <em>nhãn</em> cho một vòng lặp
+để sau đó khi gọi <code>break</code> hoặc <code>continue</code>, ta có thể chỉ ra chính xác ta muốn
+áp dụng những từ khóa đó cho vòng lặp đã được gán nhãn thay vì vòng lặp trong cùng.
+Các nhãn vòng lặp phải bắt đầu với một dấu nháy đơn. Sau đây là một ví dụ về hai
+vòng lặp lồng nhau:</p>
+<pre><pre class="playground"><code class="language-rust edition2024">fn main() {
+    let mut count = 0;
+    'counting_up: loop {
+        println!("count = {count}");
+        let mut remaining = 10;
+
+        loop {
+            println!("remaining = {remaining}");
+            if remaining == 9 {
+                break;
+            }
+            if count == 2 {
+                break 'counting_up;
+            }
+            remaining -= 1;
+        }
+
+        count += 1;
+    }
+    println!("End count = {count}");
+}</code></pre></pre>
+<p>Vòng lặp bên ngoài có nhãn <code>'counting_up</code>, và nó sẽ đếm từ 0 đến 2. Vòng lặp bên trong
+không có nhãn và đếm ngược từ 10 xuống 9. Phát biểu <code>break</code> đầu tiên không chỉ ra nhãn
+nên chỉ thoát ra khỏi vòng lặp bên trong. Trong khi đó, phát biểu <code>break 'counting_up;</code>
+sẽ thoát ra vòng lặp bên ngoài. Đoạn code này sẽ in ra:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling loops v0.1.0 (file:///projects/loops)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.58s
+     Running `target/debug/loops`
+count = 0
+remaining = 10
+remaining = 9
+count = 1
+remaining = 10
+remaining = 9
+count = 2
+remaining = 10
+End count = 2
+</code></pre>
+<h4 id="lặp-theo-điều-kiện-với-while"><a class="header" href="#lặp-theo-điều-kiện-với-while">Lặp theo điều kiện với <code>while</code></a></h4>
+<p>Một chương trình sẽ thường phải kiểm tra điều kiện bên trong một vòng lặp. Khi điều
+kiện là true, tiếp tục vòng lặp. Khi điều kiện không còn là <code>true</code>, chương trình sẽ
+gọi <code>break</code> và ngưng vòng lặp. Bạn hoàn toàn có thể làm những điều trên bằng việc
+kết hợp <code>loop</code>, <code>if</code>, <code>else</code> và <code>break</code>; bạn có thể thử ngay nếu muốn. Tuy nhiên,
+cấu trúc này rất phổ biến, do vậy Rust tạo ra một cấu trúc lặp riêng cho nó, gọi
+vòng lặp <code>while</code>. Trong Listing 3-3, chúng ta sẽ dùng <code>while</code> để lặp chương trình
+3 lần, đếm ngược mỗi lần lặp, in ra một thông báo và kết thúc sau khi hoàn thành
+vòng lặp.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">fn main() {
+    let mut number = 3;
+
+    while number != 0 {
+        println!("{number}!");
+
+        number -= 1;
+    }
+
+    println!("LIFTOFF!!!");
+}</code></pre></pre>
+<p><span class="caption">Listing 3-3: Dùng một vòng lặp <code>while</code> để chạy code trong khi một
+điều kiện vẫn còn đúng</span></p>
+<p>Vòng lặp này cho phép loại bỏ nhiều cấu trúc lồng nhau như khi bạn kết hợp
+<code>loop</code>, <code>if</code>, <code>else</code>, và <code>break</code>, giúp code của bạn sáng sủa hơn. Trong khi một
+điều kiện vẫn là <code>true</code>, chạy vòng lặp; ngược lại, kết thúc vòng lặp.</p>
+<p><a id="looping-through-a-collection-with-for"></a></p>
+<h4 id="lặp-qua-một-tập-hợp-với-for"><a class="header" href="#lặp-qua-một-tập-hợp-với-for">Lặp qua một tập hợp với <code>for</code></a></h4>
+<p>Bạn có thể chọn dùng <code>while</code> để duyệt qua các thành phần của một tập hợp, kiểu
+như một mảng. Ví dụ, vòng lặp trong Listing 3-4 in ra các phần tử có trong mảng
+<code>a</code>.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">fn main() {
+    let a = [10, 20, 30, 40, 50];
+    let mut index = 0;
+
+    while index &lt; 5 {
+        println!("the value is: {}", a[index]);
+
+        index += 1;
+    }
+}</code></pre></pre>
+<p><span class="caption">Listing 3-4: Lặp qua từng phần tử trong một tập hợp sử dụng
+vòng lặp <code>while</code></span></p>
+<p>Ở đây, đoạn code đếm qua các phần tử có trong mảng. Nó bắt đầu từ chỉ số <code>0</code>, và
+tiếp tục lặp cho đến khi gặp chỉ số cuối cùng của mảng (là khi <code>index &lt; 5</code> không
+còn trả về true). Chạy đoạn code này sẽ in ra tất cả các phần tử trong mảng:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling loops v0.1.0 (file:///projects/loops)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.32s
+     Running `target/debug/loops`
+the value is: 10
+the value is: 20
+the value is: 30
+the value is: 40
+the value is: 50
+</code></pre>
+<p>Tất cả năm giá trị trong mảng đều được xuất ra cửa sổ chạy chương trình. Mặc dù
+<code>index</code> sẽ đạt giá trị <code>5</code> vào một thời điểm nào đó, vòng lặp sẽ ngừng thực thi
+trước khi cố lấy giá trị thứ sáu (không tồn tại) từ mảng.</p>
+<p>Tuy nhiên, các tiếp cận này ẩn chứa lỗi; chúng ta có thể làm chương trình về trạng
+thái panic nếu giá trị chỉ số hay điều kiện lặp không chính xác. Ví dụ, nếu bạn
+thay đổi định nghĩa mảng <code>a</code> thành một mảng chỉ có bốn phần tử nhưng lại quên thay
+đổi điều kiện thành <code>while index &lt; 4</code>, đoạn code sẽ bị lỗi. Và nó cũng chạy chậm
+bởi trình dịch phải thêm code để kiểm tra mỗi lần lặp xem chỉ số có nằm trong
+phạm vi hợp lệ hay không.</p>
+<p>Như một cách tiếp cận chính xác hơn, bạn có thể dùng một vòng <code>for</code> và thực thi
+code cho mỗi phần tử trong tập hợp. Một vòng lặp <code>for</code> sẽ trông như đoạn code
+trong Listing 3-5.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">fn main() {
+    let a = [10, 20, 30, 40, 50];
+
+    for element in a {
+        println!("the value is: {element}");
+    }
+}</code></pre></pre>
+<p><span class="caption">Listing 3-5: Looping through each element of a collection
+using a <code>for</code> loop</span></p>
+<p>Khi chạy đoạn code này, bạn sẽ thấy cùng kết xuất như trong Listing 3-4. Quan trọng
+hơn, giờ độ an toàn của code cao hơn và loại bỏ cơ hội phát sinh bug khi cố truy
+cập một phần tử vượt ra ngoài phạm vi của mảng.</p>
+<p>Sử dụng vòng <code>for</code>, bạn cũng không cần phải nhớ thay đổi các đoạn code khác nếu bạn thay
+đổi số giá trị có trong mảng, như cách bạn cần làm nếu sử dụng cách thức trong
+Listing 3-4.</p>
+<p>Sự an toàn và chính xác của các vòng <code>for</code> làm cho chúng trở thành cấu trúc lặp
+phổ biến nhất trong Rust. Ngay cả khi bạn muốn chạy một số code một số lần nhất
+định, giống trong ví dụ đếm ngược mà chúng ta dùng vòng lặp <code>while</code>trong Listing 3-3,
+hầu hết Rustaceans sẽ chọn dùng <code>for</code>. Để làm điều này ta có thể dùng một <code>Range</code>,
+vốn được cung cấp bởi thư viện chuẩn, và sẽ tạo ra tất cả các con số tuần tự bắt
+đầu từ một giá trị và kết thúc trước một giá trị khác.</p>
+<p>Đây là ví dụ countdown được viết lại dùng vòng <code>for</code> và một phương thức khác ta chưa
+nhắc đến, <code>rev</code>, để đảo ngược <code>Range</code>:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">fn main() {
+    for number in (1..4).rev() {
+        println!("{number}!");
+    }
+    println!("LIFTOFF!!!");
+}</code></pre></pre>
+<p>Đoạn code này trông rõ ràng sáng sủa hơn phải không?</p>
+<h2 id="tổng-kết"><a class="header" href="#tổng-kết">Tổng kết</a></h2>
+<p>Bạn đã làm được! Đây thật là một chương với rất nhiều thông tin: bạn học về biến,
+các kiểu dữ liệu vô hướng và kết hợp, hàm, ghi chú, phát biểu <code>if</code>, và cả các
+vòng lặp! Để thực hành với các khái niệm được giới thiệu trong chương này, hãy thử
+viết một chương trình làm những việc sau:</p>
+<ul>
+<li>Chuyển đổi nhiệt độ giữa các hệ Fahrenheit và Celsius.</li>
+<li>Tạo số Fibonacci thứ <em>n</em>.</li>
+<li>In ra lời bài hát “The Twelve Days of Christmas”, ứng dụng các vòng lặp để in ra những đoạn lặp lại trong bài hát.</li>
+</ul>
+<p>Khi bạn đã sẵn sàng để tiếp tục, chúng ta sẽ nói về một khái niệm <em>không</em> tồn tại
+trong hầu hết các ngôn ngữ khác: ownership.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch03-04-comments.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch04-00-understanding-ownership.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch03-04-comments.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch04-00-understanding-ownership.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

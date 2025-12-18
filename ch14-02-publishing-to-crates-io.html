@@ -1,0 +1,677 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Publishing a Crate to Crates.io - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="publishing-a-crate-to-cratesio"><a class="header" href="#publishing-a-crate-to-cratesio">Publishing a Crate to Crates.io</a></h2>
+<p>Chúng ta đã sử dụng các package từ <a href="https://crates.io/">crates.io</a><!-- ignore --> làm dependencies cho dự án của mình, nhưng bạn cũng có thể chia sẻ mã của mình với người khác bằng cách xuất bản package riêng. Registry của crate tại <a href="https://crates.io/">crates.io</a><!-- ignore --> phân phối mã nguồn của package của bạn, chủ yếu là mã nguồn mở.</p>
+<p>Rust và Cargo có các tính năng giúp package bạn xuất bản dễ được tìm thấy và sử dụng hơn. Chúng ta sẽ nói về một số tính năng này và sau đó giải thích cách xuất bản package.</p>
+<h3 id="viết-bình-luận-tài-liệu-hữu-Ích"><a class="header" href="#viết-bình-luận-tài-liệu-hữu-Ích">Viết Bình Luận Tài Liệu Hữu Ích</a></h3>
+<p>Việc tài liệu hóa chính xác package sẽ giúp người dùng khác biết cách và khi nào sử dụng chúng, vì vậy đáng để đầu tư thời gian viết tài liệu. Trong Chương 3, chúng ta đã thảo luận cách comment code Rust sử dụng hai dấu gạch chéo, <code>//</code>. Rust cũng có một kiểu comment đặc biệt cho tài liệu, gọi tiện là <em>documentation comment</em>, sẽ tạo ra tài liệu HTML. HTML sẽ hiển thị nội dung của các comment tài liệu cho các API public, nhằm hướng dẫn lập trình viên cách <em>sử dụng</em> crate thay vì cách crate được <em>triển khai</em>.</p>
+<p>Documentation comment sử dụng ba dấu gạch chéo, <code>///</code>, thay vì hai, và hỗ trợ Markdown để định dạng văn bản. Đặt comment ngay trước item mà nó tài liệu hóa. Listing 14-1 minh họa các comment tài liệu cho một hàm <code>add_one</code> trong crate tên là <code>my_crate</code>.</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust ignore">/// Adds one to the number given.
+///
+/// # Examples
+///
+/// ```
+/// let arg = 5;
+/// let answer = my_crate::add_one(arg);
+///
+/// assert_eq!(6, answer);
+/// ```
+pub fn add_one(x: i32) -&gt; i32 {
+    x + 1
+}</code></pre>
+<p><span class="caption">Listing 14-1: A documentation comment for a
+function</span></p>
+<p>Ở đây, chúng ta cung cấp mô tả về chức năng của hàm <code>add_one</code>, bắt đầu một
+section với tiêu đề <code>Examples</code>, và sau đó cung cấp code minh họa cách sử dụng
+hàm <code>add_one</code>. Chúng ta có thể tạo tài liệu HTML từ comment này bằng cách chạy
+<code>cargo doc</code>. Lệnh này sẽ chạy công cụ <code>rustdoc</code> đi kèm Rust và đặt tài liệu HTML
+tạo ra trong thư mục <em>target/doc</em>.</p>
+<p>Để tiện lợi, chạy <code>cargo doc --open</code> sẽ build HTML cho tài liệu crate hiện tại
+(cũng như tài liệu cho tất cả dependencies của crate) và mở kết quả trong trình
+duyệt web. Điều hướng đến hàm <code>add_one</code> và bạn sẽ thấy cách văn bản trong
+comment được hiển thị, như minh họa trong Hình 14-1:</p>
+<img alt="Rendered HTML documentation for the `add_one` function of `my_crate`" src="img/trpl14-01.png" class="center" />
+<p><span class="caption">Figure 14-1: HTML documentation for the <code>add_one</code>
+function</span></p>
+<h4 id="các-section-thường-dùng"><a class="header" href="#các-section-thường-dùng">Các Section Thường Dùng</a></h4>
+<p>Chúng ta đã sử dụng tiêu đề Markdown <code># Examples</code> trong Listing 14-1 để tạo
+một section trong HTML với tên “Examples.” Dưới đây là một số section khác mà
+tác giả crate thường dùng trong tài liệu:</p>
+<ul>
+<li><strong>Panics</strong>: Các tình huống mà hàm được tài liệu hóa có thể panic. Những
+người gọi hàm mà không muốn chương trình của họ panic cần đảm bảo không
+gọi hàm trong những tình huống này.</li>
+<li><strong>Errors</strong>: Nếu hàm trả về <code>Result</code>, mô tả các loại lỗi có thể xảy ra và
+điều kiện nào gây ra lỗi sẽ giúp người dùng viết code xử lý các lỗi khác
+nhau một cách phù hợp.</li>
+<li><strong>Safety</strong>: Nếu hàm là <code>unsafe</code> để gọi (chúng ta sẽ bàn về unsafety ở Chương
+19), cần có một section giải thích tại sao hàm là unsafe và các invariant mà
+hàm mong người gọi tuân thủ.</li>
+</ul>
+<p>Hầu hết các comment tài liệu không cần tất cả các section này, nhưng đây là
+một checklist hữu ích nhắc nhở bạn về những khía cạnh của code mà người dùng
+sẽ quan tâm.</p>
+<h4 id="documentation-comments-as-tests"><a class="header" href="#documentation-comments-as-tests">Documentation Comments as Tests</a></h4>
+<p>Thêm các khối code ví dụ trong comment tài liệu có thể giúp minh họa cách sử
+dụng thư viện của bạn, và điều này còn có một lợi ích thêm: chạy <code>cargo test</code>
+sẽ thực thi các ví dụ trong tài liệu như các test! Không gì tốt hơn tài liệu
+có ví dụ minh họa. Nhưng cũng không gì tệ hơn các ví dụ không hoạt động vì
+code đã thay đổi kể từ khi tài liệu được viết. Nếu chúng ta chạy <code>cargo test</code>
+với tài liệu của hàm <code>add_one</code> từ Listing 14-1, chúng ta sẽ thấy một section
+trong kết quả test như sau:</p>
+<!-- manual-regeneration
+cd listings/ch14-more-about-cargo/listing-14-01/
+cargo test
+copy just the doc-tests section below
+-->
+<pre><code class="language-text">   Doc-tests my_crate
+
+running 1 test
+test src/lib.rs - add_one (line 5) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+</code></pre>
+<p>Bây giờ nếu chúng ta thay đổi hàm hoặc ví dụ sao cho <code>assert_eq!</code> trong ví dụ
+panic và chạy lại <code>cargo test</code>, chúng ta sẽ thấy rằng các doc test phát hiện
+ra rằng ví dụ và code không còn đồng bộ với nhau nữa!</p>
+<h4 id="comment-cho-các-item-chứa-nó"><a class="header" href="#comment-cho-các-item-chứa-nó">Comment cho các Item Chứa Nó</a></h4>
+<p>Kiểu comment tài liệu <code>//!</code> sẽ thêm tài liệu vào item chứa các comment thay
+vì các item theo sau. Chúng ta thường dùng kiểu doc comment này bên trong
+file gốc của crate (<em>src/lib.rs</em> theo quy ước) hoặc bên trong một module để
+document toàn bộ crate hoặc module.</p>
+<p>Ví dụ, để thêm tài liệu mô tả mục đích của crate <code>my_crate</code> chứa hàm
+<code>add_one</code>, chúng ta thêm các doc comment bắt đầu với <code>//!</code> vào đầu file
+<em>src/lib.rs</em>, như được minh họa trong Listing 14-2:</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust ignore">//! # My Crate
+//!
+//! `my_crate` is a collection of utilities to make performing certain
+//! calculations more convenient.
+
+/// Adds one to the number given.
+// --snip--
+<span class="boring">///
+</span><span class="boring">/// # Examples
+</span><span class="boring">///
+</span><span class="boring">/// ```
+</span><span class="boring">/// let arg = 5;
+</span><span class="boring">/// let answer = my_crate::add_one(arg);
+</span><span class="boring">///
+</span><span class="boring">/// assert_eq!(6, answer);
+</span><span class="boring">/// ```
+</span><span class="boring">pub fn add_one(x: i32) -&gt; i32 {
+</span><span class="boring">    x + 1
+</span><span class="boring">}</span></code></pre>
+<p><span class="caption">Listing 14-2: Documentation cho toàn bộ crate <code>my_crate</code></span></p>
+<p>Chú ý rằng không có code nào sau dòng cuối cùng bắt đầu bằng <code>//!</code>. Vì chúng
+ta bắt đầu comment với <code>//!</code> thay vì <code>///</code>, chúng ta đang document item chứa
+comment này thay vì một item theo sau. Trong trường hợp này, item đó là file
+<em>src/lib.rs</em>, tức là crate root. Các comment này mô tả toàn bộ crate.</p>
+<p>Khi chạy <code>cargo doc --open</code>, các comment này sẽ hiển thị trên trang chính
+của tài liệu crate <code>my_crate</code> phía trên danh sách các item public trong crate,
+như được minh họa trong Figure 14-2:</p>
+<img alt="Rendered HTML documentation with a comment for the crate as a whole" src="img/trpl14-02.png" class="center" />
+<p><span class="caption">Figure 14-2: Tài liệu được render cho <code>my_crate</code>,
+bao gồm comment mô tả toàn bộ crate</span></p>
+<p>Các documentation comment bên trong các item rất hữu ích để mô tả crates
+và modules. Dùng chúng để giải thích mục đích tổng thể của container để
+giúp người dùng hiểu tổ chức crate.</p>
+<h3 id="export-một-public-api-thuận-tiện-với-pub-use"><a class="header" href="#export-một-public-api-thuận-tiện-với-pub-use">Export một Public API thuận tiện với <code>pub use</code></a></h3>
+<p>Cấu trúc của public API là yếu tố quan trọng khi xuất bản crate. Người dùng
+crate của bạn không quen với cấu trúc bằng bạn và có thể gặp khó khăn khi
+tìm các phần họ muốn dùng nếu crate có hierarchy module lớn.</p>
+<p>Trong Chapter 7, chúng ta đã học cách làm item public với từ khóa <code>pub</code>,
+và đưa item vào scope với từ khóa <code>use</code>. Tuy nhiên, cấu trúc hợp lý cho bạn
+khi phát triển crate có thể không thuận tiện cho người khác. Bạn có thể
+muốn tổ chức các struct theo một hierarchy nhiều cấp, nhưng người dùng muốn
+dùng một type trong cấp sâu có thể khó biết type đó tồn tại. Họ cũng có
+thể phiền khi phải viết <code>use my_crate::some_module::another_module::UsefulType;</code>
+thay vì <code>use my_crate::UsefulType;</code>.</p>
+<p>Tin tốt là nếu cấu trúc <em>không</em> tiện lợi cho người khác dùng từ thư viện
+khác, bạn không cần phải thay đổi tổ chức nội bộ: thay vào đó, bạn có thể
+re-export item để tạo cấu trúc public khác với cấu trúc private bằng cách dùng
+<code>pub use</code>. Re-export sẽ lấy một public item ở một nơi và làm nó public ở nơi
+khác, như thể item được định nghĩa ở vị trí khác đó.</p>
+<p>Ví dụ, giả sử chúng ta tạo một library tên là <code>art</code> để mô hình hóa các
+khái niệm nghệ thuật. Trong library này có hai module: module <code>kinds</code> chứa
+hai enum <code>PrimaryColor</code> và <code>SecondaryColor</code>, và module <code>utils</code> chứa hàm <code>mix</code>,
+như được minh họa trong Listing 14-3:</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground test_harness">//! # Art
+//!
+//! A library for modeling artistic concepts.
+
+pub mod kinds {
+    /// The primary colors according to the RYB color model.
+    pub enum PrimaryColor {
+        Red,
+        Yellow,
+        Blue,
+    }
+
+    /// The secondary colors according to the RYB color model.
+    pub enum SecondaryColor {
+        Orange,
+        Green,
+        Purple,
+    }
+}
+
+pub mod utils {
+    use crate::kinds::*;
+
+    /// Combines two primary colors in equal amounts to create
+    /// a secondary color.
+    pub fn mix(c1: PrimaryColor, c2: PrimaryColor) -&gt; SecondaryColor {
+        // --snip--
+<span class="boring">        unimplemented!();
+</span>    }
+}</code></pre>
+<p><span class="caption">Listing 14-3: Một thư viện <code>art</code> với các item được tổ chức
+trong các module <code>kinds</code> và <code>utils</code></span></p>
+<p>Figure 14-3 minh họa trang chính của tài liệu crate này được tạo bởi
+<code>cargo doc</code>:</p>
+<img alt="Rendered documentation for the `art` crate that lists the `kinds` and `utils` modules" src="img/trpl14-03.png" class="center" />
+<p><span class="caption">Figure 14-3: Trang chính của tài liệu crate <code>art</code>
+liệt kê các module <code>kinds</code> và <code>utils</code></span></p>
+<p>Chú ý rằng các type <code>PrimaryColor</code> và <code>SecondaryColor</code> không được liệt kê
+trên trang chính, cũng như hàm <code>mix</code>. Chúng ta phải click vào <code>kinds</code> và
+<code>utils</code> để xem chúng.</p>
+<p>Một crate khác phụ thuộc vào thư viện này sẽ cần các câu lệnh <code>use</code> để
+đưa các item từ <code>art</code> vào scope, chỉ ra cấu trúc module hiện tại. Listing 14-4
+minh họa một ví dụ crate sử dụng các item <code>PrimaryColor</code> và <code>mix</code> từ crate
+<code>art</code>:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore">use art::kinds::PrimaryColor;
+use art::utils::mix;
+
+fn main() {
+    let red = PrimaryColor::Red;
+    let yellow = PrimaryColor::Yellow;
+    mix(red, yellow);
+}</code></pre>
+<p><span class="caption">Listing 14-4: Một crate sử dụng các item của crate <code>art</code> với
+cấu trúc nội bộ của nó</span></p>
+<p>Tác giả của code trong Listing 14-4, sử dụng crate <code>art</code>, phải xác định rằng
+<code>PrimaryColor</code> nằm trong module <code>kinds</code> và <code>mix</code> nằm trong module <code>utils</code>.
+Cấu trúc module của crate <code>art</code> quan trọng hơn với các developer làm việc
+trên crate <code>art</code> hơn là với những người dùng nó. Cấu trúc nội bộ không chứa
+thông tin hữu ích cho ai đó đang cố gắng hiểu cách sử dụng crate <code>art</code>,
+mà ngược lại gây nhầm lẫn vì các developer phải tìm xem nên look vào đâu
+và phải chỉ rõ tên module trong các câu lệnh <code>use</code>.</p>
+<p>Để loại bỏ cấu trúc nội bộ khỏi API công khai, chúng ta có thể chỉnh sửa
+code crate <code>art</code> trong Listing 14-3 để thêm các câu lệnh <code>pub use</code> để
+re-export các item lên cấp top-level, như minh họa trong Listing 14-5:</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust ignore">//! # Art
+//!
+//! A library for modeling artistic concepts.
+
+pub use self::kinds::PrimaryColor;
+pub use self::kinds::SecondaryColor;
+pub use self::utils::mix;
+
+pub mod kinds {
+    // --snip--
+<span class="boring">    /// The primary colors according to the RYB color model.
+</span><span class="boring">    pub enum PrimaryColor {
+</span><span class="boring">        Red,
+</span><span class="boring">        Yellow,
+</span><span class="boring">        Blue,
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    /// The secondary colors according to the RYB color model.
+</span><span class="boring">    pub enum SecondaryColor {
+</span><span class="boring">        Orange,
+</span><span class="boring">        Green,
+</span><span class="boring">        Purple,
+</span><span class="boring">    }
+</span>}
+
+pub mod utils {
+    // --snip--
+<span class="boring">    use crate::kinds::*;
+</span><span class="boring">
+</span><span class="boring">    /// Combines two primary colors in equal amounts to create
+</span><span class="boring">    /// a secondary color.
+</span><span class="boring">    pub fn mix(c1: PrimaryColor, c2: PrimaryColor) -&gt; SecondaryColor {
+</span><span class="boring">        SecondaryColor::Orange
+</span><span class="boring">    }
+</span>}</code></pre>
+<p><span class="caption">Listing 14-5: Thêm các câu lệnh <code>pub use</code> để re-export
+các item</span></p>
+<p>Tài liệu API mà <code>cargo doc</code> tạo ra cho crate này giờ sẽ liệt kê và liên kết
+các re-export trên trang chính, như minh họa trong Figure 14-4, giúp
+các type <code>PrimaryColor</code> và <code>SecondaryColor</code> cũng như hàm <code>mix</code> dễ tìm hơn.</p>
+<img alt="Rendered documentation for the `art` crate with the re-exports on the front page" src="img/trpl14-04.png" class="center" />
+<p><span class="caption">Figure 14-4: Trang chính của tài liệu crate <code>art</code>
+liệt kê các re-exports</span></p>
+<p>Người dùng crate <code>art</code> vẫn có thể xem và sử dụng cấu trúc nội bộ từ Listing
+14-3 như minh họa trong Listing 14-4, hoặc họ có thể sử dụng cấu trúc
+tiện lợi hơn trong Listing 14-5, như minh họa trong Listing 14-6:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore">use art::PrimaryColor;
+use art::mix;
+
+fn main() {
+    // --snip--
+<span class="boring">    let red = PrimaryColor::Red;
+</span><span class="boring">    let yellow = PrimaryColor::Yellow;
+</span><span class="boring">    mix(red, yellow);
+</span>}</code></pre>
+<p><span class="caption">Listing 14-6: Một chương trình sử dụng các item được re-export từ
+crate <code>art</code></span></p>
+<p>Trong trường hợp có nhiều module lồng nhau, việc re-export các type ở cấp
+trên cùng với <code>pub use</code> có thể cải thiện đáng kể trải nghiệm của người
+dùng crate. Một cách sử dụng phổ biến khác của <code>pub use</code> là re-export
+các định nghĩa từ một dependency trong crate hiện tại để biến các
+định nghĩa đó thành một phần của public API crate của bạn.</p>
+<p>Tạo một cấu trúc public API hữu ích thường là nghệ thuật hơn là khoa học,
+và bạn có thể lặp lại để tìm ra API phù hợp nhất với người dùng của bạn.
+Chọn <code>pub use</code> giúp bạn linh hoạt trong cách cấu trúc crate nội bộ và
+tách biệt cấu trúc nội bộ đó khỏi những gì bạn trình bày cho người dùng.
+Hãy xem một số code của các crate bạn đã cài để xem liệu cấu trúc nội bộ
+của chúng có khác với public API không.</p>
+<h3 id="thiết-lập-tài-khoản-cratesio"><a class="header" href="#thiết-lập-tài-khoản-cratesio">Thiết lập tài khoản Crates.io</a></h3>
+<p>Trước khi bạn có thể publish bất kỳ crate nào, bạn cần tạo một tài khoản
+trên <a href="https://crates.io/">crates.io</a><!-- ignore --> và lấy API token. Để làm
+điều này, truy cập trang chủ tại <a href="https://crates.io/">crates.io</a><!-- ignore -->
+và đăng nhập qua tài khoản GitHub. (Hiện tại tài khoản GitHub là bắt buộc,
+nhưng trang web có thể hỗ trợ các cách tạo tài khoản khác trong tương lai.)
+Khi đã đăng nhập, truy cập cài đặt tài khoản của bạn tại
+<a href="https://crates.io/me/">https://crates.io/me/</a><!-- ignore --> và lấy API key.
+Sau đó chạy lệnh <code>cargo login</code> với API key của bạn, như sau:</p>
+<pre><code class="language-console">$ cargo login abcdefghijklmnopqrstuvwxyz012345
+</code></pre>
+<p>Lệnh này sẽ thông báo cho Cargo về API token của bạn và lưu trữ nó cục bộ
+tại <em>~/.cargo/credentials</em>. Lưu ý rằng token này là một <em>bí mật</em>: không
+chia sẻ nó với bất kỳ ai khác. Nếu bạn đã chia sẻ token với người khác vì
+bất kỳ lý do gì, bạn nên thu hồi nó và tạo một token mới trên
+<a href="https://crates.io/">crates.io</a><!-- ignore -->.</p>
+<h3 id="thêm-metadata-cho-crate-mới"><a class="header" href="#thêm-metadata-cho-crate-mới">Thêm Metadata cho Crate Mới</a></h3>
+<p>Giả sử bạn có một crate mà bạn muốn publish. Trước khi publish, bạn cần
+thêm một số metadata vào phần <code>[package]</code> trong file <em>Cargo.toml</em> của crate.</p>
+<p>Crate của bạn cần có một tên duy nhất. Khi làm việc với crate cục bộ, bạn
+có thể đặt tên crate tùy ý. Tuy nhiên, tên crate trên
+<a href="https://crates.io/">crates.io</a><!-- ignore --> được cấp theo cơ chế
+first-come, first-served. Khi tên crate đã được dùng, không ai khác có thể
+publish crate với tên đó. Trước khi thử publish, hãy tìm kiếm tên bạn muốn
+sử dụng. Nếu tên đó đã được dùng, bạn sẽ cần tìm tên khác và chỉnh sửa
+trường <code>name</code> trong file <em>Cargo.toml</em> ở phần <code>[package]</code> để sử dụng tên mới
+khi publish, như sau:</p>
+<p><span class="filename">Filename: Cargo.toml</span></p>
+<pre><code class="language-toml">[package]
+name = "guessing_game"
+</code></pre>
+<p>Ngay cả khi bạn đã chọn một tên duy nhất, khi chạy <code>cargo publish</code> để
+publish crate vào thời điểm này, bạn sẽ nhận được một cảnh báo và sau đó là
+một lỗi:</p>
+<!-- manual-regeneration
+cd listings/ch14-more-about-cargo/listing-14-01/
+cargo publish
+copy just the relevant lines below
+-->
+<pre><code class="language-console">$ cargo publish
+    Updating crates.io index
+warning: manifest has no description, license, license-file, documentation, homepage or repository.
+See https://doc.rust-lang.org/cargo/reference/manifest.html#package-metadata for more info.
+--snip--
+error: failed to publish to registry at https://crates.io
+
+Caused by:
+  the remote server responded with an error: missing or empty metadata fields: description, license. Please see https://doc.rust-lang.org/cargo/reference/manifest.html for how to upload metadata
+</code></pre>
+<p>Lỗi này xảy ra vì bạn đang thiếu một số thông tin quan trọng: bạn phải có
+<code>description</code> và <code>license</code> để người khác biết crate của bạn làm gì và dưới
+điều kiện nào họ có thể sử dụng. Trong <em>Cargo.toml</em>, thêm một <code>description</code>
+chỉ vài câu ngắn, vì nó sẽ hiển thị trong kết quả tìm kiếm crate của bạn.
+Đối với trường <code>license</code>, bạn cần cung cấp một <em>license identifier</em>.
+<a href="http://spdx.org/licenses/">Linux Foundation’s Software Package Data Exchange (SPDX)</a> liệt kê các
+identifier mà bạn có thể dùng. Ví dụ, để chỉ ra rằng bạn cấp phép crate
+bằng MIT License, thêm identifier <code>MIT</code>:</p>
+<p><span class="filename">Filename: Cargo.toml</span></p>
+<pre><code class="language-toml">[package]
+name = "guessing_game"
+license = "MIT"
+</code></pre>
+<p>Nếu bạn muốn dùng một license không có trong danh sách SPDX, bạn cần đặt
+nội dung license đó vào một file, thêm file đó vào dự án, và dùng <code>license-file</code>
+để chỉ định tên file đó thay vì dùng khóa <code>license</code>.</p>
+<p>Hướng dẫn chọn license phù hợp cho dự án của bạn nằm ngoài phạm vi cuốn
+sách này. Nhiều người trong cộng đồng Rust cấp phép dự án của họ giống như
+Rust bằng cách dùng dual license <code>MIT OR Apache-2.0</code>. Cách làm này cũng
+chứng minh rằng bạn có thể chỉ định nhiều license bằng cách dùng <code>OR</code> để
+cho phép nhiều license cho dự án của bạn.</p>
+<p>Với tên duy nhất, phiên bản, description, và license đã thêm vào, file
+<em>Cargo.toml</em> cho một dự án sẵn sàng publish có thể trông như sau:</p>
+<p><span class="filename">Filename: Cargo.toml</span></p>
+<pre><code class="language-toml">[package]
+name = "guessing_game"
+version = "0.1.0"
+edition = "2021"
+description = "A fun game where you guess what number the computer has chosen."
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+</code></pre>
+<p><a href="https://doc.rust-lang.org/cargo/">Cargo’s documentation</a> mô tả các metadata
+khác mà bạn có thể chỉ định để giúp người khác dễ dàng tìm thấy và sử dụng
+crate của bạn hơn.</p>
+<h3 id="publishing-to-cratesio"><a class="header" href="#publishing-to-cratesio">Publishing to Crates.io</a></h3>
+<p>Bây giờ bạn đã tạo tài khoản, lưu API token, chọn tên cho crate của bạn,
+và chỉ định các metadata cần thiết, bạn đã sẵn sàng để publish! Việc publish
+một crate sẽ tải một phiên bản cụ thể lên <a href="https://crates.io/">crates.io</a>
+cho người khác sử dụng.</p>
+<p>Hãy cẩn thận, vì việc publish là <em>vĩnh viễn</em>. Phiên bản đó không thể bị
+ghi đè, và code không thể bị xóa. Một mục tiêu chính của <a href="https://crates.io/">crates.io</a>
+là làm một kho lưu trữ vĩnh viễn của code để các build của mọi dự án phụ thuộc
+vào các crate từ <a href="https://crates.io/">crates.io</a> vẫn tiếp tục hoạt động.
+Cho phép xóa phiên bản sẽ phá vỡ mục tiêu này. Tuy nhiên, không có giới
+hạn về số phiên bản crate mà bạn có thể publish.</p>
+<p>Chạy lệnh <code>cargo publish</code> lần nữa. Lúc này lệnh sẽ thành công:</p>
+<!-- manual-regeneration
+go to some valid crate, publish a new version
+cargo publish
+copy just the relevant lines below
+-->
+<pre><code class="language-console">$ cargo publish
+    Updating crates.io index
+   Packaging guessing_game v0.1.0 (file:///projects/guessing_game)
+   Verifying guessing_game v0.1.0 (file:///projects/guessing_game)
+   Compiling guessing_game v0.1.0
+(file:///projects/guessing_game/target/package/guessing_game-0.1.0)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.19s
+   Uploading guessing_game v0.1.0 (file:///projects/guessing_game)
+</code></pre>
+<p>Chúc mừng! Bây giờ bạn đã chia sẻ code của mình với cộng đồng Rust, và
+bất kỳ ai cũng có thể dễ dàng thêm crate của bạn làm dependency trong dự án
+của họ.</p>
+<h3 id="publishing-a-new-version-of-an-existing-crate"><a class="header" href="#publishing-a-new-version-of-an-existing-crate">Publishing a New Version of an Existing Crate</a></h3>
+<p>Khi bạn đã thực hiện thay đổi cho crate và sẵn sàng phát hành phiên bản
+mới, hãy thay đổi giá trị <code>version</code> trong <em>Cargo.toml</em> của bạn và publish
+lại. Sử dụng các quy tắc <a href="http://semver.org/">Semantic Versioning</a> để quyết định số
+phiên bản tiếp theo phù hợp dựa trên các loại thay đổi bạn đã thực hiện.
+Sau đó chạy <code>cargo publish</code> để tải phiên bản mới lên.</p>
+<h3 id="deprecating-versions-from-cratesio-with-cargo-yank"><a class="header" href="#deprecating-versions-from-cratesio-with-cargo-yank">Deprecating Versions from Crates.io with <code>cargo yank</code></a></h3>
+<p>Mặc dù bạn không thể xóa các phiên bản trước của crate, bạn có thể ngăn
+các dự án mới thêm chúng làm dependency mới. Điều này hữu ích khi một
+phiên bản crate bị lỗi vì lý do nào đó. Trong những tình huống này, Cargo
+hỗ trợ <em>yanking</em> một phiên bản crate.</p>
+<p>Yanking một phiên bản ngăn các dự án mới phụ thuộc vào phiên bản đó
+trong khi vẫn cho phép tất cả các dự án hiện có đang phụ thuộc vào nó
+tiếp tục hoạt động. Về cơ bản, yank đảm bảo rằng tất cả các dự án có
+<em>Cargo.lock</em> sẽ không bị phá vỡ, và bất kỳ <em>Cargo.lock</em> mới nào được
+tạo ra sẽ không sử dụng phiên bản bị yank.</p>
+<p>Để yank một phiên bản crate, trong thư mục của crate mà bạn đã publish
+trước đó, chạy <code>cargo yank</code> và chỉ định phiên bản bạn muốn yank. Ví dụ,
+nếu chúng ta đã publish crate có tên <code>guessing_game</code> phiên bản 1.0.1
+và muốn yank nó, trong thư mục dự án của <code>guessing_game</code> chúng ta sẽ chạy:</p>
+<!-- manual-regeneration:
+cargo yank carol-test --version 2.1.0
+cargo yank carol-test --version 2.1.0 --undo
+-->
+<pre><code class="language-console">$ cargo yank --vers 1.0.1
+    Updating crates.io index
+        Yank guessing_game@1.0.1
+</code></pre>
+<p>Bằng cách thêm <code>--undo</code> vào lệnh, bạn cũng có thể hoàn tác một yank và
+cho phép các dự án bắt đầu phụ thuộc vào phiên bản đó một lần nữa:</p>
+<pre><code class="language-console">$ cargo yank --vers 1.0.1 --undo
+    Updating crates.io index
+      Unyank guessing_game@1.0.1
+</code></pre>
+<p>Một yank <em>không</em> xóa bất kỳ mã nào. Ví dụ, nó không thể xóa các thông tin bí mật
+bị tải lên nhầm. Nếu điều đó xảy ra, bạn phải ngay lập tức đặt lại những thông tin bí mật đó.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch14-01-release-profiles.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch14-03-cargo-workspaces.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch14-01-release-profiles.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch14-03-cargo-workspaces.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

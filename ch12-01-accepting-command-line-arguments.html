@@ -1,0 +1,331 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Accepting Command Line Arguments - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="nhận-tham-số-dòng-lệnh"><a class="header" href="#nhận-tham-số-dòng-lệnh">Nhận Tham Số Dòng Lệnh</a></h2>
+<p>Hãy tạo một dự án mới bằng cách dùng, như thường lệ, <code>cargo new</code>. Chúng ta sẽ gọi dự án này là
+<code>minigrep</code> để phân biệt với công cụ <code>grep</code> mà bạn có thể đã có
+trên hệ thống của mình.</p>
+<pre><code class="language-console">$ cargo new minigrep
+     Created binary (application) `minigrep` project
+$ cd minigrep
+</code></pre>
+<p>Nhiệm vụ đầu tiên là làm cho <code>minigrep</code> nhận hai tham số dòng lệnh: đường dẫn tệp và một chuỗi để tìm kiếm. Tức là, chúng ta muốn có thể chạy chương trình của mình bằng <code>cargo run</code>, với hai dấu gạch ngang để chỉ ra rằng các tham số sau là dành cho chương trình của chúng ta chứ không phải cho <code>cargo</code>, một chuỗi để tìm kiếm, và một đường dẫn tới tệp để tìm kiếm, như sau:</p>
+<pre><code class="language-console">$ cargo run -- searchstring example-filename.txt
+</code></pre>
+<p>Right now, the program generated by <code>cargo new</code> cannot process arguments we
+give it. Some existing libraries on <a href="https://crates.io/">crates.io</a> can help
+with writing a program that accepts command line arguments, but because you’re
+just learning this concept, let’s implement this capability ourselves.</p>
+<h3 id="Đọc-giá-trị-tham-số"><a class="header" href="#Đọc-giá-trị-tham-số">Đọc Giá Trị Tham Số</a></h3>
+<p>Để cho phép <code>minigrep</code> đọc các giá trị của tham số dòng lệnh mà chúng ta truyền vào, chúng ta sẽ cần hàm <code>std::env::args</code> được cung cấp trong thư viện chuẩn của Rust. Hàm này trả về một iterator của các tham số dòng lệnh được truyền cho <code>minigrep</code>. Chúng ta sẽ tìm hiểu kỹ về iterator trong <a href="ch13-00-functional-features.html">Chương 13</a><!-- ignore -->. Hiện tại, bạn chỉ cần biết hai chi tiết về iterator: iterator sinh ra một chuỗi các giá trị, và chúng ta có thể gọi phương thức <code>collect</code> trên một iterator để biến nó thành một tập hợp, chẳng hạn như vector, chứa tất cả các phần tử mà iterator tạo ra.</p>
+<p>Mã trong Listing 12-1 cho phép chương trình <code>minigrep</code> của bạn đọc bất kỳ tham số dòng lệnh nào được truyền vào và sau đó thu thập các giá trị đó vào một vector.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">use std::env;
+
+fn main() {
+    let args: Vec&lt;String&gt; = env::args().collect();
+    dbg!(args);
+}</code></pre></pre>
+<p><span class="caption">Listing 12-1: Thu thập các tham số dòng lệnh vào một vector và in chúng ra</span></p>
+<p>Trước tiên, chúng ta đưa module <code>std::env</code> vào phạm vi với câu lệnh <code>use</code> để có thể sử dụng hàm <code>args</code> của nó. Lưu ý rằng hàm <code>std::env::args</code> được lồng trong hai cấp module. Như chúng ta đã thảo luận trong <a href="ch07-04-bringing-paths-into-scope-with-the-use-keyword.html#creating-idiomatic-use-paths">Chương 7</a><!-- ignore -->, trong những trường hợp hàm cần dùng được lồng trong nhiều module, chúng ta chọn cách đưa module cha vào phạm vi thay vì đưa trực tiếp hàm. Bằng cách này, chúng ta có thể dễ dàng sử dụng các hàm khác từ <code>std::env</code>. Cách này cũng ít gây nhầm lẫn hơn so với việc thêm <code>use std::env::args</code> và sau đó gọi hàm chỉ với <code>args</code>, vì <code>args</code> có thể dễ bị nhầm với một hàm được định nghĩa trong module hiện tại.</p>
+<section class="note" aria-role="note">
+<h3 id="hàm-args-và-unicode-không-hợp-lệ"><a class="header" href="#hàm-args-và-unicode-không-hợp-lệ">Hàm <code>args</code> và Unicode không hợp lệ</a></h3>
+<p>Lưu ý rằng <code>std::env::args</code> sẽ gây panic nếu bất kỳ tham số nào chứa Unicode không hợp lệ. Nếu chương trình của bạn cần chấp nhận các tham số chứa Unicode không hợp lệ, hãy dùng <code>std::env::args_os</code> thay thế. Hàm này trả về một iterator tạo ra các giá trị <code>OsString</code> thay vì <code>String</code>. Ở đây, chúng ta chọn sử dụng <code>std::env::args</code> để đơn giản, vì các giá trị <code>OsString</code> khác nhau tùy theo nền tảng và phức tạp hơn khi làm việc so với <code>String</code>.</p>
+</section>
+<p>Ở dòng đầu tiên của <code>main</code>, chúng ta gọi <code>env::args</code>, và ngay lập tức dùng <code>collect</code> để biến iterator thành một vector chứa tất cả các giá trị mà iterator sinh ra. Chúng ta có thể dùng hàm <code>collect</code> để tạo nhiều loại tập hợp khác nhau, vì vậy chúng ta chú thích rõ kiểu của <code>args</code> để chỉ ra rằng chúng ta muốn một vector các chuỗi. Mặc dù hiếm khi cần chú thích kiểu trong Rust, <code>collect</code> là một trong những hàm mà bạn thường phải chú thích, vì Rust không thể suy ra loại tập hợp bạn muốn.</p>
+<p>Cuối cùng, chúng ta in vector ra bằng macro debug. Hãy thử chạy mã trước tiên không có tham số, rồi sau đó với hai tham số:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.61s
+     Running `target/debug/minigrep`
+[src/main.rs:5:5] args = [
+    "target/debug/minigrep",
+]
+</code></pre>
+<pre><code class="language-console">$ cargo run -- needle haystack
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.57s
+     Running `target/debug/minigrep needle haystack`
+[src/main.rs:5:5] args = [
+    "target/debug/minigrep",
+    "needle",
+    "haystack",
+]
+</code></pre>
+<p>Lưu ý rằng giá trị đầu tiên trong vector là <code>"target/debug/minigrep"</code>, chính là tên của file nhị phân của chúng ta. Điều này khớp với hành vi của danh sách tham số trong C, cho phép chương trình sử dụng tên mà chúng được gọi khi thực thi. Thường thì việc có quyền truy cập vào tên chương trình rất tiện lợi nếu bạn muốn in nó trong các thông báo hoặc thay đổi hành vi của chương trình dựa trên alias dòng lệnh được dùng để gọi chương trình. Nhưng trong chương này, chúng ta sẽ bỏ qua giá trị này và chỉ lưu hai tham số mà chúng ta cần.</p>
+<h3 id="lưu-giá-trị-tham-số-vào-biến"><a class="header" href="#lưu-giá-trị-tham-số-vào-biến">Lưu Giá Trị Tham Số vào Biến</a></h3>
+<p>Chương trình hiện tại đã có thể truy cập các giá trị được chỉ định dưới dạng tham số dòng lệnh. Bây giờ chúng ta cần lưu giá trị của hai tham số vào các biến để có thể sử dụng chúng trong suốt phần còn lại của chương trình. Chúng ta thực hiện việc này trong Listing 12-2.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust should_panic noplayground">use std::env;
+
+fn main() {
+    let args: Vec&lt;String&gt; = env::args().collect();
+
+    let query = &amp;args[1];
+    let file_path = &amp;args[2];
+
+    println!("Searching for {query}");
+    println!("In file {file_path}");
+}</code></pre>
+<p><span class="caption">Listing 12-2: Tạo các biến để lưu tham số truy vấn và tham số đường dẫn tệp</span></p>
+<p>Như chúng ta đã thấy khi in vector, tên chương trình chiếm giá trị đầu tiên trong vector tại <code>args[0]</code>, vì vậy chúng ta bắt đầu các tham số từ chỉ số <code>1</code>. Tham số đầu tiên mà <code>minigrep</code> nhận là chuỗi mà chúng ta muốn tìm kiếm, vì vậy chúng ta đặt một tham chiếu tới tham số đầu tiên vào biến <code>query</code>. Tham số thứ hai sẽ là đường dẫn tệp, nên chúng ta đặt một tham chiếu tới tham số thứ hai vào biến <code>file_path</code>.</p>
+<p>Chúng ta tạm thời in các giá trị của những biến này để chứng minh rằng mã hoạt động như mong muốn. Hãy chạy lại chương trình này với các tham số <code>test</code> và <code>sample.txt</code>:</p>
+<pre><code class="language-console">$ cargo run -- test sample.txt
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.0s
+     Running `target/debug/minigrep test sample.txt`
+Searching for test
+In file sample.txt
+</code></pre>
+<p>Tuyệt vời, chương trình hoạt động rồi! Các giá trị của các tham số mà chúng ta cần đang được lưu vào các biến đúng. Sau này chúng ta sẽ thêm một số xử lý lỗi để đối phó với một số tình huống có thể xảy ra, chẳng hạn như khi người dùng không cung cấp tham số; hiện tại, chúng ta sẽ bỏ qua tình huống đó và tập trung vào việc thêm khả năng đọc tệp.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch12-00-an-io-project.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch12-02-reading-a-file.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch12-00-an-io-project.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch12-02-reading-a-file.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

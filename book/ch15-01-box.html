@@ -1,0 +1,484 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Using Box&lt;T&gt; to Point to Data on the Heap - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="sử-dụng-boxt-để-trỏ-đến-dữ-liệu-trên-heap"><a class="header" href="#sử-dụng-boxt-để-trỏ-đến-dữ-liệu-trên-heap">Sử dụng <code>Box&lt;T&gt;</code> để trỏ đến dữ liệu trên Heap</a></h2>
+<p>Smart pointer đơn giản nhất là <em>box</em>, với kiểu được viết là <code>Box&lt;T&gt;</code>. Boxes
+cho phép bạn lưu trữ dữ liệu trên heap thay vì trên stack. Trên stack chỉ còn
+pointer trỏ đến dữ liệu trên heap. Tham khảo Chương 4 để ôn lại sự khác biệt
+giữa stack và heap.</p>
+<p>Boxes không có chi phí hiệu năng nào, ngoài việc lưu dữ liệu trên heap thay vì
+trên stack. Tuy nhiên, chúng cũng không có nhiều khả năng bổ sung. Bạn sẽ
+sử dụng chúng thường xuyên nhất trong các trường hợp sau:</p>
+<ul>
+<li>Khi bạn có một kiểu mà kích thước không thể biết tại thời điểm biên dịch và
+bạn muốn sử dụng giá trị của kiểu đó trong một ngữ cảnh yêu cầu kích thước
+chính xác</li>
+<li>Khi bạn có một lượng dữ liệu lớn và muốn chuyển quyền sở hữu nhưng muốn
+đảm bảo dữ liệu không bị sao chép khi làm vậy</li>
+<li>Khi bạn muốn sở hữu một giá trị và bạn chỉ quan tâm rằng nó là một kiểu
+triển khai một trait cụ thể, thay vì phải là một kiểu cụ thể</li>
+</ul>
+<p>Chúng ta sẽ minh họa tình huống đầu tiên trong phần <a href="#enabling-recursive-types-with-boxes">“Enabling Recursive Types
+with Boxes”</a>. Trong trường hợp thứ hai,
+việc chuyển quyền sở hữu một lượng lớn dữ liệu có thể mất nhiều thời gian
+bởi vì dữ liệu bị sao chép trên stack. Để cải thiện hiệu năng trong trường
+hợp này, chúng ta có thể lưu lượng dữ liệu lớn trên heap trong một box.
+Khi đó, chỉ một lượng nhỏ dữ liệu pointer được sao chép trên stack, trong khi
+dữ liệu mà nó tham chiếu vẫn nằm nguyên vị trí trên heap. Trường hợp thứ ba
+được gọi là <em>trait object</em>, và Chương 17 dành hẳn một phần, <a href="ch17-02-trait-objects.html#using-trait-objects-that-allow-for-values-of-different-types">“Using Trait
+Objects That Allow for Values of Different Types,”</a>, để thảo luận
+về chủ đề này. Vì vậy những gì bạn học ở đây sẽ được áp dụng lại ở Chương 17!</p>
+<h3 id="sử-dụng-boxt-để-lưu-dữ-liệu-trên-heap"><a class="header" href="#sử-dụng-boxt-để-lưu-dữ-liệu-trên-heap">Sử dụng <code>Box&lt;T&gt;</code> để lưu dữ liệu trên Heap</a></h3>
+<p>Trước khi thảo luận về trường hợp lưu trữ trên heap cho <code>Box&lt;T&gt;</code>, chúng ta sẽ
+xem cú pháp và cách tương tác với các giá trị được lưu trữ bên trong <code>Box&lt;T&gt;</code>.</p>
+<p>Listing 15-1 minh họa cách sử dụng box để lưu một giá trị <code>i32</code> trên heap:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">fn main() {
+    let b = Box::new(5);
+    println!("b = {b}");
+}</code></pre></pre>
+<p><span class="caption">Listing 15-1: Lưu một giá trị <code>i32</code> trên heap bằng box</span></p>
+<p>Chúng ta định nghĩa biến <code>b</code> là một <code>Box</code> trỏ đến giá trị <code>5</code>, được cấp phát
+trên heap. Chương trình này sẽ in ra <code>b = 5</code>; trong trường hợp này, chúng ta
+có thể truy cập dữ liệu trong box tương tự như khi dữ liệu nằm trên stack. Giống
+như bất kỳ giá trị nào mà chúng ta sở hữu, khi một box ra khỏi phạm vi, như
+<code>b</code> ở cuối <code>main</code>, nó sẽ được giải phóng bộ nhớ. Việc giải phóng xảy ra cả với
+box (lưu trên stack) và dữ liệu mà nó trỏ đến (lưu trên heap).</p>
+<p>Việc đặt một giá trị đơn lẻ trên heap không thực sự hữu ích, vì vậy bạn sẽ ít
+khi dùng boxes một mình theo cách này. Việc lưu giá trị như một <code>i32</code> trên stack,
+nơi chúng được lưu mặc định, là phù hợp hơn trong hầu hết các trường hợp. Hãy
+xem một ví dụ mà boxes cho phép chúng ta định nghĩa các kiểu mà nếu không có
+boxes thì sẽ không làm được.</p>
+<h3 id="cho-phép-kiểu-đệ-quy-với-boxes"><a class="header" href="#cho-phép-kiểu-đệ-quy-với-boxes">Cho phép kiểu đệ quy với Boxes</a></h3>
+<p>Một giá trị của <em>kiểu đệ quy</em> có thể chứa một giá trị khác cùng kiểu bên trong
+nó. Kiểu đệ quy gặp vấn đề vì tại thời điểm biên dịch Rust cần biết một kiểu
+chiếm bao nhiêu không gian. Tuy nhiên, việc lồng các giá trị kiểu đệ quy về lý
+thuyết có thể tiếp tục vô hạn, vì vậy Rust không thể biết chính xác kích thước
+cần thiết. Vì boxes có kích thước xác định, chúng ta có thể cho phép kiểu đệ
+quy bằng cách chèn một box trong định nghĩa kiểu đệ quy.</p>
+<p>Lấy ví dụ về một kiểu đệ quy, hãy xem xét <em>cons list</em>. Đây là một kiểu dữ liệu
+thường thấy trong các ngôn ngữ lập trình hàm. Kiểu cons list chúng ta sẽ định
+nghĩa khá đơn giản, ngoại trừ phần đệ quy; do đó, các khái niệm trong ví dụ này
+sẽ hữu ích mỗi khi bạn gặp các tình huống phức tạp hơn liên quan đến kiểu đệ
+quy.</p>
+<h4 id="thông-tin-thêm-về-cons-list"><a class="header" href="#thông-tin-thêm-về-cons-list">Thông tin thêm về Cons List</a></h4>
+<p><em>Cons list</em> là một cấu trúc dữ liệu xuất phát từ ngôn ngữ lập trình Lisp và các
+biến thể của nó, được tạo từ các cặp lồng nhau, và là phiên bản Lisp của
+linked list. Tên của nó xuất phát từ hàm <code>cons</code> (viết tắt của “construct
+function”) trong Lisp, dùng để tạo một cặp mới từ hai đối số. Bằng cách gọi
+<code>cons</code> trên một cặp gồm một giá trị và một cặp khác, chúng ta có thể tạo
+cons lists gồm các cặp đệ quy.</p>
+<p>Ví dụ, dưới đây là biểu diễn giả mã của một cons list chứa danh sách 1, 2, 3
+với mỗi cặp được đặt trong dấu ngoặc:</p>
+<pre><code class="language-text">(1, (2, (3, Nil)))
+</code></pre>
+<p>Mỗi phần tử trong cons list chứa hai thành phần: giá trị của phần tử hiện tại
+và phần tử tiếp theo. Phần tử cuối cùng trong danh sách chỉ chứa một giá trị
+gọi là <code>Nil</code> mà không có phần tử tiếp theo. Một cons list được tạo ra bằng cách
+gọi đệ quy hàm <code>cons</code>. Tên chuẩn để chỉ trường hợp cơ sở của đệ quy là <code>Nil</code>.
+Lưu ý rằng đây không phải là cùng khái niệm “null” hay “nil” trong Chương 6,
+mà là một giá trị không hợp lệ hoặc vắng mặt.</p>
+<p>Cons list không phải là một cấu trúc dữ liệu thường được sử dụng trong Rust.
+Hầu hết thời gian khi bạn cần một danh sách các phần tử trong Rust, <code>Vec&lt;T&gt;</code>
+là lựa chọn tốt hơn. Các kiểu dữ liệu đệ quy phức tạp khác <em>có</em> thể hữu ích
+trong nhiều tình huống, nhưng bắt đầu với cons list trong chương này giúp
+chúng ta khám phá cách boxes cho phép định nghĩa kiểu đệ quy mà không bị
+xao nhãng quá nhiều.</p>
+<p>Listing 15-2 chứa định nghĩa enum cho một cons list. Lưu ý rằng mã này sẽ
+chưa biên dịch được vì kiểu <code>List</code> chưa có kích thước xác định, điều này
+chúng ta sẽ minh họa tiếp theo.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile">enum List {
+    Cons(i32, List),
+    Nil,
+}
+<span class="boring">
+</span><span class="boring">fn main() {}</span></code></pre>
+<p><span class="caption">Listing 15-2: Lần thử đầu tiên định nghĩa enum để
+biểu diễn cấu trúc dữ liệu cons list chứa các giá trị <code>i32</code></span></p>
+<blockquote>
+<p>Lưu ý: Chúng ta đang triển khai một cons list chỉ chứa các giá trị <code>i32</code>
+cho ví dụ này. Chúng ta hoàn toàn có thể dùng generics, như đã thảo luận
+trong Chương 10, để định nghĩa một cons list có thể lưu trữ giá trị của
+bất kỳ kiểu nào.</p>
+</blockquote>
+<p>Sử dụng kiểu <code>List</code> để lưu danh sách <code>1, 2, 3</code> sẽ trông như mã trong
+Listing 15-3:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile"><span class="boring">enum List {
+</span><span class="boring">    Cons(i32, List),
+</span><span class="boring">    Nil,
+</span><span class="boring">}
+</span><span class="boring">
+</span>// --snip--
+
+use crate::List::{Cons, Nil};
+
+fn main() {
+    let list = Cons(1, Cons(2, Cons(3, Nil)));
+}</code></pre>
+<p><span class="caption">Listing 15-3: Sử dụng enum <code>List</code> để lưu danh sách <code>1, 2, 3</code></span></p>
+<p>Giá trị <code>Cons</code> đầu tiên chứa <code>1</code> và một giá trị <code>List</code> khác. Giá trị <code>List</code>
+này là một giá trị <code>Cons</code> khác chứa <code>2</code> và một giá trị <code>List</code> khác nữa. Giá
+trị <code>List</code> này là một <code>Cons</code> nữa chứa <code>3</code> và một giá trị <code>List</code>, cuối cùng là
+<code>Nil</code>, biến thể không đệ quy đánh dấu kết thúc của danh sách.</p>
+<p>Nếu chúng ta cố gắng biên dịch mã trong Listing 15-3, chúng ta sẽ nhận được
+lỗi như trong Listing 15-4:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling cons-list v0.1.0 (file:///projects/cons-list)
+error[E0072]: recursive type `List` has infinite size
+ --&gt; src/main.rs:1:1
+  |
+1 | enum List {
+  | ^^^^^^^^^
+2 |     Cons(i32, List),
+  |               ---- recursive without indirection
+  |
+help: insert some indirection (e.g., a `Box`, `Rc`, or `&amp;`) to break the cycle
+  |
+2 |     Cons(i32, Box&lt;List&gt;),
+  |               ++++    +
+
+error[E0391]: cycle detected when computing when `List` needs drop
+ --&gt; src/main.rs:1:1
+  |
+1 | enum List {
+  | ^^^^^^^^^
+  |
+  = note: ...which immediately requires computing when `List` needs drop again
+  = note: cycle used when computing whether `List` needs drop
+  = note: see https://rustc-dev-guide.rust-lang.org/overview.html#queries and https://rustc-dev-guide.rust-lang.org/query.html for more information
+
+Some errors have detailed explanations: E0072, E0391.
+For more information about an error, try `rustc --explain E0072`.
+error: could not compile `cons-list` (bin "cons-list") due to 2 previous errors
+</code></pre>
+<p><span class="caption">Listing 15-4: Lỗi nhận được khi cố gắng định nghĩa
+một enum đệ quy</span></p>
+<p>Lỗi này cho thấy kiểu này “có kích thước vô hạn”. Nguyên nhân là chúng ta đã
+định nghĩa <code>List</code> với một biến thể đệ quy: nó trực tiếp chứa một giá trị của
+chính nó. Do đó, Rust không thể xác định cần bao nhiêu không gian để lưu một
+giá trị <code>List</code>. Hãy phân tích lý do chúng ta nhận được lỗi này. Trước tiên, ta
+xem cách Rust tính toán kích thước cần thiết để lưu một giá trị của kiểu không
+đệ quy.</p>
+<h4 id="tính-kích-thước-của-kiểu-không-Đệ-quy"><a class="header" href="#tính-kích-thước-của-kiểu-không-Đệ-quy">Tính Kích Thước của Kiểu Không Đệ Quy</a></h4>
+<p>Nhớ lại enum <code>Message</code> mà chúng ta đã định nghĩa trong Listing 6-2 khi bàn
+về định nghĩa enum trong Chương 6:</p>
+<pre><pre class="playground"><code class="language-rust edition2024">enum Message {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(i32, i32, i32),
+}
+<span class="boring">
+</span><span class="boring">fn main() {}</span></code></pre></pre>
+<p>Để xác định bao nhiêu không gian cần cấp phát cho một giá trị <code>Message</code>, Rust
+sẽ xem qua từng biến thể để xem biến thể nào cần nhiều không gian nhất. Rust
+thấy rằng <code>Message::Quit</code> không cần không gian, <code>Message::Move</code> cần đủ không
+gian để lưu hai giá trị <code>i32</code>, v.v. Vì chỉ có một biến thể được sử dụng tại
+một thời điểm, nên không gian tối đa mà một giá trị <code>Message</code> cần chính là
+không gian cần để lưu biến thể lớn nhất.</p>
+<p>So sánh với trường hợp khi Rust cố xác định kích thước cần thiết cho một
+kiểu đệ quy như enum <code>List</code> trong Listing 15-2. Trình biên dịch bắt đầu bằng
+việc xem biến thể <code>Cons</code>, chứa một giá trị kiểu <code>i32</code> và một giá trị kiểu
+<code>List</code>. Do đó, <code>Cons</code> cần một lượng không gian bằng kích thước của <code>i32</code> cộng
+với kích thước của <code>List</code>. Để tính kích thước của kiểu <code>List</code>, trình biên
+dịch nhìn vào các biến thể, bắt đầu với <code>Cons</code>. Biến thể <code>Cons</code> chứa một
+giá trị kiểu <code>i32</code> và một giá trị kiểu <code>List</code>, và quá trình này tiếp tục
+vô hạn, như minh họa trong Hình 15-1.</p>
+<img alt="Danh sách Cons vô hạn" src="img/trpl15-01.svg" class="center" style="width: 50%;" />
+<p><span class="caption">Hình 15-1: Một <code>List</code> vô hạn gồm các biến thể <code>Cons</code>
+vô hạn</span></p>
+<h4 id="sử-dụng-boxt-để-có-kiểu-đệ-quy-với-kích-thước-đã-biết"><a class="header" href="#sử-dụng-boxt-để-có-kiểu-đệ-quy-với-kích-thước-đã-biết">Sử dụng <code>Box&lt;T&gt;</code> để có kiểu đệ quy với kích thước đã biết</a></h4>
+<p>Vì Rust không thể xác định bao nhiêu không gian cần cấp phát cho các kiểu
+được định nghĩa đệ quy, trình biên dịch sẽ đưa ra lỗi kèm theo gợi ý hữu ích:</p>
+<!-- manual-regeneration
+after doing automatic regeneration, look at listings/ch15-smart-pointers/listing-15-03/output.txt and copy the relevant line
+-->
+<pre><code class="language-text">help: insert some indirection (e.g., a `Box`, `Rc`, or `&amp;`) to make `List` representable
+  |
+2 |     Cons(i32, Box&lt;List&gt;),
+  |               ++++    +
+</code></pre>
+<p>Trong gợi ý này, “điều hướng gián tiếp” (indirection) có nghĩa là thay vì lưu
+một giá trị trực tiếp, chúng ta nên thay đổi cấu trúc dữ liệu để lưu giá trị
+một cách gián tiếp bằng cách lưu một con trỏ tới giá trị đó.</p>
+<p>Vì <code>Box&lt;T&gt;</code> là một con trỏ, Rust luôn biết kích thước của một <code>Box&lt;T&gt;</code> cần
+bao nhiêu: kích thước của con trỏ không thay đổi dựa trên lượng dữ liệu mà nó
+trỏ tới. Điều này có nghĩa là chúng ta có thể đặt một <code>Box&lt;T&gt;</code> bên trong
+biến thể <code>Cons</code> thay vì một giá trị <code>List</code> khác trực tiếp. <code>Box&lt;T&gt;</code> sẽ trỏ
+tới giá trị <code>List</code> tiếp theo, giá trị này sẽ nằm trên heap thay vì bên trong
+biến thể <code>Cons</code>. Về mặt khái niệm, chúng ta vẫn có một danh sách, được tạo ra
+bằng cách các danh sách chứa các danh sách khác, nhưng việc triển khai này
+bây giờ giống như đặt các phần tử cạnh nhau thay vì bên trong nhau.</p>
+<p>Chúng ta có thể thay đổi định nghĩa của enum <code>List</code> trong Listing 15-2 và
+cách sử dụng <code>List</code> trong Listing 15-3 sang mã trong Listing 15-5, mã này sẽ
+biên dịch được:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">enum List {
+    Cons(i32, Box&lt;List&gt;),
+    Nil,
+}
+
+use crate::List::{Cons, Nil};
+
+fn main() {
+    let list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
+}</code></pre></pre>
+<p><span class="caption">Listing 15-5: Định nghĩa <code>List</code> sử dụng <code>Box&lt;T&gt;</code> để có kích thước xác định</span></p>
+<p>Biến thể <code>Cons</code> cần kích thước của một <code>i32</code> cộng với không gian để lưu con trỏ của box. Biến thể <code>Nil</code> không lưu trữ giá trị nào, vì vậy nó cần ít không gian hơn biến thể <code>Cons</code>. Bây giờ chúng ta biết rằng bất kỳ giá trị <code>List</code> nào sẽ chiếm kích thước của một <code>i32</code> cộng với kích thước của con trỏ trong box. Bằng cách sử dụng box, chúng ta đã phá vỡ chuỗi đệ quy vô tận, vì vậy compiler có thể tính được kích thước cần thiết để lưu một giá trị <code>List</code>. Hình 15-2 minh họa biến thể <code>Cons</code> hiện nay trông như thế nào.</p>
+<img alt="A finite Cons list" src="img/trpl15-02.svg" class="center" />
+<p><span class="caption">Hình 15-2: Một <code>List</code> không vô tận vì <code>Cons</code> chứa một <code>Box</code></span></p>
+<p>Box chỉ cung cấp cơ chế gián tiếp và cấp phát trên heap; nó không có bất kỳ khả năng đặc biệt nào khác, như những gì chúng ta sẽ thấy với các loại smart pointer khác. Nó cũng không gây overhead về hiệu năng mà các khả năng đặc biệt đó mang lại, vì vậy nó có thể hữu ích trong các trường hợp như cons list, nơi cơ chế gián tiếp là tính năng duy nhất mà chúng ta cần. Chúng ta cũng sẽ xem thêm các trường hợp sử dụng box trong Chương 17.</p>
+<p>Kiểu <code>Box&lt;T&gt;</code> là một smart pointer vì nó triển khai trait <code>Deref</code>, cho phép giá trị <code>Box&lt;T&gt;</code> được sử dụng như tham chiếu. Khi một giá trị <code>Box&lt;T&gt;</code> ra khỏi phạm vi, dữ liệu trên heap mà box trỏ tới cũng được giải phóng nhờ triển khai trait <code>Drop</code>. Hai trait này sẽ còn quan trọng hơn nữa đối với chức năng mà các loại smart pointer khác cung cấp mà chúng ta sẽ thảo luận trong phần còn lại của chương. Hãy cùng khám phá hai trait này chi tiết hơn.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch15-00-smart-pointers.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch15-02-deref.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch15-00-smart-pointers.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch15-02-deref.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

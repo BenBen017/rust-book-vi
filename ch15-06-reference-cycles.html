@@ -1,0 +1,666 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Reference Cycles Can Leak Memory - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="chu-kỳ-tham-chiếu-có-thể-gây-rò-rỉ-bộ-nhớ"><a class="header" href="#chu-kỳ-tham-chiếu-có-thể-gây-rò-rỉ-bộ-nhớ">Chu kỳ tham chiếu có thể gây rò rỉ bộ nhớ</a></h2>
+<p>Các đảm bảo về an toàn bộ nhớ của Rust khiến việc vô tình tạo ra bộ nhớ
+không bao giờ được giải phóng (gọi là <em>rò rỉ bộ nhớ</em>) trở nên khó khăn,
+nhưng không phải là không thể. Ngăn chặn hoàn toàn rò rỉ bộ nhớ không phải
+là một trong những đảm bảo của Rust, có nghĩa là rò rỉ bộ nhớ vẫn an toàn
+về mặt bộ nhớ trong Rust. Chúng ta có thể thấy Rust cho phép rò rỉ bộ nhớ
+khi sử dụng <code>Rc&lt;T&gt;</code> và <code>RefCell&lt;T&gt;</code>: có thể tạo ra các tham chiếu mà các
+phần tử tham chiếu lẫn nhau theo một chu kỳ. Điều này gây rò rỉ bộ nhớ
+bởi vì số tham chiếu của mỗi phần tử trong chu kỳ sẽ không bao giờ
+đạt 0, và các giá trị sẽ không bao giờ được drop.</p>
+<h3 id="tạo-một-chu-kỳ-tham-chiếu"><a class="header" href="#tạo-một-chu-kỳ-tham-chiếu">Tạo một chu kỳ tham chiếu</a></h3>
+<p>Hãy xem cách một chu kỳ tham chiếu có thể xảy ra và cách ngăn chặn nó,
+bắt đầu với định nghĩa của enum <code>List</code> và phương thức <code>tail</code> trong Listing
+15-25:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">use crate::List::{Cons, Nil};
+use std::cell::RefCell;
+use std::rc::Rc;
+
+#[derive(Debug)]
+enum List {
+    Cons(i32, RefCell&lt;Rc&lt;List&gt;&gt;),
+    Nil,
+}
+
+impl List {
+    fn tail(&amp;self) -&gt; Option&lt;&amp;RefCell&lt;Rc&lt;List&gt;&gt;&gt; {
+        match self {
+            Cons(_, item) =&gt; Some(item),
+            Nil =&gt; None,
+        }
+    }
+}
+
+fn main() {}</code></pre></pre>
+<p><span class="caption">Listing 15-25: Định nghĩa cons list giữ một
+<code>RefCell&lt;T&gt;</code> để chúng ta có thể sửa đổi phần mà một biến thể <code>Cons</code> đang tham chiếu</span></p>
+<p>Chúng ta đang sử dụng một biến thể khác của định nghĩa <code>List</code> từ Listing 15-5.
+Phần tử thứ hai trong biến thể <code>Cons</code> giờ là <code>RefCell&lt;Rc&lt;List&gt;&gt;</code>, có nghĩa là
+thay vì chỉ sửa đổi giá trị <code>i32</code> như chúng ta đã làm trong Listing 15-24,
+chúng ta muốn sửa đổi giá trị <code>List</code> mà một biến thể <code>Cons</code> đang trỏ tới.
+Chúng ta cũng thêm phương thức <code>tail</code> để thuận tiện khi truy cập phần tử
+thứ hai nếu chúng ta có một biến thể <code>Cons</code>.</p>
+<p>Trong Listing 15-26, chúng ta thêm một hàm <code>main</code> sử dụng các định nghĩa trong
+Listing 15-25. Đoạn code này tạo một list trong <code>a</code> và một list trong <code>b</code> trỏ
+tới list trong <code>a</code>. Sau đó nó sửa đổi list trong <code>a</code> để trỏ tới <code>b</code>, tạo ra
+một chu kỳ tham chiếu. Có các câu lệnh <code>println!</code> dọc theo quá trình để hiển
+thị số tham chiếu tại các điểm khác nhau.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">use crate::List::{Cons, Nil};
+</span><span class="boring">use std::cell::RefCell;
+</span><span class="boring">use std::rc::Rc;
+</span><span class="boring">
+</span><span class="boring">#[derive(Debug)]
+</span><span class="boring">enum List {
+</span><span class="boring">    Cons(i32, RefCell&lt;Rc&lt;List&gt;&gt;),
+</span><span class="boring">    Nil,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl List {
+</span><span class="boring">    fn tail(&amp;self) -&gt; Option&lt;&amp;RefCell&lt;Rc&lt;List&gt;&gt;&gt; {
+</span><span class="boring">        match self {
+</span><span class="boring">            Cons(_, item) =&gt; Some(item),
+</span><span class="boring">            Nil =&gt; None,
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn main() {
+    let a = Rc::new(Cons(5, RefCell::new(Rc::new(Nil))));
+
+    println!("a initial rc count = {}", Rc::strong_count(&amp;a));
+    println!("a next item = {:?}", a.tail());
+
+    let b = Rc::new(Cons(10, RefCell::new(Rc::clone(&amp;a))));
+
+    println!("a rc count after b creation = {}", Rc::strong_count(&amp;a));
+    println!("b initial rc count = {}", Rc::strong_count(&amp;b));
+    println!("b next item = {:?}", b.tail());
+
+    if let Some(link) = a.tail() {
+        *link.borrow_mut() = Rc::clone(&amp;b);
+    }
+
+    println!("b rc count after changing a = {}", Rc::strong_count(&amp;b));
+    println!("a rc count after changing a = {}", Rc::strong_count(&amp;a));
+
+    // Uncomment the next line to see that we have a cycle;
+    // it will overflow the stack.
+    // println!("a next item = {:?}", a.tail());
+}</code></pre></pre>
+<p><span class="caption">Listing 15-26: Tạo một chu kỳ tham chiếu của hai giá trị <code>List</code> trỏ lẫn nhau</span></p>
+<p>Chúng ta tạo một instance <code>Rc&lt;List&gt;</code> giữ một giá trị <code>List</code> trong biến <code>a</code>
+với danh sách ban đầu là <code>5, Nil</code>. Sau đó chúng ta tạo một instance <code>Rc&lt;List&gt;</code>
+giữ một giá trị <code>List</code> khác trong biến <code>b</code> chứa giá trị 10 và trỏ tới list trong <code>a</code>.</p>
+<p>Chúng ta sửa đổi <code>a</code> để nó trỏ tới <code>b</code> thay vì <code>Nil</code>, tạo ra một chu kỳ.
+Chúng ta làm điều này bằng cách sử dụng phương thức <code>tail</code> để lấy tham chiếu tới
+<code>RefCell&lt;Rc&lt;List&gt;&gt;</code> trong <code>a</code>, và lưu vào biến <code>link</code>. Sau đó chúng ta dùng phương thức
+<code>borrow_mut</code> trên <code>RefCell&lt;Rc&lt;List&gt;&gt;</code> để thay đổi giá trị bên trong từ một <code>Rc&lt;List&gt;</code>
+giữ giá trị <code>Nil</code> thành <code>Rc&lt;List&gt;</code> trong <code>b</code>.</p>
+<p>Khi chạy đoạn code này, giữ câu lệnh <code>println!</code> cuối cùng đang bị comment lại,
+chúng ta sẽ nhận được output sau:</p>
+<pre><code class="language-console">$ cargo run
+   Compiling cons-list v0.1.0 (file:///projects/cons-list)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.53s
+     Running `target/debug/cons-list`
+a initial rc count = 1
+a next item = Some(RefCell { value: Nil })
+a rc count after b creation = 2
+b initial rc count = 1
+b next item = Some(RefCell { value: Cons(5, RefCell { value: Nil }) })
+b rc count after changing a = 2
+a rc count after changing a = 2
+</code></pre>
+<p>Số lượng tham chiếu của các instance <code>Rc&lt;List&gt;</code> trong cả <code>a</code> và <code>b</code> là 2 sau khi
+chúng ta thay đổi danh sách trong <code>a</code> để trỏ tới <code>b</code>. Ở cuối <code>main</code>, Rust sẽ
+drop biến <code>b</code>, điều này làm giảm số lượng tham chiếu của instance <code>Rc&lt;List&gt;</code> trong <code>b</code>
+từ 2 xuống còn 1. Bộ nhớ mà <code>Rc&lt;List&gt;</code> chiếm trên heap sẽ không bị giải phóng tại thời điểm này,
+bởi vì số lượng tham chiếu vẫn là 1, không phải 0. Sau đó, Rust drop <code>a</code>, làm giảm số lượng
+tham chiếu của instance <code>Rc&lt;List&gt;</code> trong <code>a</code> từ 2 xuống còn 1. Bộ nhớ của instance này cũng
+không thể bị giải phóng, vì instance <code>Rc&lt;List&gt;</code> khác vẫn trỏ tới nó. Bộ nhớ được cấp phát
+cho danh sách sẽ mãi không được thu hồi. Để hình dung chu kỳ tham chiếu này, chúng tôi tạo một sơ đồ trong Hình 15-4.</p>
+<img alt="Reference cycle of lists" src="img/trpl15-04.svg" class="center" />
+<p><span class="caption">Hình 15-4: Một chu kỳ tham chiếu của các danh sách <code>a</code> và <code>b</code> trỏ lẫn nhau</span></p>
+<p>Nếu bạn bỏ comment câu lệnh <code>println!</code> cuối cùng và chạy chương trình, Rust sẽ cố gắng
+in chu kỳ này với <code>a</code> trỏ tới <code>b</code> trỏ tới <code>a</code> và cứ thế cho đến khi tràn stack.</p>
+<p>So với một chương trình thực tế, hậu quả của việc tạo chu kỳ tham chiếu trong ví dụ này
+không quá nghiêm trọng: ngay sau khi chúng ta tạo chu kỳ tham chiếu, chương trình kết thúc.
+Tuy nhiên, nếu một chương trình phức tạp hơn cấp phát nhiều bộ nhớ trong một chu kỳ và giữ nó lâu,
+chương trình sẽ sử dụng nhiều bộ nhớ hơn cần thiết và có thể làm hệ thống bị quá tải, dẫn đến hết bộ nhớ khả dụng.</p>
+<p>Việc tạo chu kỳ tham chiếu không dễ, nhưng cũng không phải là không thể. Nếu bạn có các giá trị
+<code>RefCell&lt;T&gt;</code> chứa các giá trị <code>Rc&lt;T&gt;</code> hoặc các kết hợp lồng nhau tương tự của các kiểu với khả năng
+biến đổi bên trong và đếm tham chiếu, bạn phải đảm bảo rằng mình không tạo ra các chu kỳ;
+bạn không thể trông chờ Rust bắt lỗi chúng. Tạo một chu kỳ tham chiếu sẽ là một lỗi logic trong chương trình của bạn,
+và bạn nên dùng kiểm thử tự động, review code và các phương pháp phát triển phần mềm khác để giảm thiểu.</p>
+<p>Một giải pháp khác để tránh chu kỳ tham chiếu là tổ chức lại cấu trúc dữ liệu sao cho
+một số tham chiếu biểu thị quyền sở hữu và một số tham chiếu không biểu thị quyền sở hữu.
+Kết quả là, bạn có thể có các chu kỳ được tạo từ một số quan hệ sở hữu và một số quan hệ
+không sở hữu, và chỉ các quan hệ sở hữu mới ảnh hưởng tới việc một giá trị có thể bị drop hay không.
+Trong Listing 15-25, chúng ta luôn muốn các variant <code>Cons</code> sở hữu danh sách của chúng,
+vì vậy việc tổ chức lại cấu trúc dữ liệu là không khả thi. Hãy xem một ví dụ sử dụng các đồ thị
+gồm các nút cha và nút con để thấy khi nào các quan hệ không sở hữu là cách phù hợp để ngăn
+chu kỳ tham chiếu.</p>
+<h3 id="ngăn-ngừa-chu-kỳ-tham-chiếu-chuyển-rct-thành-weakt"><a class="header" href="#ngăn-ngừa-chu-kỳ-tham-chiếu-chuyển-rct-thành-weakt">Ngăn Ngừa Chu Kỳ Tham Chiếu: Chuyển <code>Rc&lt;T&gt;</code> thành <code>Weak&lt;T&gt;</code></a></h3>
+<p>Cho đến nay, chúng ta đã minh họa rằng việc gọi <code>Rc::clone</code> sẽ tăng <code>strong_count</code>
+của một instance <code>Rc&lt;T&gt;</code>, và một instance <code>Rc&lt;T&gt;</code> chỉ được dọn dẹp nếu <code>strong_count</code>
+của nó là 0. Bạn cũng có thể tạo một <em>tham chiếu yếu</em> tới giá trị bên trong một
+instance <code>Rc&lt;T&gt;</code> bằng cách gọi <code>Rc::downgrade</code> và truyền một tham chiếu tới <code>Rc&lt;T&gt;</code>.
+Các tham chiếu mạnh (strong) là cách bạn chia sẻ quyền sở hữu của một instance <code>Rc&lt;T&gt;</code>.
+Các tham chiếu yếu (weak) không biểu thị mối quan hệ sở hữu, và số lượng của chúng
+không ảnh hưởng đến thời điểm instance <code>Rc&lt;T&gt;</code> được dọn dẹp. Chúng sẽ không gây ra chu kỳ
+tham chiếu vì bất kỳ chu kỳ nào có chứa tham chiếu yếu sẽ bị phá vỡ khi số lượng
+tham chiếu mạnh của các giá trị liên quan về 0.</p>
+<p>Khi bạn gọi <code>Rc::downgrade</code>, bạn nhận được một smart pointer kiểu <code>Weak&lt;T&gt;</code>.
+Thay vì tăng <code>strong_count</code> trong instance <code>Rc&lt;T&gt;</code> lên 1, việc gọi <code>Rc::downgrade</code>
+sẽ tăng <code>weak_count</code> lên 1. Kiểu <code>Rc&lt;T&gt;</code> dùng <code>weak_count</code> để theo dõi có bao nhiêu
+tham chiếu <code>Weak&lt;T&gt;</code> tồn tại, tương tự như <code>strong_count</code>. Sự khác biệt là <code>weak_count</code>
+không cần phải về 0 để instance <code>Rc&lt;T&gt;</code> được dọn dẹp.</p>
+<p>Vì giá trị mà <code>Weak&lt;T&gt;</code> tham chiếu có thể đã bị drop, để thao tác với giá trị mà một
+<code>Weak&lt;T&gt;</code> trỏ tới, bạn phải chắc chắn giá trị vẫn tồn tại. Làm điều này bằng cách
+gọi phương thức <code>upgrade</code> trên instance <code>Weak&lt;T&gt;</code>, phương thức này sẽ trả về
+<code>Option&lt;Rc&lt;T&gt;&gt;</code>. Bạn sẽ nhận được <code>Some</code> nếu giá trị <code>Rc&lt;T&gt;</code> chưa bị drop và <code>None</code>
+nếu giá trị <code>Rc&lt;T&gt;</code> đã bị drop. Vì <code>upgrade</code> trả về <code>Option&lt;Rc&lt;T&gt;&gt;</code>, Rust sẽ đảm bảo
+rằng cả trường hợp <code>Some</code> và <code>None</code> đều được xử lý, và sẽ không có con trỏ không hợp lệ.</p>
+<p>Ví dụ, thay vì sử dụng một danh sách mà các phần tử chỉ biết về phần tử tiếp theo,
+chúng ta sẽ tạo một cây mà các phần tử biết về các phần tử con <em>và</em> các phần tử cha của chúng.</p>
+<h4 id="tạo-cấu-trúc-dữ-liệu-cây-một-node-với-các-node-con"><a class="header" href="#tạo-cấu-trúc-dữ-liệu-cây-một-node-với-các-node-con">Tạo Cấu Trúc Dữ Liệu Cây: một <code>Node</code> với các Node Con</a></h4>
+<p>Để bắt đầu, chúng ta sẽ xây dựng một cây với các node biết về các node con của chúng.
+Chúng ta sẽ tạo một struct có tên <code>Node</code> giữ giá trị <code>i32</code> của chính nó cũng như các
+tham chiếu tới các giá trị <code>Node</code> con:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">use std::cell::RefCell;
+use std::rc::Rc;
+
+#[derive(Debug)]
+struct Node {
+    value: i32,
+    children: RefCell&lt;Vec&lt;Rc&lt;Node&gt;&gt;&gt;,
+}
+<span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    let leaf = Rc::new(Node {
+</span><span class="boring">        value: 3,
+</span><span class="boring">        children: RefCell::new(vec![]),
+</span><span class="boring">    });
+</span><span class="boring">
+</span><span class="boring">    let branch = Rc::new(Node {
+</span><span class="boring">        value: 5,
+</span><span class="boring">        children: RefCell::new(vec![Rc::clone(&amp;leaf)]),
+</span><span class="boring">    });
+</span><span class="boring">}</span></code></pre></pre>
+<p>Chúng ta muốn một <code>Node</code> sở hữu các node con của nó, và chúng ta muốn chia sẻ quyền sở hữu đó với các biến
+để có thể truy cập trực tiếp từng <code>Node</code> trong cây. Để làm điều này, chúng ta định nghĩa các phần tử trong <code>Vec&lt;T&gt;</code>
+là các giá trị kiểu <code>Rc&lt;Node&gt;</code>. Chúng ta cũng muốn thay đổi node nào là con của node khác,
+vì vậy chúng ta đặt một <code>RefCell&lt;T&gt;</code> trong <code>children</code> bao quanh <code>Vec&lt;Rc&lt;Node&gt;&gt;</code>.</p>
+<p>Tiếp theo, chúng ta sẽ sử dụng định nghĩa struct và tạo một instance <code>Node</code> có tên <code>leaf</code> với giá trị 3 và không có node con,
+và một instance khác có tên <code>branch</code> với giá trị 5 và <code>leaf</code> là một trong các node con của nó,
+như được minh họa trong Listing 15-27:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">use std::cell::RefCell;
+</span><span class="boring">use std::rc::Rc;
+</span><span class="boring">
+</span><span class="boring">#[derive(Debug)]
+</span><span class="boring">struct Node {
+</span><span class="boring">    value: i32,
+</span><span class="boring">    children: RefCell&lt;Vec&lt;Rc&lt;Node&gt;&gt;&gt;,
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn main() {
+    let leaf = Rc::new(Node {
+        value: 3,
+        children: RefCell::new(vec![]),
+    });
+
+    let branch = Rc::new(Node {
+        value: 5,
+        children: RefCell::new(vec![Rc::clone(&amp;leaf)]),
+    });
+}</code></pre></pre>
+<p>Chúng ta clone <code>Rc&lt;Node&gt;</code> trong <code>leaf</code> và lưu vào <code>branch</code>, nghĩa là <code>Node</code> trong <code>leaf</code> bây giờ có hai chủ sở hữu: <code>leaf</code> và <code>branch</code>.
+Chúng ta có thể đi từ <code>branch</code> đến <code>leaf</code> thông qua <code>branch.children</code>, nhưng không có cách nào đi từ <code>leaf</code> đến <code>branch</code>.
+Lý do là <code>leaf</code> không có tham chiếu đến <code>branch</code> và không biết chúng có liên quan. Chúng ta muốn <code>leaf</code> biết rằng <code>branch</code> là cha của nó.
+Chúng ta sẽ làm điều đó tiếp theo.</p>
+<h4 id="thêm-tham-chiếu-từ-con-tới-cha"><a class="header" href="#thêm-tham-chiếu-từ-con-tới-cha">Thêm Tham Chiếu từ Con tới Cha</a></h4>
+<p>Để cho node con nhận biết cha của nó, chúng ta cần thêm một trường <code>parent</code> vào định nghĩa struct <code>Node</code>.
+Vấn đề là xác định kiểu dữ liệu của <code>parent</code> nên là gì. Chúng ta biết nó không thể chứa <code>Rc&lt;T&gt;</code>, vì điều đó sẽ tạo ra một vòng tham chiếu
+với <code>leaf.parent</code> trỏ tới <code>branch</code> và <code>branch.children</code> trỏ tới <code>leaf</code>, dẫn đến giá trị <code>strong_count</code> của chúng sẽ không bao giờ về 0.</p>
+<p>Xem xét các mối quan hệ theo cách khác, một node cha nên sở hữu các node con của nó: nếu một node cha bị drop, các node con cũng nên bị drop theo.
+Tuy nhiên, một node con không nên sở hữu cha của nó: nếu chúng ta drop một node con, node cha vẫn tồn tại. Đây là trường hợp sử dụng tham chiếu yếu!</p>
+<p>Vì vậy, thay vì dùng <code>Rc&lt;T&gt;</code>, chúng ta sẽ làm kiểu của <code>parent</code> sử dụng <code>Weak&lt;T&gt;</code>, cụ thể là <code>RefCell&lt;Weak&lt;Node&gt;&gt;</code>.
+Bây giờ định nghĩa struct <code>Node</code> của chúng ta trông như sau:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">use std::cell::RefCell;
+use std::rc::{Rc, Weak};
+
+#[derive(Debug)]
+struct Node {
+    value: i32,
+    parent: RefCell&lt;Weak&lt;Node&gt;&gt;,
+    children: RefCell&lt;Vec&lt;Rc&lt;Node&gt;&gt;&gt;,
+}
+<span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    let leaf = Rc::new(Node {
+</span><span class="boring">        value: 3,
+</span><span class="boring">        parent: RefCell::new(Weak::new()),
+</span><span class="boring">        children: RefCell::new(vec![]),
+</span><span class="boring">    });
+</span><span class="boring">
+</span><span class="boring">    println!("leaf parent = {:?}", leaf.parent.borrow().upgrade());
+</span><span class="boring">
+</span><span class="boring">    let branch = Rc::new(Node {
+</span><span class="boring">        value: 5,
+</span><span class="boring">        parent: RefCell::new(Weak::new()),
+</span><span class="boring">        children: RefCell::new(vec![Rc::clone(&amp;leaf)]),
+</span><span class="boring">    });
+</span><span class="boring">
+</span><span class="boring">    *leaf.parent.borrow_mut() = Rc::downgrade(&amp;branch);
+</span><span class="boring">
+</span><span class="boring">    println!("leaf parent = {:?}", leaf.parent.borrow().upgrade());
+</span><span class="boring">}</span></code></pre></pre>
+<p>Một node sẽ có thể tham chiếu tới node cha của nó nhưng không sở hữu node cha.
+Trong Listing 15-28, chúng ta cập nhật <code>main</code> để sử dụng định nghĩa mới này,
+vì vậy node <code>leaf</code> sẽ có cách để tham chiếu tới cha của nó là <code>branch</code>:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">use std::cell::RefCell;
+</span><span class="boring">use std::rc::{Rc, Weak};
+</span><span class="boring">
+</span><span class="boring">#[derive(Debug)]
+</span><span class="boring">struct Node {
+</span><span class="boring">    value: i32,
+</span><span class="boring">    parent: RefCell&lt;Weak&lt;Node&gt;&gt;,
+</span><span class="boring">    children: RefCell&lt;Vec&lt;Rc&lt;Node&gt;&gt;&gt;,
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn main() {
+    let leaf = Rc::new(Node {
+        value: 3,
+        parent: RefCell::new(Weak::new()),
+        children: RefCell::new(vec![]),
+    });
+
+    println!("leaf parent = {:?}", leaf.parent.borrow().upgrade());
+
+    let branch = Rc::new(Node {
+        value: 5,
+        parent: RefCell::new(Weak::new()),
+        children: RefCell::new(vec![Rc::clone(&amp;leaf)]),
+    });
+
+    *leaf.parent.borrow_mut() = Rc::downgrade(&amp;branch);
+
+    println!("leaf parent = {:?}", leaf.parent.borrow().upgrade());
+}</code></pre></pre>
+<p><span class="caption">Listing 15-28: Node <code>leaf</code> với tham chiếu yếu tới node cha <code>branch</code></span></p>
+<p>Việc tạo node <code>leaf</code> trông giống như trong Listing 15-27 ngoại trừ trường <code>parent</code>:
+<code>leaf</code> bắt đầu mà không có cha, vì vậy chúng ta tạo một instance <code>Weak&lt;Node&gt;</code> mới, rỗng.</p>
+<p>Tại thời điểm này, khi chúng ta cố lấy tham chiếu tới cha của <code>leaf</code> bằng phương thức
+<code>upgrade</code>, chúng ta nhận được giá trị <code>None</code>. Điều này được thể hiện trong kết quả
+từ câu lệnh <code>println!</code> đầu tiên:</p>
+<pre><code class="language-text">leaf parent = None
+</code></pre>
+<p>Khi chúng ta tạo node <code>branch</code>, nó cũng sẽ có một tham chiếu <code>Weak&lt;Node&gt;</code> mới trong
+trường <code>parent</code>, vì <code>branch</code> không có node cha. Chúng ta vẫn giữ <code>leaf</code> là một trong
+các con của <code>branch</code>. Khi đã có instance <code>Node</code> trong <code>branch</code>, chúng ta có thể sửa
+<code>leaf</code> để cung cấp cho nó một tham chiếu <code>Weak&lt;Node&gt;</code> tới cha của nó. Chúng ta dùng
+phương thức <code>borrow_mut</code> trên <code>RefCell&lt;Weak&lt;Node&gt;&gt;</code> trong trường <code>parent</code> của <code>leaf</code>,
+sau đó dùng hàm <code>Rc::downgrade</code> để tạo một tham chiếu <code>Weak&lt;Node&gt;</code> tới <code>branch</code> từ
+<code>Rc&lt;Node&gt;</code> trong <code>branch</code>.</p>
+<p>Khi in lại cha của <code>leaf</code>, lần này chúng ta sẽ nhận được biến thể <code>Some</code> chứa <code>branch</code>:
+bây giờ <code>leaf</code> có thể truy cập cha của nó! Khi in <code>leaf</code>, chúng ta cũng tránh được
+vòng lặp tham chiếu gây tràn stack như trong Listing 15-26; các tham chiếu <code>Weak&lt;Node&gt;</code>
+được in ra dưới dạng <code>(Weak)</code>:</p>
+<pre><code class="language-text">leaf parent = Some(Node { value: 5, parent: RefCell { value: (Weak) },
+children: RefCell { value: [Node { value: 3, parent: RefCell { value: (Weak) },
+children: RefCell { value: [] } }] } })
+</code></pre>
+<p>Việc không có đầu ra vô hạn cho thấy mã này không tạo ra vòng lặp tham chiếu. Chúng ta
+cũng có thể nhận thấy điều này bằng cách xem các giá trị nhận được từ việc gọi
+<code>Rc::strong_count</code> và <code>Rc::weak_count</code>.</p>
+<h4 id="trực-quan-hóa-các-thay-đổi-của-strong_count-và-weak_count"><a class="header" href="#trực-quan-hóa-các-thay-đổi-của-strong_count-và-weak_count">Trực quan hóa các thay đổi của <code>strong_count</code> và <code>weak_count</code></a></h4>
+<p>Hãy xem cách các giá trị <code>strong_count</code> và <code>weak_count</code> của các instance <code>Rc&lt;Node&gt;</code>
+thay đổi bằng cách tạo một phạm vi con mới và chuyển việc tạo <code>branch</code> vào phạm vi đó.
+Bằng cách này, chúng ta có thể thấy điều gì xảy ra khi <code>branch</code> được tạo và sau đó bị
+hủy khi nó ra khỏi phạm vi. Các thay đổi được thể hiện trong Listing 15-29:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">use std::cell::RefCell;
+</span><span class="boring">use std::rc::{Rc, Weak};
+</span><span class="boring">
+</span><span class="boring">#[derive(Debug)]
+</span><span class="boring">struct Node {
+</span><span class="boring">    value: i32,
+</span><span class="boring">    parent: RefCell&lt;Weak&lt;Node&gt;&gt;,
+</span><span class="boring">    children: RefCell&lt;Vec&lt;Rc&lt;Node&gt;&gt;&gt;,
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn main() {
+    let leaf = Rc::new(Node {
+        value: 3,
+        parent: RefCell::new(Weak::new()),
+        children: RefCell::new(vec![]),
+    });
+
+    println!(
+        "leaf strong = {}, weak = {}",
+        Rc::strong_count(&amp;leaf),
+        Rc::weak_count(&amp;leaf),
+    );
+
+    {
+        let branch = Rc::new(Node {
+            value: 5,
+            parent: RefCell::new(Weak::new()),
+            children: RefCell::new(vec![Rc::clone(&amp;leaf)]),
+        });
+
+        *leaf.parent.borrow_mut() = Rc::downgrade(&amp;branch);
+
+        println!(
+            "branch strong = {}, weak = {}",
+            Rc::strong_count(&amp;branch),
+            Rc::weak_count(&amp;branch),
+        );
+
+        println!(
+            "leaf strong = {}, weak = {}",
+            Rc::strong_count(&amp;leaf),
+            Rc::weak_count(&amp;leaf),
+        );
+    }
+
+    println!("leaf parent = {:?}", leaf.parent.borrow().upgrade());
+    println!(
+        "leaf strong = {}, weak = {}",
+        Rc::strong_count(&amp;leaf),
+        Rc::weak_count(&amp;leaf),
+    );
+}</code></pre></pre>
+<p><span class="caption">Listing 15-29: Tạo <code>branch</code> trong một phạm vi con và
+kiểm tra số lượng tham chiếu mạnh và yếu</span></p>
+<p>Sau khi <code>leaf</code> được tạo, <code>Rc&lt;Node&gt;</code> của nó có <code>strong count</code> là 1 và <code>weak count</code> là 0.
+Trong phạm vi con, chúng ta tạo <code>branch</code> và liên kết nó với <code>leaf</code>, vào thời điểm đó khi
+in ra các số lượng, <code>Rc&lt;Node&gt;</code> trong <code>branch</code> sẽ có <code>strong count</code> là 1 và <code>weak count</code> là 1
+(cho <code>leaf.parent</code> trỏ tới <code>branch</code> với một <code>Weak&lt;Node&gt;</code>). Khi in các số lượng của <code>leaf</code>,
+chúng ta sẽ thấy nó có <code>strong count</code> là 2, vì <code>branch</code> bây giờ có một bản clone của
+<code>Rc&lt;Node&gt;</code> của <code>leaf</code> lưu trong <code>branch.children</code>, nhưng vẫn có <code>weak count</code> là 0.</p>
+<p>Khi phạm vi con kết thúc, <code>branch</code> ra khỏi phạm vi và <code>strong count</code> của <code>Rc&lt;Node&gt;</code> giảm xuống 0,
+vì vậy <code>Node</code> của nó bị drop. <code>weak count</code> là 1 từ <code>leaf.parent</code> không ảnh hưởng đến việc <code>Node</code>
+có bị drop hay không, vì vậy chúng ta không gặp rò rỉ bộ nhớ!</p>
+<p>Nếu chúng ta thử truy cập parent của <code>leaf</code> sau khi kết thúc phạm vi, chúng ta sẽ nhận được
+<code>None</code> một lần nữa. Cuối chương trình, <code>Rc&lt;Node&gt;</code> trong <code>leaf</code> có <code>strong count</code> là 1 và
+<code>weak count</code> là 0, vì biến <code>leaf</code> bây giờ là tham chiếu duy nhất đến <code>Rc&lt;Node&gt;</code>.</p>
+<p>Tất cả logic quản lý số lượng tham chiếu và việc drop giá trị đều được tích hợp trong
+<code>Rc&lt;T&gt;</code> và <code>Weak&lt;T&gt;</code> cùng với các implement của trait <code>Drop</code>. Bằng cách xác định rằng
+mối quan hệ từ con đến cha nên là một tham chiếu <code>Weak&lt;T&gt;</code> trong định nghĩa của <code>Node</code>,
+bạn có thể cho các node cha trỏ tới node con và ngược lại mà không tạo ra vòng tham chiếu
+và rò rỉ bộ nhớ.</p>
+<h2 id="tóm-tắt"><a class="header" href="#tóm-tắt">Tóm tắt</a></h2>
+<p>Chương này trình bày cách sử dụng smart pointer để thực hiện các đảm bảo và đánh đổi khác
+với những gì Rust mặc định thực hiện với các reference thông thường. Kiểu <code>Box&lt;T&gt;</code> có kích thước
+cố định và trỏ đến dữ liệu được cấp phát trên heap. Kiểu <code>Rc&lt;T&gt;</code> theo dõi số lượng tham
+chiếu đến dữ liệu trên heap để dữ liệu có thể có nhiều chủ sở hữu. Kiểu <code>RefCell&lt;T&gt;</code> với
+khả năng mutability nội tại cung cấp cho chúng ta một kiểu có thể sử dụng khi cần một kiểu
+immutable nhưng vẫn cần thay đổi giá trị bên trong; nó cũng thực thi các quy tắc mượn tại
+runtime thay vì compile time.</p>
+<p>Chúng ta cũng đã bàn về các trait <code>Deref</code> và <code>Drop</code>, cho phép nhiều chức năng của smart pointer.
+Chúng ta khám phá các vòng tham chiếu có thể gây rò rỉ bộ nhớ và cách ngăn chặn chúng bằng
+<code>Weak&lt;T&gt;</code>.</p>
+<p>Nếu chương này khiến bạn hứng thú và bạn muốn triển khai smart pointer của riêng mình, hãy xem
+thêm tại <a href="../nomicon/index.html">“The Rustonomicon”</a> để có thêm thông tin hữu ích.</p>
+<p>Tiếp theo, chúng ta sẽ bàn về đồng thời trong Rust. Bạn thậm chí sẽ được tìm hiểu về vài smart
+pointer mới.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch15-05-interior-mutability.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch16-00-concurrency.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch15-05-interior-mutability.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch16-00-concurrency.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

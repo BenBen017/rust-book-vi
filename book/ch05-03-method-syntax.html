@@ -1,0 +1,589 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Cú pháp phương thức - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="method-syntax"><a class="header" href="#method-syntax">Method Syntax</a></h2>
+<p><em>Methods</em> tương tự như functions: chúng được khai báo với từ khóa <code>fn</code> và một
+tên, chúng có thể có parameters và một return value, và chúng chứa một số code
+được chạy khi method được gọi từ một nơi khác. Không giống như functions,
+methods được định nghĩa trong ngữ cảnh của một struct (hoặc một enum hoặc một trait
+object, chúng ta đề cập lần lượt trong <a href="ch06-00-enums.html">Chapter 6</a><!-- ignore --> và <a href="ch17-02-trait-objects.html">Chapter
+17</a><!-- ignore -->), và parameter đầu tiên của chúng luôn là
+<code>self</code>, đại diện cho instance của struct mà method đang được gọi trên đó.</p>
+<h3 id="defining-methods"><a class="header" href="#defining-methods">Defining Methods</a></h3>
+<p>Hãy thay đổi function <code>area</code> đang có một instance <code>Rectangle</code> làm parameter
+và thay vào đó tạo một method <code>area</code> được định nghĩa trên struct <code>Rectangle</code>,
+như được minh họa trong Listing 5-13.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024">#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    fn area(&amp;self) -&gt; u32 {
+        self.width * self.height
+    }
+}
+
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+
+    println!(
+        "The area of the rectangle is {} square pixels.",
+        rect1.area()
+    );
+}</code></pre></pre>
+<p><span class="caption">Listing 5-13: Định nghĩa một method <code>area</code> trên
+<code>Rectangle</code> struct</span></p>
+<p>Để định nghĩa function trong ngữ cảnh của <code>Rectangle</code>, chúng ta bắt đầu một
+block <code>impl</code> (implementation) cho <code>Rectangle</code>. Mọi thứ bên trong block <code>impl</code>
+này sẽ được gắn với type <code>Rectangle</code>. Sau đó chúng ta di chuyển function <code>area</code>
+vào bên trong các dấu ngoặc nhọn của <code>impl</code> và thay đổi parameter đầu tiên (và
+trong trường hợp này là parameter duy nhất) thành <code>self</code> trong signature và ở
+mọi nơi trong body. Trong <code>main</code>, nơi chúng ta đã gọi function <code>area</code> và truyền
+<code>rect1</code> làm một argument, chúng ta có thể thay vào đó sử dụng <em>method syntax</em>
+để gọi method <code>area</code> trên instance <code>Rectangle</code> của chúng ta. Method syntax
+được viết sau một instance: chúng ta thêm một dấu chấm theo sau là tên method,
+dấu ngoặc tròn, và bất kỳ argument nào.</p>
+<p>Trong signature của <code>area</code>, chúng ta sử dụng <code>&amp;self</code> thay vì <code>rectangle: &amp;Rectangle</code>.
+<code>&amp;self</code> thực chất là dạng viết tắt của <code>self: &amp;Self</code>. Bên trong một block <code>impl</code>,
+type <code>Self</code> là một alias cho type mà block <code>impl</code> đó áp dụng. Các method bắt buộc
+phải có một parameter tên là <code>self</code> với type <code>Self</code> làm parameter đầu tiên, vì vậy
+Rust cho phép bạn rút gọn điều này chỉ còn tên <code>self</code> ở vị trí parameter đầu tiên.
+Lưu ý rằng chúng ta vẫn cần sử dụng dấu <code>&amp;</code> phía trước dạng viết tắt <code>self</code> để
+chỉ ra rằng method này mượn (borrow) instance <code>Self</code>, giống như cách chúng ta đã
+làm với <code>rectangle: &amp;Rectangle</code>. Các method có thể nhận quyền sở hữu của <code>self</code>,
+mượn <code>self</code> một cách bất biến (immutable) như chúng ta đã làm ở đây, hoặc mượn
+<code>self</code> một cách khả biến (mutable), giống như với bất kỳ parameter nào khác.</p>
+<p>Chúng ta chọn <code>&amp;self</code> ở đây vì cùng lý do đã dùng <code>&amp;Rectangle</code> trong phiên bản
+function: chúng ta không muốn lấy quyền sở hữu, và chỉ muốn đọc dữ liệu trong
+struct chứ không ghi vào nó. Nếu chúng ta muốn thay đổi instance mà method được
+gọi trên đó như một phần công việc của method, chúng ta sẽ dùng <code>&amp;mut self</code> làm
+parameter đầu tiên. Việc có một method lấy quyền sở hữu của instance bằng cách
+chỉ sử dụng <code>self</code> làm parameter đầu tiên là khá hiếm; kỹ thuật này thường được
+dùng khi method biến đổi <code>self</code> thành một thứ gì đó khác và bạn muốn ngăn không
+cho người gọi tiếp tục sử dụng instance ban đầu sau khi quá trình biến đổi kết
+thúc.</p>
+<p>Lý do chính để sử dụng methods thay vì functions, ngoài việc cung cấp method
+syntax và không phải lặp lại type của <code>self</code> trong signature của mỗi method,
+là để tổ chức mã nguồn. Chúng ta đã đặt tất cả những gì có thể làm với một
+instance của một type vào trong một block <code>impl</code> duy nhất, thay vì để những
+người dùng mã của chúng ta trong tương lai phải đi tìm các khả năng của
+<code>Rectangle</code> ở nhiều vị trí khác nhau trong thư viện mà chúng ta cung cấp.</p>
+<p>Lưu ý rằng chúng ta có thể chọn đặt cho một method cùng tên với một trong các
+field của struct. Ví dụ, chúng ta có thể định nghĩa một method trên <code>Rectangle</code>
+mà cũng có tên là <code>width</code>:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#[derive(Debug)]
+</span><span class="boring">struct Rectangle {
+</span><span class="boring">    width: u32,
+</span><span class="boring">    height: u32,
+</span><span class="boring">}
+</span><span class="boring">
+</span>impl Rectangle {
+    fn width(&amp;self) -&gt; bool {
+        self.width &gt; 0
+    }
+}
+
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+
+    if rect1.width() {
+        println!("The rectangle has a nonzero width; it is {}", rect1.width);
+    }
+}</code></pre></pre>
+<p>Ở đây, chúng ta chọn để method <code>width</code> trả về <code>true</code> nếu giá trị trong field
+<code>width</code> của instance lớn hơn <code>0</code>, và trả về <code>false</code> nếu giá trị là <code>0</code>: chúng ta
+có thể sử dụng một field bên trong một method cùng tên cho bất kỳ mục đích nào.
+Trong <code>main</code>, khi chúng ta theo sau <code>rect1.width</code> bằng dấu ngoặc tròn, Rust hiểu
+rằng chúng ta đang nói đến method <code>width</code>. Khi chúng ta không dùng dấu ngoặc
+tròn, Rust hiểu rằng chúng ta đang nói đến field <code>width</code>.</p>
+<p>Thường thì, nhưng không phải lúc nào cũng vậy, khi chúng ta đặt cho một method
+cùng tên với một field, chúng ta muốn nó chỉ trả về giá trị của field đó và
+không làm gì khác. Những method như vậy được gọi là <em>getters</em>, và Rust không tự
+động triển khai chúng cho các field của struct như một số ngôn ngữ khác.
+Getters rất hữu ích vì bạn có thể để field ở chế độ private nhưng method thì ở
+chế độ public, từ đó cho phép truy cập chỉ-đọc (read-only) tới field đó như một
+phần của public API của type. Chúng ta sẽ thảo luận về public và private là gì
+và cách chỉ định một field hoặc method là public hay private trong <a href="ch07-03-paths-for-referring-to-an-item-in-the-module-tree.html#exposing-paths-with-the-pub-keyword">Chapter
+7</a><!-- ignore -->.</p>
+<section class="note" aria-role="note">
+<h3 id="toán-tử---ở-đâu"><a class="header" href="#toán-tử---ở-đâu">Toán tử <code>-&gt;</code> ở đâu?</a></h3>
+<p>Trong C và C++, có hai toán tử khác nhau được dùng để gọi method: bạn dùng
+<code>.</code> nếu gọi method trực tiếp trên object và dùng <code>-&gt;</code> nếu gọi method trên
+một con trỏ tới object và cần dereference con trỏ trước. Nói cách khác, nếu
+<code>object</code> là một con trỏ, thì <code>object-&gt;something()</code> tương tự với
+<code>(*object).something()</code>.</p>
+<p>Rust không có toán tử tương đương với <code>-&gt;</code>; thay vào đó, Rust có một tính
+năng gọi là <em>automatic referencing and dereferencing</em>. Việc gọi method là
+một trong số ít những nơi trong Rust có hành vi này.</p>
+<p>Cách hoạt động như sau: khi bạn gọi một method với <code>object.something()</code>,
+Rust sẽ tự động thêm <code>&amp;</code>, <code>&amp;mut</code>, hoặc <code>*</code> để <code>object</code> khớp với signature của
+method. Nói cách khác, các cách gọi sau là giống nhau:</p>
+<!-- CAN'T EXTRACT SEE BUG https://github.com/rust-lang/mdBook/issues/1127 -->
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">#[derive(Debug,Copy,Clone)]
+</span><span class="boring">struct Point {
+</span><span class="boring">    x: f64,
+</span><span class="boring">    y: f64,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl Point {
+</span><span class="boring">   fn distance(&amp;self, other: &amp;Point) -&gt; f64 {
+</span><span class="boring">       let x_squared = f64::powi(other.x - self.x, 2);
+</span><span class="boring">       let y_squared = f64::powi(other.y - self.y, 2);
+</span><span class="boring">
+</span><span class="boring">       f64::sqrt(x_squared + y_squared)
+</span><span class="boring">   }
+</span><span class="boring">}
+</span><span class="boring">let p1 = Point { x: 0.0, y: 0.0 };
+</span><span class="boring">let p2 = Point { x: 5.0, y: 6.5 };
+</span>p1.distance(&amp;p2);
+(&amp;p1).distance(&amp;p2);
+<span class="boring">}</span></code></pre></pre>
+<p>Cách gọi đầu tiên trông gọn gàng hơn nhiều. Hành vi tự động reference này hoạt
+động được là vì các method có một receiver rõ ràng — chính là type của <code>self</code>.
+Dựa vào receiver và tên của method, Rust có thể xác định một cách dứt khoát
+liệu method đang đọc (<code>&amp;self</code>), thay đổi (<code>&amp;mut self</code>), hay tiêu thụ (<code>self</code>).
+Việc Rust làm cho cơ chế mượn (borrowing) trở nên ngầm định đối với receiver
+của method là một phần quan trọng giúp mô hình ownership trở nên dễ dùng hơn
+trong thực tế.</p>
+</section>
+<h3 id="methods-with-more-parameters"><a class="header" href="#methods-with-more-parameters">Methods with More Parameters</a></h3>
+<p>Hãy thực hành sử dụng methods bằng cách triển khai một method thứ hai trên
+struct <code>Rectangle</code>. Lần này, chúng ta muốn một instance của <code>Rectangle</code> nhận
+một instance khác của <code>Rectangle</code> và trả về <code>true</code> nếu <code>Rectangle</code> thứ hai có
+thể nằm hoàn toàn bên trong <code>self</code> (tức là <code>Rectangle</code> đầu tiên); nếu không,
+nó sẽ trả về <code>false</code>. Nói cách khác, sau khi chúng ta đã định nghĩa method
+<code>can_hold</code>, chúng ta muốn có thể viết chương trình như được minh họa trong
+Listing 5-14.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore">fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+    let rect2 = Rectangle {
+        width: 10,
+        height: 40,
+    };
+    let rect3 = Rectangle {
+        width: 60,
+        height: 45,
+    };
+
+    println!("Can rect1 hold rect2? {}", rect1.can_hold(&amp;rect2));
+    println!("Can rect1 hold rect3? {}", rect1.can_hold(&amp;rect3));
+}</code></pre>
+<p><span class="caption">Listing 5-14: Sử dụng method <code>can_hold</code> chưa được viết</span></p>
+<p>Kết quả mong đợi sẽ trông như sau vì cả hai kích thước của <code>rect2</code> đều nhỏ hơn
+các kích thước của <code>rect1</code>, nhưng <code>rect3</code> thì rộng hơn <code>rect1</code>:</p>
+<pre><code class="language-text">Can rect1 hold rect2? true
+Can rect1 hold rect3? false
+</code></pre>
+<p>Chúng ta biết rằng mình muốn định nghĩa một method, vì vậy nó sẽ nằm trong block
+<code>impl Rectangle</code>. Tên method sẽ là <code>can_hold</code>, và nó sẽ nhận một immutable borrow
+của một <code>Rectangle</code> khác làm parameter. Chúng ta có thể biết type của parameter
+này bằng cách nhìn vào đoạn code gọi method:
+<code>rect1.can_hold(&amp;rect2)</code> truyền vào <code>&amp;rect2</code>, tức là một immutable borrow tới
+<code>rect2</code>, một instance của <code>Rectangle</code>. Điều này là hợp lý vì chúng ta chỉ cần
+đọc <code>rect2</code> (thay vì ghi, điều đó sẽ yêu cầu một mutable borrow), và chúng ta
+muốn <code>main</code> vẫn giữ quyền sở hữu của <code>rect2</code> để có thể dùng lại nó sau khi gọi
+method <code>can_hold</code>. Giá trị trả về của <code>can_hold</code> sẽ là một Boolean, và phần
+triển khai sẽ kiểm tra xem chiều rộng và chiều cao của <code>self</code> có lớn hơn chiều
+rộng và chiều cao của <code>Rectangle</code> còn lại hay không. Hãy thêm method <code>can_hold</code>
+mới vào block <code>impl</code> từ Listing 5-13, như được minh họa trong Listing 5-15.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#[derive(Debug)]
+</span><span class="boring">struct Rectangle {
+</span><span class="boring">    width: u32,
+</span><span class="boring">    height: u32,
+</span><span class="boring">}
+</span><span class="boring">
+</span>impl Rectangle {
+    fn area(&amp;self) -&gt; u32 {
+        self.width * self.height
+    }
+
+    fn can_hold(&amp;self, other: &amp;Rectangle) -&gt; bool {
+        self.width &gt; other.width &amp;&amp; self.height &gt; other.height
+    }
+}
+<span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    let rect1 = Rectangle {
+</span><span class="boring">        width: 30,
+</span><span class="boring">        height: 50,
+</span><span class="boring">    };
+</span><span class="boring">    let rect2 = Rectangle {
+</span><span class="boring">        width: 10,
+</span><span class="boring">        height: 40,
+</span><span class="boring">    };
+</span><span class="boring">    let rect3 = Rectangle {
+</span><span class="boring">        width: 60,
+</span><span class="boring">        height: 45,
+</span><span class="boring">    };
+</span><span class="boring">
+</span><span class="boring">    println!("Can rect1 hold rect2? {}", rect1.can_hold(&amp;rect2));
+</span><span class="boring">    println!("Can rect1 hold rect3? {}", rect1.can_hold(&amp;rect3));
+</span><span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 5-15: Triển khai method <code>can_hold</code> trên
+<code>Rectangle</code>, method này nhận một instance <code>Rectangle</code> khác làm parameter</span></p>
+<p>Khi chúng ta chạy đoạn code này với hàm <code>main</code> trong Listing 5-14, chúng ta sẽ
+nhận được kết quả mong muốn. Methods có thể nhận nhiều parameter; chúng ta chỉ
+cần thêm chúng vào signature sau parameter <code>self</code>, và các parameter đó hoạt
+động giống hệt như parameter trong functions.</p>
+<h3 id="associated-functions"><a class="header" href="#associated-functions">Associated Functions</a></h3>
+<p>Tất cả các function được định nghĩa bên trong một block <code>impl</code> đều được gọi là
+<em>các associated functions</em> vì chúng được gắn với type được nêu sau từ khóa
+<code>impl</code>. Chúng ta có thể định nghĩa các associated function không có <code>self</code> làm
+parameter đầu tiên (và do đó không phải là methods), bởi vì chúng không cần một
+instance của type để hoạt động. Chúng ta đã từng sử dụng một function như vậy:
+function <code>String::from</code> được định nghĩa trên type <code>String</code>.</p>
+<p>Các associated function không phải là methods thường được dùng làm constructor
+để trả về một instance mới của struct. Chúng thường được đặt tên là <code>new</code>, nhưng
+<code>new</code> không phải là một tên đặc biệt và cũng không được tích hợp sẵn trong ngôn
+ngữ. Ví dụ, chúng ta có thể chọn cung cấp một associated function tên là
+<code>square</code>, function này sẽ nhận một parameter kích thước và dùng giá trị đó cho
+cả chiều rộng lẫn chiều cao, từ đó giúp việc tạo một <code>Rectangle</code> hình vuông trở
+nên dễ dàng hơn thay vì phải chỉ định cùng một giá trị hai lần:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#[derive(Debug)]
+</span><span class="boring">struct Rectangle {
+</span><span class="boring">    width: u32,
+</span><span class="boring">    height: u32,
+</span><span class="boring">}
+</span><span class="boring">
+</span>impl Rectangle {
+    fn square(size: u32) -&gt; Self {
+        Self {
+            width: size,
+            height: size,
+        }
+    }
+}
+<span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    let sq = Rectangle::square(3);
+</span><span class="boring">}</span></code></pre></pre>
+<p>Từ khóa <code>Self</code> trong kiểu trả về và trong body của function là alias cho type
+xuất hiện sau từ khóa <code>impl</code>, trong trường hợp này là <code>Rectangle</code>.</p>
+<p>Để gọi associated function này, chúng ta sử dụng cú pháp <code>::</code> với tên struct;
+<code>let sq = Rectangle::square(3);</code> là một ví dụ. Function này được đặt trong
+namespace của struct: cú pháp <code>::</code> được dùng cho cả associated functions và
+các namespace được tạo bởi modules. Chúng ta sẽ thảo luận về modules trong
+<a href="ch07-02-defining-modules-to-control-scope-and-privacy.html">Chapter 7</a><!-- ignore -->.</p>
+<h3 id="multiple-impl-blocks"><a class="header" href="#multiple-impl-blocks">Multiple <code>impl</code> Blocks</a></h3>
+<p>Mỗi struct được phép có nhiều <code>impl</code> block. Ví dụ, Listing
+5-15 tương đương với đoạn code được trình bày trong Listing 5-16, trong đó
+mỗi method nằm trong một <code>impl</code> block riêng.</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#[derive(Debug)]
+</span><span class="boring">struct Rectangle {
+</span><span class="boring">    width: u32,
+</span><span class="boring">    height: u32,
+</span><span class="boring">}
+</span><span class="boring">
+</span>impl Rectangle {
+    fn area(&amp;self) -&gt; u32 {
+        self.width * self.height
+    }
+}
+
+impl Rectangle {
+    fn can_hold(&amp;self, other: &amp;Rectangle) -&gt; bool {
+        self.width &gt; other.width &amp;&amp; self.height &gt; other.height
+    }
+}
+<span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    let rect1 = Rectangle {
+</span><span class="boring">        width: 30,
+</span><span class="boring">        height: 50,
+</span><span class="boring">    };
+</span><span class="boring">    let rect2 = Rectangle {
+</span><span class="boring">        width: 10,
+</span><span class="boring">        height: 40,
+</span><span class="boring">    };
+</span><span class="boring">    let rect3 = Rectangle {
+</span><span class="boring">        width: 60,
+</span><span class="boring">        height: 45,
+</span><span class="boring">    };
+</span><span class="boring">
+</span><span class="boring">    println!("Can rect1 hold rect2? {}", rect1.can_hold(&amp;rect2));
+</span><span class="boring">    println!("Can rect1 hold rect3? {}", rect1.can_hold(&amp;rect3));
+</span><span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 5-16: Viết lại Listing 5-15 bằng cách sử dụng nhiều <code>impl</code>
+blocks</span></p>
+<p>Không có lý do bắt buộc nào để tách các method này ra thành nhiều <code>impl</code> block
+trong trường hợp này, nhưng đây là cú pháp hợp lệ. Chúng ta sẽ thấy một trường
+hợp mà nhiều <code>impl</code> block trở nên hữu ích ở Chapter 10, nơi chúng ta thảo luận
+về generic types và traits.</p>
+<h2 id="summary"><a class="header" href="#summary">Summary</a></h2>
+<p>Struct cho phép bạn tạo ra các custom types có ý nghĩa đối với domain của bạn.
+Bằng cách sử dụng struct, bạn có thể giữ các mảnh dữ liệu liên quan được gắn
+kết với nhau và đặt tên cho từng mảnh để làm cho code của bạn rõ ràng hơn.
+Trong các <code>impl</code> block, bạn có thể định nghĩa các function được liên kết với
+type của mình, và methods là một dạng associated function cho phép bạn chỉ rõ
+hành vi mà các instance của struct đó có.</p>
+<p>Nhưng struct không phải là cách duy nhất để bạn tạo custom types: hãy chuyển
+sang feature enum của Rust để bổ sung thêm một công cụ nữa vào toolbox của bạn.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch05-02-example-structs.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch06-00-enums.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch05-02-example-structs.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch06-00-enums.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

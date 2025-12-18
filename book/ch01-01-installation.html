@@ -1,0 +1,351 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Cài đặt - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <p><a id="installation"></a></p>
+<h2 id="cài-đặt"><a class="header" href="#cài-đặt">Cài đặt</a></h2>
+<p>Bước đầu tiên là cài đặt Rust. Chúng ta sẽ tải về Rust thông qua <code>rustup</code>, một công cụ
+dòng lệnh quản lý phiên bản và các công cụ của Rust. Bạn sẽ cần một đường Internet
+để download.</p>
+<blockquote>
+<p>Ghi chú: nếu vì lý do gì đó bạn không muốn dùng <code>rustup</code>, xin đọc phần
+<a href="https://forge.rust-lang.org/infra/other-installation-methods.html">Other Rust Installation Methods page</a> for more options.</p>
+</blockquote>
+<p>Các bước kế tiếp cài đặt phiên bản ổn định mới nhất của trình dịch Rust. Các yêu cầu về tính
+ổn định của Rust đảm bảo rằng tất cả các ví dụ có thể dịch được trong sách vẫn có thể tiếp tục
+dịch được với các phiên bản Rust mới hơn. Các thông báo có thể khác nhau một chút, vì Rust
+thường xuyên cải thiện các thông báo lỗi hoặc các cảnh báo. Nói cách khác, bất kỳ phiên bản
+ổn định mới hơn nào của Rust cũng đều hoạt động với nội dung cuốn sách này.</p>
+<section class="note" aria-role="note">
+<h3 id="quy-ước-về-dòng-lệnh"><a class="header" href="#quy-ước-về-dòng-lệnh">Quy ước về dòng lệnh</a></h3>
+<p>Trong chương này cũng như trong các phần còn lại của sách, chúng tôi
+sẽ trình bày một số câu lệnh giống như khi chạy trong cửa sổ terminal.
+Các dòng bạn cần nhập vào terminal sẽ bắt đầu với <code>$</code>. Tuy nhiên bạn
+không cần nhập ký tự <code>$</code>; nó chỉ để biểu thị vị trí bắt đầu của các câu lệnh.
+Các dòng không bắt đầu với <code>$</code> thường là kết quả hiển thị của câu lệnh trước đó.
+Thêm nữa, các ví dụ với PowerShell sẽ dùng <code>&gt;</code> thay vì <code>$</code>.</p>
+</section>
+<h3 id="cài-đặt-rustup-trên-linux-hoặc-macos"><a class="header" href="#cài-đặt-rustup-trên-linux-hoặc-macos">Cài đặt <code>rustup</code> trên Linux hoặc macOS</a></h3>
+<p>Nếu bạn đang dùng Linux hay macOS, hãy mở một cửa sổ terminal và gõ vào lệnh sau:</p>
+<pre><code class="language-console">$ curl --proto '=https' --tlsv1.3 https://sh.rustup.rs -sSf | sh
+</code></pre>
+<p>Câu lệnh này sẽ tải về một đoạn script và bắt đầu quá trình cài đặt công cụ
+<code>rustup</code>, tiếp sau đó sẽ cài đặt phiên bản ổn định mới nhất của Rust. Bạn có thể
+được nhắc nhập vào mật khẩu. Nếu quá trình cài đặt thành công, dòng sau đây sẽ xuất hiện:</p>
+<pre><code class="language-text">Rust is installed now. Great!
+</code></pre>
+<p>Bạn cũng sẽ cần một trình liên kết (linker), thứ mà Rust sẽ dùng để kết nối các
+kết quả dịch riêng biệt thành một file duy nhất. Và thường nó sẽ được cài đặt sẵn.
+Tuy nhiên nếu bạn gặp phải các lỗi liên kết, bạn cần cài một trình biên dịch C, và
+nó thường sẽ bao gồm cả một trình liên kết. Một trình dịch C cũng cũng cần thiết vì
+các gói Rust dựa trên mã C và do đó sẽ cần một trình dịch C.</p>
+<p>Trên MacOS, bạn có thể cài đặt một trình dịch C bằng cách chạy:</p>
+<pre><code class="language-console">$ xcode-select --install
+</code></pre>
+<p>Với  người dùng Linux nói chung nên cài GCC hoặc Clang, tùy thuộc vào tài liệu của
+bộ phân phối Linux mà họ sử dụng. Ví dụ, nếu bạn dùng Ubuntu, bạn có thể cài đặt gói
+<code>build-essential</code>.</p>
+<h3 id="cài-đặt-rustup-trên-windows"><a class="header" href="#cài-đặt-rustup-trên-windows">Cài đặt <code>rustup</code> trên Windows</a></h3>
+<p>Trên Windows, truy cập vào <a href="https://www.rust-lang.org/tools/install">https://www.rust-lang.org/tools/install</a> và
+theo các hướng dẫn để cài đặt Rust. Trong lúc cài đặt bạn sẽ nhận được một thông
+báo nói về việc bạn cần thêm các công cụ build cho Visual Studio 2013 hoặc mới
+hơn.
+Cách dễ nhất để lấy về các công cụ này là cài đặt <a href="https://visualstudio.microsoft.com/visual-cpp-build-tools/">Visual Studio
+2022</a>.
+Khi được hỏi phần nào cần được cài đặt, nhớ hãy chọn:</p>
+<ul>
+<li>“Desktop Development with C++”.</li>
+<li>Windows 10 or 11 SDK.</li>
+<li>English language pack component, cùng bất kỳ ngôn ngữ nào bạn muốn chọn.</li>
+</ul>
+<p>Các câu lệnh trong phần còn lại của cuốn sách này sẽ làm việc với cả hai <em>cmd.exe</em>
+và PowerShell. Nếu có gì khác nhau, chúng tôi sẽ chỉ ra bạn cần sử dụng cái nào.</p>
+<p><a id="troubleshooting"></a></p>
+<h3 id="xử-lý-trục-trặc"><a class="header" href="#xử-lý-trục-trặc">Xử lý trục trặc</a></h3>
+<p>Để kiểm tra xem bạn đã cài đặt Rust đúng chưa, mở một cửa sổ lệnh mới và gõ vào
+dòng sau:</p>
+<pre><code class="language-console">$ rustc --version
+</code></pre>
+<p>Bạn sẽ thấy số phiên bản, chuỗi hash và ngày commit của phiên bản ổn định mới nhất
+theo định dạng sau:</p>
+<pre><code class="language-text">rustc x.y.z (abcabcabc yyyy-mm-dd)
+</code></pre>
+<p>Nếu bạn thấy thông tin này, bạn đã cài đặt Rust thành công! Nếu không thấy và bạn
+đang sử dụng Windows, hãy kiểm tra xe Rust có trong biến môi trường PATH không, theo
+một trong những cách sau:</p>
+<p>Trong cửa sổ Windows CMD, sử dụng:</p>
+<pre><code class="language-console">&gt; echo %PATH%
+</code></pre>
+<p>Trong cửa sổ PowerShell, sử dụng:</p>
+<pre><code class="language-powershell">&gt; echo $env:Path
+</code></pre>
+<p>Trong cửa sổ Linux và macOS, sử dụng:</p>
+<pre><code class="language-console">$ echo $PATH
+</code></pre>
+<p>Nếu tất cả đều đúng nhưng Rust vẫn không chạy, bạn có thể tìm sự giúp đỡ từ một
+số nơi. Cách dễ nhất là kênh #beginners trên [the official Rust Discord][discord].
+Ở đó bạn có thể chat với những Rustacean (nickname chúng tôi tự đặt cho bản thân) khác
+trên <a href="https://www.rust-lang.org/community">the community page</a>.</p>
+<h3 id="cập-nhật-và-gỡ-bỏ"><a class="header" href="#cập-nhật-và-gỡ-bỏ">Cập nhật và gỡ bỏ</a></h3>
+<p>Sau khi đã cài đặt xong Rust thông qua <code>rustup</code>, việc cập nhật phiên bản mới nhất
+khá đơn giản. Từ dòng lệnh, chạy câu lệnh cập nhật sau:</p>
+<pre><code class="language-console">$ rustup update
+</code></pre>
+<p>Để gỡ bỏ Rust và <code>rustup</code>, chạy câu lệnh sau:</p>
+<pre><code class="language-console">$ rustup self uninstall
+</code></pre>
+<h3 id="tài-liệu-trên-máy"><a class="header" href="#tài-liệu-trên-máy">Tài liệu trên máy</a></h3>
+<p>Bản cài đặt của Rust cũng bao gồm một bản sao của tài liệu này, dó đó bạn có thể
+đọc offline. Chạy <code>rustup doc</code> để mở tài liệu này bằng trình duyệt của bạn.</p>
+<p>Bất kỳ lúc nào nếu bạn không biết một kiểu dữ liệu hay một hàm trong thư viện chuẩn
+phải được dùng thế nào, hay tra tài liệu application programming interface (API)!</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch01-00-getting-started.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch01-02-hello-world.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch01-00-getting-started.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch01-02-hello-world.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

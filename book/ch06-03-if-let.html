@@ -1,0 +1,362 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Điều khiển luồng thực thi một các chính xác với if let - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="concise-control-flow-with-if-let"><a class="header" href="#concise-control-flow-with-if-let">Concise Control Flow with <code>if let</code></a></h2>
+<p>Cú pháp <code>if let</code> cho phép bạn kết hợp <code>if</code> và <code>let</code> theo một cách ngắn gọn hơn
+để xử lý các giá trị khớp với một pattern nhất định trong khi bỏ qua các
+pattern còn lại. Hãy xem xét chương trình trong Listing 6-6 với giá trị được
+khớp là kiểu <code>Option &lt;u8&gt;</code> trong biến <code>config_max</code> nhưng chúng ta chỉ muốn thực
+thi code nếu giá trị là biến thể <code>Some</code>.</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">fn main() {
+</span>    let config_max = Some(3u8);
+    match config_max {
+        Some(max) =&gt; println!("The maximum is configured to be {max}"),
+        _ =&gt; (),
+    }
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 6-6: Một <code>match</code> chỉ quan tâm đến việc thực thi
+code khi giá trị là <code>Some</code></span></p>
+<p>Nếu giá trị là <code>Some</code>, chúng ta sẽ in ra giá trị trong biến thể <code>Some</code> bằng
+cách gán giá trị cho biến <code>max</code> trong pattern. Chúng ta không muốn làm gì với
+giá trị <code>None</code>. Để thoả mãn biểu thức <code>match</code>, chúng ta phải thêm <code>_ =&gt; ()</code> sau
+dù chỉ xử lý một biến thể, điều này thật phiền phức khi thêm vào code.</p>
+<p>Thay vào đó, chúng ta có thể viết code ngắn gọn hơn bằng cách sử dụng <code>if let</code>.
+Code dưới đây sẽ hoạt động tương tự như <code>match</code> trong Listing 6-6:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">fn main() {
+</span>    let config_max = Some(3u8);
+    if let Some(max) = config_max {
+        println!("The maximum is configured to be {max}");
+    }
+<span class="boring">}</span></code></pre></pre>
+<p>Cú pháp <code>if let</code> sẽ nhận một pattern và một biểu thức được phân tách bằng dấu
+bằng. Nó hoạt động tương như <code>match</code>, trong đó biểu thức được gửi vào <code>match</code>
+và pattern là nhánh đầu tiên của nó. Trong trường hợp này, pattern là <code>Some(max)</code>, và <code>max</code> được gán cho giá trị bên trong <code>Some</code>. Chúng ta sau đó có thể sử
+dụng <code>max</code> trong thân của code block, <code>if let</code> cũng hoạt đọng theo cách tương
+tự như chúng ta sử dụng <code>max</code> trong nhánh của <code>match</code>. Code trong block <code>if let</code> sẽ không được chạy nếu giá trị không khớp với pattern.</p>
+<p>Sử dụng <code>if let</code> sẽ ít phải gõ, ít phải thụt lề, và ít code dài dòng kiểu mẫu
+hơn. Tuy nhiên, bạn sẽ không đảm bảo tính kiểm tra đầy đủ như <code>match</code>. Lựa chọn
+giữa <code>match</code> và <code>if let</code> phụ thuộc vào bạn đang làm gì trong trường hợp cụ thể
+của bạn và liệu có đáng để giảm thiểu code bằng cách bỏ qua việc kiểm tra đầy
+đủ hay không.</p>
+<p>Nói cách khác, bạn có thể coi <code>if let</code> như là cú pháp bổ sung cho một <code>match</code>
+có thể chạy code khi giá trị khớp với một pattern và sau đó bỏ qua tất cả các
+giá trị khác.</p>
+<p>Chúng ta có thể thêm một <code>else</code> với một <code>if let</code>. Block code của <code>else</code> sẽ
+giống như block code của <code>_</code> trong <code>match</code>. Nhớ lại định nghĩa enum <code>Coin</code>
+trong Listing 6-4, trong đó biến thể <code>Quarter</code> cũng có một giá trị <code>UsState</code>.
+Nếu chúng ta muốn đếm tất cả các xu không phải là 25 cent mà chúng ta thấy
+trong khi cũng gọi tên tiểu bang của các xu 25 cent, chúng ta có thể làm được
+điều đó với một biểu thức <code>match</code> như sau:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#[derive(Debug)]
+</span><span class="boring">enum UsState {
+</span><span class="boring">    Alabama,
+</span><span class="boring">    Alaska,
+</span><span class="boring">    // --snip--
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">enum Coin {
+</span><span class="boring">    Penny,
+</span><span class="boring">    Nickel,
+</span><span class="boring">    Dime,
+</span><span class="boring">    Quarter(UsState),
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    let coin = Coin::Penny;
+</span>    let mut count = 0;
+    match coin {
+        Coin::Quarter(state) =&gt; println!("State quarter from {state:?}!"),
+        _ =&gt; count += 1,
+    }
+<span class="boring">}</span></code></pre></pre>
+<p>Hoặc chúng ta có thể sử dụng một biểu thức <code>if let</code> và <code>else</code> như sau:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#[derive(Debug)]
+</span><span class="boring">enum UsState {
+</span><span class="boring">    Alabama,
+</span><span class="boring">    Alaska,
+</span><span class="boring">    // --snip--
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">enum Coin {
+</span><span class="boring">    Penny,
+</span><span class="boring">    Nickel,
+</span><span class="boring">    Dime,
+</span><span class="boring">    Quarter(UsState),
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    let coin = Coin::Penny;
+</span>    let mut count = 0;
+    if let Coin::Quarter(state) = coin {
+        println!("State quarter from {state:?}!");
+    } else {
+        count += 1;
+    }
+<span class="boring">}</span></code></pre></pre>
+<p>Nếu bạn có một trường hợp trong đó chương trình của bạn có logic quá dài dòng
+để biểu diễn bằng một <code>match</code>, hãy nhớ đến <code>if let</code>.</p>
+<h2 id="summary"><a class="header" href="#summary">Summary</a></h2>
+<p>Chúng ta đã đi qua cách sử dụng enum để tạo ra một kiểu dữ liệu tùy chỉnh thể
+hiện một giá trị có thể có bên trong một tập các giá trị được liệt kê. Chúng ta
+đã thấy cách thư viện chuẩn <code>Option&lt;T&gt;</code> giúp bạn sử dụng hệ thống kiểu (type
+system) để ngăn chặn lỗi. Khi các giá trị enum có dữ liệu bên trong chúng, bạn
+có thể sử dụng <code>match</code> hoặc <code>if let</code> để trích xuất và sử dụng các giá trị đó,
+tùy thuộc vào số lượng trường hợp bạn cần xử lý.</p>
+<p>Chương trình Rust của bạn có thể biểu diễn các khái niệm trong lĩnh vực của bạn
+bằng cách sử dụng struct và enum. Tạo kiểu dữ liệu tùy chỉnh để sử dụng trong
+API và đảm bảo an toàn kiểu dữ liệu: trình biên dịch sẽ đảm bảo rằng các hàm
+của bạn chỉ nhận được các giá trị của kiểu mà mỗi hàm mong đợi.</p>
+<p>Để cung cấp một API được tổ chức tốt cho người dùng, dễ sử dụng và chỉ tiết lộ
+chính xác những gì người dùng của bạn sẽ cần, chúng ta sẽ bây giờ chuyển sang
+Rust module.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch06-02-match.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch07-00-managing-growing-projects-with-packages-crates-and-modules.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch06-02-match.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch07-00-managing-growing-projects-with-packages-crates-and-modules.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

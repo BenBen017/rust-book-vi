@@ -1,0 +1,408 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Advanced Traits - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="advanced-traits"><a class="header" href="#advanced-traits">Advanced Traits</a></h2>
+<p>Chúng ta đã lần đầu tiên tìm hiểu về traits trong phần <a href="ch10-02-traits.html#traits-defining-shared-behavior">“Traits: Defining Shared Behavior”</a><!-- ignore --> ở Chương 10, nhưng chưa thảo luận về các chi tiết nâng cao hơn. Giờ khi bạn đã biết thêm về Rust, chúng ta có thể đi vào các chi tiết kỹ thuật.</p>
+<h3 id="chỉ-định-loại-placeholder-trong-định-nghĩa-trait-với-associated-types"><a class="header" href="#chỉ-định-loại-placeholder-trong-định-nghĩa-trait-với-associated-types">Chỉ định loại placeholder trong định nghĩa Trait với Associated Types</a></h3>
+<p><em>Associated types</em> kết nối một placeholder type với một trait sao cho các định nghĩa phương thức của trait có thể sử dụng các loại placeholder này trong chữ ký của chúng. Người triển khai một trait sẽ chỉ định loại cụ thể sẽ được sử dụng thay cho placeholder type cho triển khai đó. Nhờ đó, chúng ta có thể định nghĩa một trait sử dụng một số loại mà không cần biết chính xác các loại đó là gì cho đến khi trait được triển khai.</p>
+<p>Chúng tôi đã mô tả hầu hết các tính năng nâng cao trong chương này là hiếm khi cần đến. Associated types nằm ở mức trung gian: chúng được sử dụng ít hơn các tính năng được giải thích trong phần còn lại của cuốn sách nhưng phổ biến hơn nhiều so với các tính năng khác được thảo luận trong chương này.</p>
+<p>Một ví dụ về trait với associated type là trait <code>Iterator</code> mà thư viện chuẩn cung cấp. Associated type được đặt tên là <code>Item</code> và đại diện cho kiểu giá trị mà kiểu triển khai trait <code>Iterator</code> đang lặp qua. Định nghĩa của trait <code>Iterator</code> được trình bày như trong Listing 19-12.</p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-12/src/lib.rs}}</code></pre>
+<p><span class="caption">Listing 19-12: Định nghĩa trait <code>Iterator</code> với associated type <code>Item</code></span></p>
+<p>Kiểu <code>Item</code> là một placeholder, và định nghĩa phương thức <code>next</code> cho thấy nó sẽ trả về các giá trị kiểu <code>Option&lt;Self::Item&gt;</code>. Người triển khai trait <code>Iterator</code> sẽ chỉ định kiểu cụ thể cho <code>Item</code>, và phương thức <code>next</code> sẽ trả về một <code>Option</code> chứa giá trị của kiểu cụ thể đó.</p>
+<p>Associated types có vẻ giống với generics, vì generics cho phép chúng ta định nghĩa một hàm mà không cần chỉ định các kiểu mà nó có thể xử lý. Để xem sự khác biệt giữa hai khái niệm này, chúng ta sẽ xem một triển khai trait <code>Iterator</code> trên một kiểu có tên là <code>Counter</code> mà chỉ định kiểu <code>Item</code> là <code>u32</code>:</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust ignore">{{#rustdoc_include ../listings/ch19-advanced-features/no-listing-22-iterator-on-counter/src/lib.rs:ch19}}</code></pre>
+<p>Cú pháp này có vẻ tương tự như cú pháp của generics. Vậy tại sao không định nghĩa trait <code>Iterator</code> với generics, như được trình bày trong Listing 19-13?</p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-13/src/lib.rs}}</code></pre>
+<p><span class="caption">Listing 19-13: Một định nghĩa giả tưởng của trait <code>Iterator</code> sử dụng generics</span></p>
+<p>Sự khác biệt là khi sử dụng generics, như trong Listing 19-13, chúng ta phải chú thích các kiểu trong mỗi triển khai; vì chúng ta cũng có thể triển khai <code>Iterator&lt;String&gt; for Counter</code> hoặc bất kỳ kiểu nào khác, chúng ta có thể có nhiều triển khai của <code>Iterator</code> cho <code>Counter</code>. Nói cách khác, khi một trait có tham số generic, nó có thể được triển khai cho một kiểu nhiều lần, thay đổi các kiểu cụ thể của các tham số generic mỗi lần. Khi chúng ta sử dụng phương thức <code>next</code> trên <code>Counter</code>, chúng ta phải cung cấp chú thích kiểu để chỉ ra triển khai <code>Iterator</code> nào muốn sử dụng.</p>
+<p>Với associated types, chúng ta không cần chú thích kiểu vì chúng ta không thể triển khai một trait trên cùng một kiểu nhiều lần. Trong Listing 19-12 với định nghĩa sử dụng associated types, chúng ta chỉ có thể chọn kiểu của <code>Item</code> một lần, vì chỉ có một <code>impl Iterator for Counter</code>. Chúng ta không cần phải chỉ định rằng muốn một iterator của các giá trị <code>u32</code> ở mọi nơi mà gọi <code>next</code> trên <code>Counter</code>.</p>
+<p>Associated types cũng trở thành một phần của hợp đồng của trait: người triển khai trait phải cung cấp một kiểu để thay thế cho placeholder của associated type. Associated types thường có một tên mô tả cách sử dụng kiểu đó, và việc tài liệu hóa associated type trong tài liệu API là một thực hành tốt.</p>
+<h3 id="tham-số-kiểu-generic-mặc-định-và-nạp-chồng-toán-tử-operator-overloading"><a class="header" href="#tham-số-kiểu-generic-mặc-định-và-nạp-chồng-toán-tử-operator-overloading">Tham số kiểu Generic mặc định và Nạp chồng toán tử (Operator Overloading)</a></h3>
+<p>Khi sử dụng tham số kiểu generic, chúng ta có thể chỉ định một kiểu cụ thể mặc định cho generic type. Điều này loại bỏ nhu cầu người triển khai trait phải chỉ định kiểu cụ thể nếu kiểu mặc định phù hợp. Bạn chỉ định kiểu mặc định khi khai báo một kiểu generic với cú pháp <code>&lt;PlaceholderType=ConcreteType&gt;</code>.</p>
+<p>Một ví dụ tuyệt vời về tình huống mà kỹ thuật này hữu ích là với <em>operator overloading</em>, trong đó bạn tùy chỉnh hành vi của một toán tử (chẳng hạn <code>+</code>) trong các tình huống cụ thể.</p>
+<p>Rust không cho phép bạn tạo toán tử riêng hoặc nạp chồng các toán tử tùy ý. Nhưng bạn có thể nạp chồng các phép toán và trait tương ứng được liệt kê trong <code>std::ops</code> bằng cách triển khai các trait liên quan đến toán tử đó. Ví dụ, trong Listing 19-14 chúng ta nạp chồng toán tử <code>+</code> để cộng hai thể hiện <code>Point</code> với nhau. Chúng ta làm điều này bằng cách triển khai trait <code>Add</code> trên struct <code>Point</code>:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-14/src/main.rs}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 19-14: Triển khai trait <code>Add</code> để nạp chồng toán tử <code>+</code> cho các thể hiện <code>Point</code></span></p>
+<p>Phương thức <code>add</code> cộng các giá trị <code>x</code> của hai thể hiện <code>Point</code> và các giá trị <code>y</code> của hai thể hiện <code>Point</code> để tạo ra một <code>Point</code> mới. Trait <code>Add</code> có một associated type tên là <code>Output</code> xác định kiểu được trả về từ phương thức <code>add</code>.</p>
+<p>Tham số kiểu generic mặc định trong mã này nằm trong trait <code>Add</code>. Đây là định nghĩa của nó:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>trait Add&lt;Rhs=Self&gt; {
+    type Output;
+
+    fn add(self, rhs: Rhs) -&gt; Self::Output;
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Mã này có vẻ khá quen thuộc: một trait với một phương thức và một associated type. Phần mới là <code>Rhs=Self</code>: cú pháp này được gọi là <em>default type parameters</em>. Tham số kiểu generic <code>Rhs</code> (viết tắt của “right hand side”) xác định kiểu của tham số <code>rhs</code> trong phương thức <code>add</code>. Nếu chúng ta không chỉ định một kiểu cụ thể cho <code>Rhs</code> khi triển khai trait <code>Add</code>, kiểu của <code>Rhs</code> sẽ mặc định là <code>Self</code>, tức là kiểu mà chúng ta đang triển khai <code>Add</code>.</p>
+<p>Khi chúng ta triển khai <code>Add</code> cho <code>Point</code>, chúng ta sử dụng mặc định cho <code>Rhs</code> vì muốn cộng hai thể hiện <code>Point</code>. Hãy xem một ví dụ về việc triển khai trait <code>Add</code> mà chúng ta muốn tùy chỉnh kiểu <code>Rhs</code> thay vì sử dụng mặc định.</p>
+<p>Chúng ta có hai struct, <code>Millimeters</code> và <code>Meters</code>, chứa các giá trị ở các đơn vị khác nhau. Việc bao bọc mỏng một kiểu hiện có trong một struct khác được gọi là <em>newtype pattern</em>, mà chúng ta mô tả chi tiết hơn trong phần <a href="ch19-03-advanced-traits.html#using-the-newtype-pattern-to-implement-external-traits-on-external-types">“Using the Newtype Pattern to Implement External Traits on External Types”</a><!-- ignore -->. Chúng ta muốn cộng các giá trị millimeters với các giá trị meters và đảm bảo việc triển khai <code>Add</code> thực hiện chuyển đổi đúng. Chúng ta có thể triển khai <code>Add</code> cho <code>Millimeters</code> với <code>Meters</code> là <code>Rhs</code>, như được trình bày trong Listing 19-15.</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-15/src/lib.rs}}</code></pre>
+<p><span class="caption">Listing 19-15: Triển khai trait <code>Add</code> trên <code>Millimeters</code> để cộng <code>Millimeters</code> với <code>Meters</code></span></p>
+<p>Để cộng <code>Millimeters</code> và <code>Meters</code>, chúng ta chỉ định <code>impl Add&lt;Meters&gt;</code> để đặt giá trị của tham số kiểu <code>Rhs</code> thay vì sử dụng mặc định là <code>Self</code>.</p>
+<p>Bạn sẽ sử dụng default type parameters theo hai cách chính:</p>
+<ul>
+<li>Mở rộng một kiểu mà không phá vỡ mã hiện có</li>
+<li>Cho phép tùy chỉnh trong các trường hợp cụ thể mà hầu hết người dùng không cần đến</li>
+</ul>
+<p>Trait <code>Add</code> trong thư viện chuẩn là một ví dụ cho mục đích thứ hai: thường thì bạn sẽ cộng hai kiểu giống nhau, nhưng trait <code>Add</code> cung cấp khả năng tùy chỉnh vượt ra ngoài điều đó. Việc sử dụng default type parameter trong định nghĩa trait <code>Add</code> có nghĩa là bạn không cần chỉ định tham số bổ sung hầu hết thời gian. Nói cách khác, một chút boilerplate khi triển khai không cần thiết, giúp trait dễ sử dụng hơn.</p>
+<p>Mục đích thứ nhất tương tự mục đích thứ hai nhưng ngược lại: nếu bạn muốn thêm một tham số kiểu vào một trait hiện có, bạn có thể cung cấp giá trị mặc định để mở rộng chức năng của trait mà không phá vỡ mã triển khai hiện có.</p>
+<h3 id="cú-pháp-đầy-đủ-để-phân-biệt-gọi-phương-thức-cùng-tên"><a class="header" href="#cú-pháp-đầy-đủ-để-phân-biệt-gọi-phương-thức-cùng-tên">Cú pháp đầy đủ để phân biệt: Gọi phương thức cùng tên</a></h3>
+<p>Rust không ngăn cản một trait có phương thức cùng tên với phương thức của trait khác, và cũng không ngăn cản bạn triển khai cả hai trait trên cùng một kiểu. Cũng có thể triển khai phương thức trực tiếp trên kiểu với cùng tên như các phương thức từ trait.</p>
+<p>Khi gọi các phương thức cùng tên, bạn cần thông báo cho Rust biết bạn muốn sử dụng phương thức nào. Xem xét mã trong Listing 19-16, nơi chúng ta đã định nghĩa hai trait, <code>Pilot</code> và <code>Wizard</code>, đều có phương thức gọi là <code>fly</code>. Sau đó, chúng ta triển khai cả hai trait trên kiểu <code>Human</code>, mà kiểu này đã có một phương thức tên là <code>fly</code> được triển khai trực tiếp. Mỗi phương thức <code>fly</code> thực hiện một hành động khác nhau.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-16/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 19-16: Hai trait được định nghĩa có phương thức <code>fly</code> và được triển khai trên kiểu <code>Human</code>, đồng thời một phương thức <code>fly</code> được triển khai trực tiếp trên <code>Human</code></span></p>
+<p>Khi chúng ta gọi <code>fly</code> trên một thể hiện của <code>Human</code>, trình biên dịch mặc định sẽ gọi phương thức được triển khai trực tiếp trên kiểu, như được trình bày trong Listing 19-17.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-17/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 19-17: Gọi <code>fly</code> trên một thể hiện của <code>Human</code></span></p>
+<p>Chạy mã này sẽ in ra <code>*waving arms furiously*</code>, cho thấy Rust đã gọi phương thức <code>fly</code> được triển khai trực tiếp trên <code>Human</code>.</p>
+<p>Để gọi các phương thức <code>fly</code> từ trait <code>Pilot</code> hoặc trait <code>Wizard</code>, chúng ta cần sử dụng cú pháp rõ ràng hơn để chỉ định phương thức <code>fly</code> mà chúng ta muốn. Listing 19-18 minh họa cú pháp này.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-18/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 19-18: Chỉ định phương thức <code>fly</code> của trait nào mà chúng ta muốn gọi</span></p>
+<p>Việc chỉ định tên trait trước tên phương thức giúp Rust hiểu rõ chúng ta muốn gọi triển khai <code>fly</code> nào. Chúng ta cũng có thể viết <code>Human::fly(&amp;person)</code>, điều này tương đương với <code>person.fly()</code> mà chúng ta đã sử dụng trong Listing 19-18, nhưng cú pháp này dài hơn một chút nếu không cần phân biệt.</p>
+<p>Chạy mã này sẽ in ra:</p>
+<pre><code class="language-console">{{#include ../listings/ch19-advanced-features/listing-19-18/output.txt}}
+</code></pre>
+<p>Vì phương thức <code>fly</code> nhận một tham số <code>self</code>, nếu chúng ta có hai <em>kiểu</em> đều triển khai cùng một <em>trait</em>, Rust có thể xác định triển khai của trait nào sẽ được sử dụng dựa trên kiểu của <code>self</code>.</p>
+<p>Tuy nhiên, các hàm liên quan (associated functions) mà không phải là phương thức thì không có tham số <code>self</code>. Khi có nhiều kiểu hoặc trait định nghĩa các hàm không phải phương thức với cùng tên hàm, Rust không luôn biết bạn muốn dùng kiểu nào trừ khi bạn sử dụng <em>fully qualified syntax</em>. Ví dụ, trong Listing 19-19, chúng ta tạo một trait cho một trại động vật muốn đặt tên tất cả chó con là <em>Spot</em>. Chúng ta tạo trait <code>Animal</code> với một hàm liên quan không phải phương thức <code>baby_name</code>. Trait <code>Animal</code> được triển khai cho struct <code>Dog</code>, trên đó chúng ta cũng cung cấp một hàm liên quan không phải phương thức <code>baby_name</code> trực tiếp.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-19/src/main.rs}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 19-19: Một trait với một associated function và một kiểu có associated function cùng tên, đồng thời triển khai trait đó</span></p>
+<p>Chúng ta triển khai mã để đặt tên tất cả chó con là Spot trong hàm liên quan <code>baby_name</code> được định nghĩa trực tiếp trên <code>Dog</code>. Kiểu <code>Dog</code> cũng triển khai trait <code>Animal</code>, mô tả các đặc điểm mà tất cả động vật có. Chó con được gọi là puppies, và điều này được thể hiện trong việc triển khai trait <code>Animal</code> trên <code>Dog</code> trong hàm <code>baby_name</code> liên quan đến trait <code>Animal</code>.</p>
+<p>Trong <code>main</code>, chúng ta gọi hàm <code>Dog::baby_name</code>, phương thức này gọi hàm liên quan được định nghĩa trực tiếp trên <code>Dog</code>. Mã này sẽ in ra:</p>
+<pre><code class="language-console">{{#include ../listings/ch19-advanced-features/listing-19-19/output.txt}}
+</code></pre>
+<p>Kết quả này không phải là điều chúng ta muốn. Chúng ta muốn gọi hàm <code>baby_name</code> là một phần của trait <code>Animal</code> mà chúng ta đã triển khai trên <code>Dog</code> để mã in ra <code>A baby dog is called a puppy</code>. Kỹ thuật chỉ định tên trait mà chúng ta đã sử dụng trong Listing 19-18 không giúp được ở đây; nếu chúng ta thay đổi <code>main</code> thành mã trong Listing 19-20, sẽ xảy ra lỗi biên dịch.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile">{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-20/src/main.rs:here}}</code></pre>
+<p><span class="caption">Listing 19-20: Thử gọi hàm <code>baby_name</code> từ trait <code>Animal</code>, nhưng Rust không biết triển khai nào sẽ sử dụng</span></p>
+<p>Vì <code>Animal::baby_name</code> không có tham số <code>self</code>, và có thể có các kiểu khác triển khai trait <code>Animal</code>, Rust không thể xác định triển khai nào của <code>Animal::baby_name</code> mà chúng ta muốn sử dụng. Chúng ta sẽ nhận được lỗi biên dịch sau:</p>
+<pre><code class="language-console">{{#include ../listings/ch19-advanced-features/listing-19-20/output.txt}}
+</code></pre>
+<p>Để phân biệt và cho Rust biết rằng chúng ta muốn sử dụng triển khai của <code>Animal</code> cho <code>Dog</code> thay vì triển khai của <code>Animal</code> cho một kiểu khác, chúng ta cần sử dụng cú pháp đầy đủ (fully qualified syntax). Listing 19-21 minh họa cách sử dụng cú pháp đầy đủ.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-21/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 19-21: Sử dụng cú pháp đầy đủ để chỉ định rằng chúng ta muốn gọi hàm <code>baby_name</code> từ trait <code>Animal</code> được triển khai trên <code>Dog</code></span></p>
+<p>Chúng ta cung cấp cho Rust một chú thích kiểu trong dấu ngoặc nhọn, cho biết chúng ta muốn gọi phương thức <code>baby_name</code> từ trait <code>Animal</code> như được triển khai trên <code>Dog</code> bằng cách nói rằng chúng ta muốn coi kiểu <code>Dog</code> như một <code>Animal</code> cho lần gọi hàm này. Mã này bây giờ sẽ in ra kết quả như mong muốn:</p>
+<pre><code class="language-console">{{#include ../listings/ch19-advanced-features/listing-19-21/output.txt}}
+</code></pre>
+<p>Nói chung, cú pháp đầy đủ (fully qualified syntax) được định nghĩa như sau:</p>
+<pre><code class="language-rust ignore">&lt;Type as Trait&gt;::function(receiver_if_method, next_arg, ...);</code></pre>
+<p>Đối với các hàm liên quan (associated functions) không phải là phương thức, sẽ không có <code>receiver</code>: chỉ có danh sách các tham số khác. Bạn có thể sử dụng cú pháp đầy đủ ở bất cứ nơi nào gọi hàm hoặc phương thức. Tuy nhiên, bạn được phép bỏ bất kỳ phần nào của cú pháp này mà Rust có thể suy ra từ các thông tin khác trong chương trình. Bạn chỉ cần sử dụng cú pháp dài dòng hơn này trong những trường hợp có nhiều triển khai sử dụng cùng một tên và Rust cần giúp xác định triển khai nào bạn muốn gọi.</p>
+<h3 id="sử-dụng-supertraits-để-yêu-cầu-chức-năng-của-một-trait-trong-một-trait-khác"><a class="header" href="#sử-dụng-supertraits-để-yêu-cầu-chức-năng-của-một-trait-trong-một-trait-khác">Sử dụng Supertraits để yêu cầu chức năng của một trait trong một trait khác</a></h3>
+<p>Đôi khi, bạn có thể viết một định nghĩa trait phụ thuộc vào một trait khác: để một kiểu triển khai trait đầu tiên, bạn muốn yêu cầu kiểu đó cũng phải triển khai trait thứ hai. Bạn làm điều này để định nghĩa trait của bạn có thể sử dụng các thành phần liên quan (associated items) của trait thứ hai. Trait mà định nghĩa trait của bạn dựa vào được gọi là <em>supertrait</em> của trait đó.</p>
+<p>Ví dụ, giả sử chúng ta muốn tạo một trait <code>OutlinePrint</code> với một phương thức <code>outline_print</code> sẽ in một giá trị sao cho được khung bởi các dấu sao. Tức là, với struct <code>Point</code> triển khai trait <code>Display</code> của thư viện chuẩn để hiển thị <code>(x, y)</code>, khi chúng ta gọi <code>outline_print</code> trên một thể hiện <code>Point</code> có <code>x = 1</code> và <code>y = 3</code>, nó sẽ in ra:</p>
+<pre><code class="language-text">**********
+*        *
+* (1, 3) *
+*        *
+**********
+</code></pre>
+<p>Trong việc triển khai phương thức <code>outline_print</code>, chúng ta muốn sử dụng chức năng của trait <code>Display</code>. Do đó, chúng ta cần chỉ định rằng trait <code>OutlinePrint</code> sẽ chỉ hoạt động cho các kiểu cũng triển khai <code>Display</code> và cung cấp các chức năng mà <code>OutlinePrint</code> cần. Chúng ta có thể làm điều đó trong định nghĩa trait bằng cách chỉ định <code>OutlinePrint: Display</code>. Kỹ thuật này tương tự như việc thêm một trait bound vào trait. Listing 19-22 trình bày một triển khai của trait <code>OutlinePrint</code>.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-22/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 19-22: Triển khai trait <code>OutlinePrint</code> yêu cầu chức năng từ <code>Display</code></span></p>
+<p>Vì chúng ta đã chỉ định rằng <code>OutlinePrint</code> yêu cầu trait <code>Display</code>, chúng ta có thể sử dụng hàm <code>to_string</code> được triển khai tự động cho bất kỳ kiểu nào triển khai <code>Display</code>. Nếu chúng ta thử sử dụng <code>to_string</code> mà không thêm dấu hai chấm và chỉ định trait <code>Display</code> sau tên trait, chúng ta sẽ nhận được lỗi nói rằng không tìm thấy phương thức nào tên là <code>to_string</code> cho kiểu <code>&amp;Self</code> trong phạm vi hiện tại.</p>
+<p>Hãy xem điều gì xảy ra khi chúng ta cố triển khai <code>OutlinePrint</code> trên một kiểu không triển khai <code>Display</code>, chẳng hạn như struct <code>Point</code>:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile">{{#rustdoc_include ../listings/ch19-advanced-features/no-listing-02-impl-outlineprint-for-point/src/main.rs:here}}</code></pre>
+<p>Chúng ta sẽ nhận được lỗi nói rằng trait <code>Display</code> là bắt buộc nhưng chưa được triển khai:</p>
+<pre><code class="language-console">{{#include ../listings/ch19-advanced-features/no-listing-02-impl-outlineprint-for-point/output.txt}}
+</code></pre>
+<p>Để khắc phục, chúng ta triển khai trait <code>Display</code> trên <code>Point</code> và thỏa mãn ràng buộc mà <code>OutlinePrint</code> yêu cầu, như sau:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/no-listing-03-impl-display-for-point/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<p>Sau đó, việc triển khai trait <code>OutlinePrint</code> trên <code>Point</code> sẽ biên dịch thành công, và chúng ta có thể gọi <code>outline_print</code> trên một thể hiện của <code>Point</code> để hiển thị nó trong một khung dấu sao.</p>
+<h3 id="sử-dụng-newtype-pattern-để-triển-khai-các-trait-bên-ngoài-trên-các-kiểu-bên-ngoài"><a class="header" href="#sử-dụng-newtype-pattern-để-triển-khai-các-trait-bên-ngoài-trên-các-kiểu-bên-ngoài">Sử dụng Newtype Pattern để triển khai các trait bên ngoài trên các kiểu bên ngoài</a></h3>
+<p>Trong Chương 10, trong phần <a href="ch10-02-traits.html#implementing-a-trait-on-a-type">“Implementing a Trait on a Type”</a><!-- ignore -->, chúng ta đã đề cập đến quy tắc orphan (orphan rule) cho rằng chúng ta chỉ được phép triển khai một trait trên một kiểu nếu trait hoặc kiểu đó là cục bộ trong crate của chúng ta. Có thể vượt qua giới hạn này bằng cách sử dụng <em>newtype pattern</em>, liên quan đến việc tạo một kiểu mới trong một tuple struct. (Chúng ta đã học về tuple structs trong phần <a href="ch05-01-defining-structs.html#using-tuple-structs-without-named-fields-to-create-different-types">“Using Tuple Structs without Named Fields to Create Different Types”</a><!-- ignore --> của Chương 5.) Tuple struct sẽ có một trường và là một wrapper mỏng quanh kiểu mà chúng ta muốn triển khai trait. Khi đó, kiểu wrapper là cục bộ trong crate của chúng ta, và chúng ta có thể triển khai trait trên wrapper. Thuật ngữ <em>newtype</em> xuất phát từ ngôn ngữ lập trình Haskell. Việc sử dụng pattern này không ảnh hưởng tới hiệu năng khi chạy, và kiểu wrapper sẽ bị loại bỏ tại thời điểm biên dịch.</p>
+<p>Ví dụ, giả sử chúng ta muốn triển khai <code>Display</code> trên <code>Vec&lt;T&gt;</code>, điều mà quy tắc orphan ngăn cản chúng ta làm trực tiếp vì trait <code>Display</code> và kiểu <code>Vec&lt;T&gt;</code> được định nghĩa bên ngoài crate của chúng ta. Chúng ta có thể tạo một struct <code>Wrapper</code> chứa một thể hiện của <code>Vec&lt;T&gt;</code>; sau đó triển khai <code>Display</code> trên <code>Wrapper</code> và sử dụng giá trị <code>Vec&lt;T&gt;</code>, như được minh họa trong Listing 19-23.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-23/src/main.rs}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 19-23: Tạo một kiểu <code>Wrapper</code> quanh <code>Vec&lt;String&gt;</code> để triển khai <code>Display</code></span></p>
+<p>Việc triển khai <code>Display</code> sử dụng <code>self.0</code> để truy cập vào <code>Vec&lt;T&gt;</code> bên trong, vì <code>Wrapper</code> là một tuple struct và <code>Vec&lt;T&gt;</code> là phần tử ở chỉ số 0 trong tuple. Sau đó, chúng ta có thể sử dụng các chức năng của kiểu <code>Display</code> trên <code>Wrapper</code>.</p>
+<p>Nhược điểm của kỹ thuật này là <code>Wrapper</code> là một kiểu mới, vì vậy nó không có các phương thức của giá trị mà nó đang chứa. Chúng ta sẽ phải triển khai tất cả các phương thức của <code>Vec&lt;T&gt;</code> trực tiếp trên <code>Wrapper</code> sao cho các phương thức ủy quyền (delegate) tới <code>self.0</code>, điều này cho phép chúng ta sử dụng <code>Wrapper</code> giống hệt như một <code>Vec&lt;T&gt;</code>. Nếu muốn kiểu mới có mọi phương thức mà kiểu bên trong có, việc triển khai trait <code>Deref</code> (được thảo luận trong Chương 15, phần <a href="ch15-02-deref.html#treating-smart-pointers-like-regular-references-with-the-deref-trait">“Treating Smart Pointers Like Regular References with the <code>Deref</code> Trait”</a><!-- ignore -->) trên <code>Wrapper</code> để trả về kiểu bên trong sẽ là một giải pháp. Nếu không muốn kiểu <code>Wrapper</code> có tất cả các phương thức của kiểu bên trong — ví dụ, để hạn chế hành vi của kiểu <code>Wrapper</code> — chúng ta chỉ cần triển khai thủ công những phương thức mà chúng ta muốn.</p>
+<p>Pattern newtype này cũng hữu ích ngay cả khi không có trait liên quan. Bây giờ hãy chuyển sang và xem một số cách nâng cao để tương tác với hệ thống kiểu của Rust.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch19-01-unsafe-rust.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch19-04-advanced-types.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch19-01-unsafe-rust.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch19-04-advanced-types.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

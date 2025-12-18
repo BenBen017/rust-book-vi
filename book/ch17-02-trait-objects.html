@@ -1,0 +1,447 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Using Trait Objects That Allow for Values of Different Types - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="using-trait-objects-that-allow-for-values-of-different-types"><a class="header" href="#using-trait-objects-that-allow-for-values-of-different-types">Using Trait Objects That Allow for Values of Different Types</a></h2>
+<p>Trong Chương 8, chúng ta đã đề cập rằng một hạn chế của vector là chúng chỉ có thể
+lưu trữ các phần tử của một kiểu duy nhất. Chúng ta đã tạo một cách обход
+(workaround) trong Listing 8-9 bằng cách định nghĩa một enum <code>SpreadsheetCell</code>
+với các biến thể để chứa số nguyên, số thực và văn bản. Điều này cho phép chúng ta
+lưu trữ các kiểu dữ liệu khác nhau trong mỗi ô và vẫn có một vector đại diện cho
+một hàng các ô. Đây là một giải pháp hoàn toàn phù hợp khi các phần tử có thể thay
+thế cho nhau của chúng ta thuộc về một tập kiểu cố định mà ta biết tại thời điểm
+biên dịch.</p>
+<p>Tuy nhiên, đôi khi chúng ta muốn người dùng thư viện có thể mở rộng tập các kiểu
+hợp lệ trong một tình huống cụ thể. Để minh họa cách đạt được điều này, chúng ta sẽ
+tạo một ví dụ về công cụ giao diện người dùng đồ họa (GUI) lặp qua một danh sách
+các mục và gọi một phương thức <code>draw</code> trên mỗi mục để vẽ nó lên màn hình — một kỹ
+thuật phổ biến trong các công cụ GUI. Chúng ta sẽ tạo một library crate có tên là
+<code>gui</code>, chứa cấu trúc của một thư viện GUI. Crate này có thể bao gồm một số kiểu để
+mọi người sử dụng, chẳng hạn như <code>Button</code> hoặc <code>TextField</code>. Ngoài ra, người dùng
+<code>gui</code> cũng sẽ muốn tạo các kiểu riêng của họ có thể được vẽ: ví dụ, một lập trình
+viên có thể thêm <code>Image</code> và một người khác có thể thêm <code>SelectBox</code>.</p>
+<p>Chúng ta sẽ không triển khai một thư viện GUI đầy đủ cho ví dụ này, mà chỉ cho thấy
+cách các mảnh ghép sẽ kết hợp với nhau như thế nào. Tại thời điểm viết thư viện,
+chúng ta không thể biết trước và định nghĩa tất cả các kiểu mà những lập trình
+viên khác có thể muốn tạo ra. Nhưng chúng ta biết rằng <code>gui</code> cần theo dõi nhiều giá
+trị thuộc các kiểu khác nhau, và nó cần gọi một phương thức <code>draw</code> trên mỗi giá trị
+có kiểu khác nhau đó. Nó không cần biết chính xác điều gì sẽ xảy ra khi gọi phương
+thức <code>draw</code>, chỉ cần biết rằng giá trị đó có sẵn phương thức này để chúng ta gọi.</p>
+<p>Để làm điều này trong một ngôn ngữ có inheritance, chúng ta có thể định nghĩa một
+class tên là <code>Component</code> có một phương thức tên là <code>draw</code>. Các class khác, chẳng
+hạn như <code>Button</code>, <code>Image</code> và <code>SelectBox</code>, sẽ kế thừa từ <code>Component</code> và do đó kế thừa
+phương thức <code>draw</code>. Mỗi class có thể ghi đè phương thức <code>draw</code> để định nghĩa hành vi
+riêng của mình, nhưng framework có thể đối xử với tất cả các kiểu đó như thể chúng
+là các instance của <code>Component</code> và gọi <code>draw</code> trên chúng. Nhưng vì Rust không có
+inheritance, chúng ta cần một cách khác để cấu trúc thư viện <code>gui</code> sao cho cho phép
+người dùng mở rộng nó bằng các kiểu mới.</p>
+<h3 id="defining-a-trait-for-common-behavior"><a class="header" href="#defining-a-trait-for-common-behavior">Defining a Trait for Common Behavior</a></h3>
+<p>Để triển khai hành vi mà chúng ta muốn <code>gui</code> có, chúng ta sẽ định nghĩa một trait
+tên là <code>Draw</code> với một phương thức duy nhất là <code>draw</code>. Sau đó, chúng ta có thể định
+nghĩa một vector nhận vào một <em>trait object</em>. Một trait object trỏ tới cả một
+instance của một kiểu triển khai trait được chỉ định và một bảng được dùng để tra
+cứu các phương thức của trait đó tại runtime. Chúng ta tạo một trait object bằng
+cách chỉ định một dạng con trỏ nào đó, chẳng hạn như một tham chiếu <code>&amp;</code> hoặc một
+smart pointer <code>Box&lt;T&gt;</code>, sau đó là từ khóa <code>dyn</code>, rồi chỉ định trait tương ứng.
+(Chúng ta sẽ nói về lý do tại sao trait objects phải sử dụng con trỏ trong Chương
+19, ở mục <a href="ch19-04-advanced-types.html#dynamically-sized-types-and-the-sized-trait">“Dynamically Sized Types and the <code>Sized</code> Trait.”</a></p>
+<!-- ignore -->) Chúng ta có thể sử dụng trait objects thay cho generic hoặc kiểu
+<p>cụ thể. Ở bất kỳ đâu chúng ta sử dụng trait object, hệ thống kiểu của Rust sẽ đảm
+bảo tại thời điểm biên dịch rằng mọi giá trị được dùng trong ngữ cảnh đó đều triển
+khai trait của trait object. Do đó, chúng ta không cần phải biết trước tất cả các
+kiểu khả dĩ tại thời điểm biên dịch.</p>
+<p>Chúng ta đã đề cập rằng trong Rust, chúng ta tránh gọi struct và enum là “object”
+để phân biệt chúng với object trong các ngôn ngữ khác. Trong một struct hoặc enum,
+dữ liệu trong các field và hành vi trong các khối <code>impl</code> được tách biệt, trong khi
+ở các ngôn ngữ khác, dữ liệu và hành vi được kết hợp thành một khái niệm duy nhất
+thường được gọi là object. Tuy nhiên, trait objects <em>thực sự</em> giống với object
+trong các ngôn ngữ khác ở chỗ chúng kết hợp cả dữ liệu và hành vi. Nhưng trait
+objects khác với object truyền thống ở điểm là chúng ta không thể thêm dữ liệu vào
+một trait object. Trait objects không hữu dụng một cách tổng quát như object trong
+các ngôn ngữ khác: mục đích cụ thể của chúng là cho phép trừu tượng hóa trên các
+hành vi chung.</p>
+<p>Listing 17-3 cho thấy cách định nghĩa một trait tên là <code>Draw</code> với một phương thức
+tên là <code>draw</code>:</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch17-oop/listing-17-03/src/lib.rs}}</code></pre>
+<p><span class="caption">Listing 17-3: Definition of the <code>Draw</code> trait</span></p>
+<p>Cú pháp này hẳn sẽ trông quen thuộc từ những thảo luận của chúng ta về cách định
+nghĩa trait trong Chương 10. Tiếp theo là một số cú pháp mới: Listing 17-4 định
+nghĩa một struct tên là <code>Screen</code>, struct này chứa một vector có tên là
+<code>components</code>. Vector này có kiểu <code>Box&lt;dyn Draw&gt;</code>, tức là một trait object; nó
+đóng vai trò như một đại diện (stand-in) cho bất kỳ kiểu nào được đặt trong một
+<code>Box</code> mà triển khai trait <code>Draw</code>.</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch17-oop/listing-17-04/src/lib.rs:here}}</code></pre>
+<p><span class="caption">Listing 17-4: Definition of the <code>Screen</code> struct with a
+<code>components</code> field holding a vector of trait objects that implement the <code>Draw</code>
+trait</span></p>
+<p>Trên struct <code>Screen</code>, chúng ta sẽ định nghĩa một phương thức có tên là <code>run</code>,
+phương thức này sẽ gọi phương thức <code>draw</code> trên từng phần tử trong <code>components</code>
+của nó, như được minh họa trong Listing 17-5:</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch17-oop/listing-17-05/src/lib.rs:here}}</code></pre>
+<p><span class="caption">Listing 17-5: A <code>run</code> method on <code>Screen</code> that calls the
+<code>draw</code> method on each component</span></p>
+<p>Cách này hoạt động khác với việc định nghĩa một struct sử dụng tham số kiểu
+generic kèm theo trait bound. Một tham số kiểu generic chỉ có thể được thay thế
+bằng một kiểu cụ thể tại một thời điểm, trong khi trait objects cho phép
+nhiều kiểu cụ thể khác nhau được dùng để thay thế cho trait object tại runtime.
+Ví dụ, chúng ta có thể đã định nghĩa struct <code>Screen</code> bằng cách sử dụng một kiểu
+generic và một trait bound như trong Listing 17-6:</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch17-oop/listing-17-06/src/lib.rs:here}}</code></pre>
+<p><span class="caption">Listing 17-6: An alternate implementation of the <code>Screen</code>
+struct and its <code>run</code> method using generics and trait bounds</span></p>
+<p>Cách này giới hạn chúng ta ở một instance của <code>Screen</code> mà trong đó danh sách
+các component đều có cùng một kiểu, ví dụ tất cả đều là <code>Button</code> hoặc tất cả
+đều là <code>TextField</code>. Nếu bạn chỉ bao giờ làm việc với các collection đồng nhất
+(homogeneous), thì việc sử dụng generics và trait bounds là lựa chọn tốt hơn,
+bởi vì các định nghĩa này sẽ được monomorphize tại thời điểm biên dịch để sử
+dụng các kiểu cụ thể.</p>
+<p>Ngược lại, với phương thức sử dụng trait objects, một instance của <code>Screen</code>
+có thể chứa một <code>Vec&lt;T&gt;</code> bao gồm cả <code>Box&lt;Button&gt;</code> lẫn <code>Box&lt;TextField&gt;</code>. Hãy cùng
+xem cách cơ chế này hoạt động như thế nào, sau đó chúng ta sẽ bàn về các ảnh
+hưởng tới hiệu năng tại runtime.</p>
+<h3 id="implementing-the-trait"><a class="header" href="#implementing-the-trait">Implementing the Trait</a></h3>
+<p>Bây giờ chúng ta sẽ thêm một số kiểu triển khai trait <code>Draw</code>. Chúng ta sẽ cung
+cấp kiểu <code>Button</code>. Một lần nữa, việc triển khai đầy đủ một thư viện GUI nằm ngoài
+phạm vi của cuốn sách này, vì vậy phương thức <code>draw</code> sẽ không có phần cài đặt
+hữu ích nào trong thân của nó. Để hình dung phương thức này có thể được cài đặt
+như thế nào, một struct <code>Button</code> có thể có các field như <code>width</code>, <code>height</code> và
+<code>label</code>, như được minh họa trong Listing 17-7:</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch17-oop/listing-17-07/src/lib.rs:here}}</code></pre>
+<p><span class="caption">Listing 17-7: A <code>Button</code> struct that implements the
+<code>Draw</code> trait</span></p>
+<p>Các field <code>width</code>, <code>height</code> và <code>label</code> của <code>Button</code> sẽ khác với các field của
+những component khác; ví dụ, một kiểu <code>TextField</code> có thể có các field giống vậy
+và thêm một field <code>placeholder</code>. Mỗi kiểu mà chúng ta muốn vẽ lên màn hình đều
+sẽ triển khai trait <code>Draw</code>, nhưng sẽ sử dụng các đoạn mã khác nhau trong phương
+thức <code>draw</code> để định nghĩa cách vẽ cho kiểu cụ thể đó, như cách <code>Button</code> đã làm
+ở đây (không bao gồm mã GUI thực tế, như đã đề cập). Ví dụ, kiểu <code>Button</code> có thể
+có thêm một khối <code>impl</code> bổ sung chứa các phương thức liên quan đến việc điều gì
+xảy ra khi người dùng nhấn vào nút. Những loại phương thức này sẽ không áp dụng
+cho các kiểu như <code>TextField</code>.</p>
+<p>Nếu một người sử dụng thư viện của chúng ta quyết định triển khai một struct
+<code>SelectBox</code> có các field <code>width</code>, <code>height</code> và <code>options</code>, thì họ cũng sẽ triển
+khai trait <code>Draw</code> cho kiểu <code>SelectBox</code>, như được minh họa trong Listing 17-8:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore">{{#rustdoc_include ../listings/ch17-oop/listing-17-08/src/main.rs:here}}</code></pre>
+<p><span class="caption">Listing 17-8: Another crate using <code>gui</code> and implementing
+the <code>Draw</code> trait on a <code>SelectBox</code> struct</span></p>
+<p>Người dùng thư viện của chúng ta giờ đây có thể viết hàm <code>main</code> của họ để tạo
+một instance của <code>Screen</code>. Với instance <code>Screen</code> này, họ có thể thêm một
+<code>SelectBox</code> và một <code>Button</code> bằng cách đặt mỗi component vào một <code>Box&lt;T&gt;</code> để
+trở thành một trait object. Sau đó, họ có thể gọi phương thức <code>run</code> trên
+instance <code>Screen</code>, phương thức này sẽ gọi <code>draw</code> trên từng component.
+Listing 17-9 minh họa cách cài đặt này:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore">{{#rustdoc_include ../listings/ch17-oop/listing-17-09/src/main.rs:here}}</code></pre>
+<p><span class="caption">Listing 17-9: Using trait objects to store values of
+different types that implement the same trait</span></p>
+<p>Khi chúng ta viết thư viện, chúng ta không biết rằng sẽ có người thêm kiểu
+<code>SelectBox</code>, nhưng phần cài đặt <code>Screen</code> của chúng ta vẫn có thể hoạt động với
+kiểu mới này và vẽ nó, bởi vì <code>SelectBox</code> triển khai trait <code>Draw</code>, nghĩa là nó
+triển khai phương thức <code>draw</code>.</p>
+<p>Khái niệm này — chỉ quan tâm đến các “thông điệp” (message) mà một giá trị có
+thể phản hồi, thay vì kiểu cụ thể của giá trị đó — tương tự với khái niệm <em>duck
+typing</em> trong các ngôn ngữ kiểu động: nếu nó đi như vịt và kêu như vịt, thì nó
+chắc hẳn là vịt! Trong phần cài đặt <code>run</code> của <code>Screen</code> ở Listing 17-5, <code>run</code>
+không cần biết kiểu cụ thể của từng component là gì. Nó không kiểm tra xem một
+component có phải là instance của <code>Button</code> hay <code>SelectBox</code> hay không, mà chỉ
+đơn giản gọi phương thức <code>draw</code> trên component đó. Bằng cách chỉ định
+<code>Box&lt;dyn Draw&gt;</code> làm kiểu của các giá trị trong vector <code>components</code>, chúng ta đã
+định nghĩa rằng <code>Screen</code> cần những giá trị mà chúng ta có thể gọi được phương
+thức <code>draw</code> trên chúng.</p>
+<p>Ưu điểm của việc sử dụng trait objects cùng với hệ thống kiểu của Rust để viết
+mã tương tự như mã sử dụng duck typing là chúng ta không bao giờ phải kiểm tra
+tại runtime xem một giá trị có triển khai một phương thức cụ thể hay không, cũng
+không phải lo lắng về việc gặp lỗi khi gọi một phương thức mà giá trị đó không
+triển khai. Rust sẽ không biên dịch mã của chúng ta nếu các giá trị không triển
+khai các trait mà trait object yêu cầu.</p>
+<p>Ví dụ, Listing 17-10 cho thấy điều gì sẽ xảy ra nếu chúng ta cố gắng tạo một
+<code>Screen</code> với một <code>String</code> làm component:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile">{{#rustdoc_include ../listings/ch17-oop/listing-17-10/src/main.rs}}</code></pre>
+<p><span class="caption">Listing 17-10: Attempting to use a type that doesn’t
+implement the trait object’s trait</span></p>
+<p>Chúng ta sẽ nhận được lỗi này bởi vì <code>String</code> không triển khai trait <code>Draw</code>:</p>
+<pre><code class="language-console">{{#include ../listings/ch17-oop/listing-17-10/output.txt}}
+</code></pre>
+<p>Lỗi này cho chúng ta biết rằng hoặc là chúng ta đang truyền một giá trị vào
+<code>Screen</code> mà không đúng dự định và nên truyền một kiểu khác, hoặc chúng ta
+nên triển khai trait <code>Draw</code> trên <code>String</code> để <code>Screen</code> có thể gọi <code>draw</code>
+trên nó.</p>
+<h3 id="trait-objects-perform-dynamic-dispatch"><a class="header" href="#trait-objects-perform-dynamic-dispatch">Trait Objects Perform Dynamic Dispatch</a></h3>
+<p>Hãy nhớ lại trong mục <a href="ch10-01-syntax.html#performance-of-code-using-generics">“Performance of Code Using
+Generics”</a><!-- ignore --> ở Chương 10
+khi chúng ta thảo luận về quá trình monomorphization do compiler thực hiện
+khi sử dụng trait bounds trên generic: compiler sẽ sinh ra các triển khai
+không-generic của các hàm và phương thức cho từng kiểu cụ thể mà chúng ta
+sử dụng thay cho tham số kiểu generic. Mã kết quả từ monomorphization
+sử dụng <em>static dispatch</em>, tức là compiler biết chính xác phương thức
+bạn đang gọi tại thời điểm biên dịch. Ngược lại, <em>dynamic dispatch</em>
+xảy ra khi compiler không thể biết trước phương thức nào sẽ được gọi
+tại thời điểm biên dịch. Trong trường hợp dynamic dispatch, compiler
+sẽ sinh ra mã sao cho tại runtime sẽ xác định phương thức nào cần gọi.</p>
+<p>Khi chúng ta sử dụng trait objects, Rust buộc phải dùng dynamic dispatch.
+Compiler không biết trước tất cả các kiểu có thể được sử dụng với mã
+sử dụng trait objects, vì vậy nó không biết nên gọi phương thức nào được
+triển khai trên kiểu nào. Thay vào đó, tại runtime, Rust sử dụng các
+con trỏ bên trong trait object để biết phương thức nào cần gọi. Việc tra
+cứu này gây ra chi phí tại runtime mà static dispatch không có. Dynamic
+dispatch cũng ngăn compiler chọn việc inline mã của phương thức, từ đó
+cản trở một số tối ưu hóa. Tuy nhiên, chúng ta có được sự linh hoạt
+bổ sung trong mã mà chúng ta viết ở Listing 17-5 và hỗ trợ trong
+Listing 17-9, nên đây là một sự đánh đổi cần cân nhắc.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch17-01-what-is-oo.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch17-03-oo-design-patterns.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch17-01-what-is-oo.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch17-03-oo-design-patterns.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

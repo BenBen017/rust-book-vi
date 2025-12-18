@@ -1,0 +1,10 @@
+D:\rust-project\rust-book-vi\packages\mdbook-trpl\target\release\deps\libhumantime-a909f6f590d3bb91.rmeta: C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\humantime-2.1.0\src\lib.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\humantime-2.1.0\src\duration.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\humantime-2.1.0\src\wrapper.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\humantime-2.1.0\src\date.rs
+
+D:\rust-project\rust-book-vi\packages\mdbook-trpl\target\release\deps\libhumantime-a909f6f590d3bb91.rlib: C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\humantime-2.1.0\src\lib.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\humantime-2.1.0\src\duration.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\humantime-2.1.0\src\wrapper.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\humantime-2.1.0\src\date.rs
+
+D:\rust-project\rust-book-vi\packages\mdbook-trpl\target\release\deps\humantime-a909f6f590d3bb91.d: C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\humantime-2.1.0\src\lib.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\humantime-2.1.0\src\duration.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\humantime-2.1.0\src\wrapper.rs C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\humantime-2.1.0\src\date.rs
+
+C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\humantime-2.1.0\src\lib.rs:
+C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\humantime-2.1.0\src\duration.rs:
+C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\humantime-2.1.0\src\wrapper.rs:
+C:\Users\quan.trinhhoang\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\humantime-2.1.0\src\date.rs:

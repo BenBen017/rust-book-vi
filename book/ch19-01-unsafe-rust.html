@@ -1,0 +1,419 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Unsafe Rust - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="unsafe-rust"><a class="header" href="#unsafe-rust">Unsafe Rust</a></h2>
+<p>Tất cả code mà chúng ta đã thảo luận cho đến giờ đều được Rust
+đảm bảo an toàn bộ nhớ tại thời điểm biên dịch. Tuy nhiên,
+Rust còn có một ngôn ngữ “ẩn” bên trong, không thực thi các đảm bảo về an toàn bộ nhớ này:
+nó được gọi là <em>unsafe Rust</em> và hoạt động giống như Rust bình thường,
+nhưng cung cấp cho chúng ta những “siêu quyền” bổ sung.</p>
+<p>Unsafe Rust tồn tại vì bản chất, phân tích tĩnh là bảo thủ.
+Khi trình biên dịch cố gắng xác định xem code có tuân thủ các đảm bảo hay không,
+nó thà từ chối một số chương trình hợp lệ còn hơn chấp nhận một
+số chương trình không hợp lệ. Mặc dù code <em>có thể</em> ổn, nếu trình biên dịch
+Rust không có đủ thông tin để tự tin, nó sẽ từ chối code. Trong những trường hợp này,
+bạn có thể dùng code unsafe để nói với trình biên dịch: “Tin tôi đi, tôi biết mình đang làm gì.”
+Tuy nhiên, hãy cẩn thận, vì sử dụng unsafe Rust không đúng cách có thể gây ra
+các vấn đề liên quan đến an toàn bộ nhớ, như truy cập con trỏ null.</p>
+<p>Một lý do khác khiến Rust có “bản sao unsafe” là vì phần cứng máy tính vốn không an toàn.
+Nếu Rust không cho phép các thao tác unsafe, bạn sẽ không thể thực hiện một số tác vụ nhất định. Rust cần cho phép bạn lập trình hệ thống mức thấp, như tương tác trực tiếp với hệ điều hành hoặc thậm chí viết hệ điều hành riêng. Làm việc với lập trình hệ thống mức thấp là một trong những mục tiêu của ngôn ngữ. Hãy khám phá những gì chúng ta có thể làm với unsafe Rust và cách thực hiện.</p>
+<h3 id="siêu-quyền-unsafe"><a class="header" href="#siêu-quyền-unsafe">Siêu Quyền Unsafe</a></h3>
+<p>Để chuyển sang unsafe Rust, dùng từ khóa <code>unsafe</code> và bắt đầu một khối mới chứa code unsafe. Trong unsafe Rust, bạn có thể thực hiện năm hành động mà trong Rust an toàn không được phép, gọi là <em>siêu quyền unsafe</em>. Những siêu quyền này bao gồm khả năng:</p>
+<ul>
+<li>Giải tham chiếu một con trỏ thô (raw pointer)</li>
+<li>Gọi một hàm hoặc phương thức unsafe</li>
+<li>Truy cập hoặc sửa đổi biến static có thể thay đổi (mutable static)</li>
+<li>Triển khai một trait unsafe</li>
+<li>Truy cập các trường của <code>union</code></li>
+</ul>
+<p>Điều quan trọng cần hiểu là <code>unsafe</code> không tắt bộ kiểm tra mượn (borrow checker) hay vô hiệu hóa bất kỳ kiểm tra an toàn nào khác của Rust: nếu bạn dùng một reference trong unsafe code, nó vẫn được kiểm tra. Từ khóa <code>unsafe</code> chỉ cho phép bạn truy cập năm tính năng trên mà compiler không kiểm tra an toàn bộ nhớ. Bạn vẫn có một mức độ an toàn nhất định bên trong khối unsafe.</p>
+<p>Ngoài ra, <code>unsafe</code> không có nghĩa là code bên trong khối này chắc chắn nguy hiểm hay sẽ gây ra vấn đề an toàn bộ nhớ: ý định là người lập trình phải đảm bảo code trong khối <code>unsafe</code> truy cập bộ nhớ một cách hợp lệ.</p>
+<p>Con người có thể mắc sai lầm, và lỗi sẽ xảy ra, nhưng việc yêu cầu năm thao tác unsafe phải nằm trong các khối đánh dấu <code>unsafe</code> giúp bạn biết rằng mọi lỗi liên quan đến an toàn bộ nhớ đều phải nằm trong khối <code>unsafe</code>. Giữ các khối <code>unsafe</code> càng nhỏ càng tốt; bạn sẽ biết ơn khi sau này phải điều tra lỗi bộ nhớ.</p>
+<p>Để cô lập code unsafe càng nhiều càng tốt, tốt nhất là bao bọc code unsafe bên trong một abstraction an toàn và cung cấp một API an toàn, mà chúng ta sẽ thảo luận sau trong chương khi xem xét các hàm và phương thức unsafe. Một số phần của thư viện chuẩn được triển khai như các abstraction an toàn trên code unsafe đã được kiểm tra. Việc bọc code unsafe trong một abstraction an toàn ngăn việc sử dụng <code>unsafe</code> lan rộng ra tất cả các nơi mà bạn hoặc người dùng có thể muốn dùng chức năng được triển khai bằng code unsafe, bởi vì việc sử dụng abstraction an toàn là an toàn.</p>
+<p>Bây giờ, hãy cùng xem từng siêu quyền unsafe. Chúng ta cũng sẽ xem một số abstraction cung cấp giao diện an toàn cho code unsafe.</p>
+<h3 id="giải-tham-chiếu-một-con-trỏ-thô"><a class="header" href="#giải-tham-chiếu-một-con-trỏ-thô">Giải Tham Chiếu Một Con Trỏ Thô</a></h3>
+<p>Trong Chương 4, trong phần <a href="ch04-02-references-and-borrowing.html#dangling-references">“Dangling References”</a><!-- ignore -->, chúng ta đã đề cập rằng compiler đảm bảo các reference luôn hợp lệ. Unsafe Rust có hai loại mới gọi là <em>raw pointers</em>, tương tự như reference. Giống như reference, raw pointer có thể là immutable hoặc mutable, được viết là <code>*const T</code> và <code>*mut T</code>. Dấu sao ở đây không phải là toán tử dereference; nó là một phần của tên kiểu. Trong ngữ cảnh raw pointer, <em>immutable</em> có nghĩa là con trỏ không thể được gán trực tiếp sau khi được dereference.</p>
+<p>Khác với reference và smart pointer, raw pointer:</p>
+<ul>
+<li>Cho phép bỏ qua các quy tắc mượn bằng cách có cả immutable và mutable pointer hoặc nhiều mutable pointer tới cùng một địa chỉ</li>
+<li>Không được đảm bảo trỏ tới bộ nhớ hợp lệ</li>
+<li>Có thể là null</li>
+<li>Không thực hiện bất kỳ việc dọn dẹp tự động nào</li>
+</ul>
+<p>Bằng cách từ chối các đảm bảo mà Rust áp dụng, bạn có thể đánh đổi an toàn đã được đảm bảo để lấy hiệu năng cao hơn hoặc khả năng tương tác với ngôn ngữ khác hoặc phần cứng nơi các đảm bảo của Rust không áp dụng.</p>
+<p>Listing 19-1 minh họa cách tạo một immutable và một mutable raw pointer từ các reference.</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-01/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="tạo-con-trỏ-thô-từ-reference"><a class="header" href="#tạo-con-trỏ-thô-từ-reference">Tạo Con Trỏ Thô từ Reference</a></h3>
+<p>Lưu ý rằng trong ví dụ này chúng ta <strong>không dùng từ khóa <code>unsafe</code></strong>. Chúng ta có thể tạo raw pointer trong code an toàn; chỉ có điều không thể dereference raw pointer ngoài một khối <code>unsafe</code>, như bạn sẽ thấy ngay sau đây.</p>
+<p>Chúng ta đã tạo raw pointer bằng cách dùng <code>as</code> để ép kiểu một immutable và một mutable reference thành các loại raw pointer tương ứng. Vì chúng được tạo trực tiếp từ các reference đã được đảm bảo hợp lệ, chúng ta biết những raw pointer này là hợp lệ, nhưng không thể giả định điều đó cho bất kỳ raw pointer nào khác.</p>
+<p>Để minh họa, tiếp theo chúng ta sẽ tạo một raw pointer mà tính hợp lệ của nó không chắc chắn. Listing 19-2 sẽ cho thấy cách tạo raw pointer tới một địa chỉ bộ nhớ tùy ý. Việc sử dụng bộ nhớ tùy ý là undefined behavior: có thể có dữ liệu tại địa chỉ đó hoặc không, compiler có thể tối ưu code khiến không có truy cập bộ nhớ nào, hoặc chương trình có thể lỗi với segmentation fault. Thường thì không có lý do chính đáng để viết code như vậy, nhưng về mặt kỹ thuật là có thể.</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-02/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="ghi-nhớ-về-raw-pointer"><a class="header" href="#ghi-nhớ-về-raw-pointer">Ghi Nhớ về Raw Pointer</a></h3>
+<p>Nhớ rằng chúng ta có thể tạo raw pointer trong code an toàn, nhưng không thể dereference raw pointer và đọc dữ liệu mà nó trỏ tới. Trong Listing 19-3, chúng ta sẽ dùng toán tử dereference <code>*</code> trên raw pointer, và điều này yêu cầu phải nằm trong một khối <code>unsafe</code>.</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-03/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="lý-do-sử-dụng-raw-pointer"><a class="header" href="#lý-do-sử-dụng-raw-pointer">Lý do sử dụng Raw Pointer</a></h3>
+<p>Việc tạo con trỏ không gây hại; chỉ khi chúng ta cố truy cập giá trị mà nó trỏ tới mới có thể gặp giá trị không hợp lệ.</p>
+<p>Lưu ý rằng trong Listing 19-1 và 19-3, chúng ta đã tạo <code>*const i32</code> và <code>*mut i32</code> trỏ tới cùng một vị trí bộ nhớ chứa <code>num</code>. Nếu thay vào đó ta tạo tham chiếu immutable và mutable tới <code>num</code>, code sẽ không biên dịch vì luật sở hữu của Rust không cho phép một tham chiếu mutable cùng lúc với bất kỳ tham chiếu immutable nào. Với raw pointer, ta có thể tạo một con trỏ mutable và một con trỏ immutable tới cùng vị trí và thay đổi dữ liệu qua con trỏ mutable, có thể gây ra <strong>data race</strong>. Hãy cẩn thận!</p>
+<p>Một trường hợp chính sử dụng raw pointer là khi giao tiếp với code C, hoặc khi xây dựng các abstraction an toàn mà borrow checker không hiểu được.</p>
+<hr />
+<h3 id="gọi-unsafe-function-hoặc-method"><a class="header" href="#gọi-unsafe-function-hoặc-method">Gọi Unsafe Function hoặc Method</a></h3>
+<p>Một loại thao tác khác trong khối unsafe là gọi <strong>unsafe function</strong>. Chúng trông giống như hàm thông thường, nhưng có thêm từ khóa <code>unsafe</code> trước phần định nghĩa. Từ khóa này chỉ ra rằng hàm có những yêu cầu mà ta cần đảm bảo khi gọi, vì Rust không thể chắc rằng ta đã đáp ứng các yêu cầu đó. Khi gọi một unsafe function trong khối <code>unsafe</code>, ta đồng nghĩa rằng đã đọc tài liệu hàm và chịu trách nhiệm đảm bảo các hợp đồng của hàm.</p>
+<p>Ví dụ một hàm unsafe tên <code>dangerous</code> mà body không làm gì:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/no-listing-01-unsafe-fn/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<p>Chúng ta phải gọi hàm <code>dangerous</code> bên trong một khối <code>unsafe</code> riêng. Nếu chúng ta cố gắng gọi <code>dangerous</code> mà không có khối <code>unsafe</code>, chúng ta sẽ nhận được lỗi:</p>
+<pre><code class="language-console">{{#include ../listings/ch19-advanced-features/output-only-01-missing-unsafe/output.txt}}
+</code></pre>
+<p>Với khối <code>unsafe</code>, chúng ta đang khẳng định với Rust rằng chúng ta đã đọc tài liệu của hàm, hiểu cách sử dụng đúng, và đã xác minh rằng chúng ta đang tuân thủ hợp đồng của hàm đó.</p>
+<p>Các thân hàm của các hàm <code>unsafe</code> về cơ bản là các khối <code>unsafe</code>, vì vậy để thực hiện các thao tác unsafe khác bên trong một hàm unsafe, chúng ta không cần phải thêm một khối <code>unsafe</code> khác.</p>
+<h4 id="tạo-một-safe-abstraction-trên-unsafe-code"><a class="header" href="#tạo-một-safe-abstraction-trên-unsafe-code">Tạo một Safe Abstraction trên Unsafe Code</a></h4>
+<p>Chỉ vì một hàm chứa mã unsafe không có nghĩa là chúng ta phải đánh dấu toàn bộ hàm là <code>unsafe</code>. Thực tế, việc bao bọc mã <code>unsafe</code> trong một hàm an toàn là một trừu tượng phổ biến.</p>
+<p>Ví dụ, hãy nghiên cứu hàm <code>split_at_mut</code> từ thư viện chuẩn, hàm này yêu cầu một số mã <code>unsafe</code>. Chúng ta sẽ khám phá cách triển khai nó. Phương thức an toàn này được định nghĩa trên các slice có thể thay đổi: nó nhận một slice và chia nó thành hai bằng cách tách slice tại chỉ số được truyền làm tham số. Danh sách 19-4 cho thấy cách sử dụng <code>split_at_mut</code>.</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-04/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 19-4: Sử dụng hàm an toàn <code>split_at_mut</code></span></p>
+<p>Chúng ta không thể triển khai hàm này chỉ bằng Rust an toàn. Một thử nghiệm có thể trông giống như Listing 19-5, nhưng sẽ không biên dịch được. Để đơn giản, chúng ta sẽ triển khai <code>split_at_mut</code> như một hàm thay vì một phương thức và chỉ dành cho các slice của giá trị <code>i32</code> thay vì một kiểu tổng quát <code>T</code>.</p>
+<pre><code class="language-rust ignore does_not_compile">{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-05/src/main.rs:here}}</code></pre>
+<p><span class="caption">Listing 19-5: Một triển khai thử nghiệm của <code>split_at_mut</code> chỉ sử dụng Rust an toàn</span></p>
+<p>Hàm này trước tiên lấy tổng độ dài của slice. Sau đó, nó khẳng định rằng chỉ số được truyền làm tham số nằm trong slice bằng cách kiểm tra xem nó có nhỏ hơn hoặc bằng độ dài hay không. Việc khẳng định này có nghĩa là nếu chúng ta truyền một chỉ số lớn hơn độ dài để tách slice tại đó, hàm sẽ panic trước khi cố gắng sử dụng chỉ số đó.</p>
+<p>Tiếp theo, chúng ta trả về hai slice có thể thay đổi trong một tuple: một từ đầu slice gốc đến chỉ số <code>mid</code> và một từ <code>mid</code> đến cuối slice.</p>
+<p>Khi chúng ta cố gắng biên dịch mã trong Listing 19-5, chúng ta sẽ nhận được lỗi.</p>
+<pre><code class="language-console">{{#include ../listings/ch19-advanced-features/listing-19-05/output.txt}}
+</code></pre>
+<p>Trình kiểm tra mượn (borrow checker) của Rust không thể hiểu rằng chúng ta đang mượn các phần khác nhau của slice; nó chỉ biết rằng chúng ta đang mượn cùng một slice hai lần. Việc mượn các phần khác nhau của slice về cơ bản là hợp lệ vì hai slice này không chồng lấn, nhưng Rust không đủ thông minh để nhận ra điều này. Khi chúng ta biết mã là an toàn, nhưng Rust thì không, đó là lúc cần sử dụng mã <code>unsafe</code>.</p>
+<p>Listing 19-6 cho thấy cách sử dụng một khối <code>unsafe</code>, một con trỏ thô (raw pointer), và một số lời gọi tới các hàm unsafe để thực hiện triển khai <code>split_at_mut</code>.</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-06/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 19-6: Sử dụng mã unsafe trong triển khai hàm <code>split_at_mut</code></span></p>
+<p>Nhớ lại từ phần <a href="ch04-03-slices.html#the-slice-type">“The Slice Type”</a><!-- ignore --> trong Chương 4 rằng slice là một con trỏ tới dữ liệu và độ dài của slice. Chúng ta sử dụng phương thức <code>len</code> để lấy độ dài của slice và phương thức <code>as_mut_ptr</code> để truy cập con trỏ thô (raw pointer) của slice. Trong trường hợp này, vì chúng ta có một slice có thể thay đổi của các giá trị <code>i32</code>, <code>as_mut_ptr</code> trả về một con trỏ thô với kiểu <code>*mut i32</code>, mà chúng ta đã lưu vào biến <code>ptr</code>.</p>
+<p>Chúng ta giữ lại khẳng định rằng chỉ số <code>mid</code> nằm trong slice. Sau đó, chúng ta đến phần mã unsafe: hàm <code>slice::from_raw_parts_mut</code> nhận một con trỏ thô và một độ dài, và nó tạo ra một slice. Chúng ta sử dụng hàm này để tạo một slice bắt đầu từ <code>ptr</code> với độ dài <code>mid</code>. Sau đó, chúng ta gọi phương thức <code>add</code> trên <code>ptr</code> với <code>mid</code> làm tham số để lấy một con trỏ thô bắt đầu từ <code>mid</code>, và chúng ta tạo một slice sử dụng con trỏ đó với số phần tử còn lại sau <code>mid</code> làm độ dài.</p>
+<p>Hàm <code>slice::from_raw_parts_mut</code> là unsafe vì nó nhận một con trỏ thô và phải tin rằng con trỏ này là hợp lệ. Phương thức <code>add</code> trên con trỏ thô cũng là unsafe, vì nó phải tin rằng vị trí offset cũng là một con trỏ hợp lệ. Do đó, chúng ta phải đặt một khối <code>unsafe</code> xung quanh các lời gọi tới <code>slice::from_raw_parts_mut</code> và <code>add</code> để có thể gọi chúng. Bằng cách nhìn vào mã và thêm khẳng định rằng <code>mid</code> phải nhỏ hơn hoặc bằng <code>len</code>, chúng ta có thể chắc chắn rằng tất cả các con trỏ thô được sử dụng bên trong khối <code>unsafe</code> sẽ là con trỏ hợp lệ tới dữ liệu trong slice. Đây là cách sử dụng <code>unsafe</code> chấp nhận được và phù hợp.</p>
+<p>Lưu ý rằng chúng ta không cần đánh dấu hàm <code>split_at_mut</code> kết quả là <code>unsafe</code>, và chúng ta có thể gọi hàm này từ Rust an toàn. Chúng ta đã tạo một lớp trừu tượng an toàn cho mã unsafe với triển khai của hàm sử dụng mã <code>unsafe</code> một cách an toàn, vì nó chỉ tạo ra các con trỏ hợp lệ từ dữ liệu mà hàm này có quyền truy cập.</p>
+<p>Ngược lại, việc sử dụng <code>slice::from_raw_parts_mut</code> trong Listing 19-7 có thể gây crash khi slice được sử dụng. Mã này lấy một vị trí bộ nhớ tùy ý và tạo một slice dài 10.000 phần tử.</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-07/src/main.rs:here}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 19-7: Tạo một slice từ vị trí bộ nhớ tùy ý</span></p>
+<p>Chúng ta không sở hữu bộ nhớ tại vị trí tùy ý này, và không có đảm bảo rằng slice mà mã này tạo ra chứa các giá trị <code>i32</code> hợp lệ. Việc cố gắng sử dụng <code>values</code> như thể nó là một slice hợp lệ sẽ dẫn đến hành vi không xác định (undefined behavior).</p>
+<h4 id="sử-dụng-các-hàm-extern-để-gọi-mã-bên-ngoài"><a class="header" href="#sử-dụng-các-hàm-extern-để-gọi-mã-bên-ngoài">Sử dụng các hàm <code>extern</code> để gọi mã bên ngoài</a></h4>
+<p>Đôi khi, mã Rust của bạn có thể cần tương tác với mã được viết bằng ngôn ngữ khác. Để làm điều này, Rust có từ khóa <code>extern</code> giúp tạo và sử dụng <em>Foreign Function Interface (FFI)</em>. FFI là một cách để một ngôn ngữ lập trình định nghĩa các hàm và cho phép một ngôn ngữ lập trình khác (foreign) gọi các hàm đó.</p>
+<p>Listing 19-8 minh họa cách thiết lập tích hợp với hàm <code>abs</code> từ thư viện chuẩn C. Các hàm được khai báo trong các khối <code>extern</code> luôn là unsafe khi gọi từ mã Rust. Lý do là các ngôn ngữ khác không tuân thủ các quy tắc và đảm bảo của Rust, và Rust không thể kiểm tra chúng, vì vậy trách nhiệm đảm bảo an toàn thuộc về lập trình viên.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-08/src/main.rs}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 19-8: Khai báo và gọi một hàm <code>extern</code> được định nghĩa trong ngôn ngữ khác</span></p>
+<p>Trong khối <code>extern "C"</code>, chúng ta liệt kê tên và chữ ký của các hàm bên ngoài từ ngôn ngữ khác mà chúng ta muốn gọi. Phần <code>"C"</code> định nghĩa <em>application binary interface (ABI)</em> mà hàm bên ngoài sử dụng: ABI xác định cách gọi hàm ở cấp độ assembly. ABI <code>"C"</code> là phổ biến nhất và theo chuẩn ABI của ngôn ngữ lập trình C.</p>
+<section class="note" aria-role="note">
+<h4 id="gọi-hàm-rust-từ-các-ngôn-ngữ-khác"><a class="header" href="#gọi-hàm-rust-từ-các-ngôn-ngữ-khác">Gọi hàm Rust từ các ngôn ngữ khác</a></h4>
+<p>Chúng ta cũng có thể sử dụng <code>extern</code> để tạo một giao diện cho phép các ngôn ngữ khác gọi các hàm Rust. Thay vì tạo toàn bộ khối <code>extern</code>, chúng ta thêm từ khóa <code>extern</code> và chỉ định ABI sẽ sử dụng ngay trước từ khóa <code>fn</code> cho hàm tương ứng. Chúng ta cũng cần thêm chú thích <code>#[no_mangle]</code> để thông báo cho trình biên dịch Rust không thay đổi tên hàm này. <em>Mangling</em> là khi một trình biên dịch thay đổi tên mà chúng ta đã đặt cho hàm thành một tên khác chứa thêm thông tin cho các phần khác của quá trình biên dịch sử dụng, nhưng ít dễ đọc hơn với con người. Mỗi trình biên dịch ngôn ngữ lập trình thay đổi tên theo cách hơi khác nhau, vì vậy để một hàm Rust có thể được gọi từ các ngôn ngữ khác, chúng ta phải tắt việc thay đổi tên của trình biên dịch Rust.</p>
+<p>Trong ví dụ sau, chúng ta làm cho hàm <code>call_from_c</code> có thể truy cập từ mã C, sau khi nó được biên dịch thành thư viện chia sẻ và liên kết từ C:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[no_mangle]
+pub extern "C" fn call_from_c() {
+    println!("Just called a Rust function from C!");
+}
+<span class="boring">}</span></code></pre></pre>
+<p>This usage of <code>extern</code> does not require <code>unsafe</code>.</p>
+</section>
+<h3 id="truy-cập-hoặc-sửa-đổi-một-biến-static-có-thể-thay-đổi"><a class="header" href="#truy-cập-hoặc-sửa-đổi-một-biến-static-có-thể-thay-đổi">Truy cập hoặc sửa đổi một biến static có thể thay đổi</a></h3>
+<p>Trong cuốn sách này, chúng ta chưa nói về <em>biến toàn cục</em> (global variables), mà Rust hỗ trợ nhưng có thể gây ra vấn đề với các quy tắc ownership của Rust. Nếu hai luồng truy cập cùng một biến toàn cục có thể thay đổi, điều này có thể gây ra <em>data race</em>.</p>
+<p>Trong Rust, các biến toàn cục được gọi là biến <em>static</em>. Listing 19-9 cho thấy một ví dụ về khai báo và sử dụng biến static với một slice chuỗi làm giá trị.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-09/src/main.rs}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 19-9: Khai báo và sử dụng một biến static không thể thay đổi</span></p>
+<p>Các biến static tương tự như các hằng số (constants), mà chúng ta đã thảo luận trong phần <a href="ch03-01-variables-and-mutability.html#constants">“Differences Between Variables and Constants”</a><!-- ignore --> ở Chương 3. Tên của các biến static theo quy ước viết <code>SCREAMING_SNAKE_CASE</code>. Các biến static chỉ có thể lưu trữ các tham chiếu với lifetime <code>'static</code>, nghĩa là trình biên dịch Rust có thể xác định được lifetime và chúng ta không cần phải chú thích rõ ràng. Truy cập một biến static không thể thay đổi là an toàn.</p>
+<p>Một khác biệt tinh tế giữa constants và biến static không thể thay đổi là các giá trị trong một biến static có một địa chỉ cố định trong bộ nhớ. Việc sử dụng giá trị này sẽ luôn truy cập cùng một dữ liệu. Ngược lại, constants được phép sao chép dữ liệu mỗi khi chúng được sử dụng. Một khác biệt nữa là các biến static có thể thay đổi được (mutable). Truy cập và sửa đổi các biến static mutable là <em>unsafe</em>. Listing 19-10 cho thấy cách khai báo, truy cập và sửa đổi một biến static mutable có tên là <code>COUNTER</code>.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-10/src/main.rs}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 19-10: Đọc hoặc ghi vào một biến static mutable là unsafe</span></p>
+<p>Như với các biến thông thường, chúng ta xác định khả năng thay đổi bằng từ khóa <code>mut</code>. Bất kỳ mã nào đọc hoặc ghi từ <code>COUNTER</code> phải nằm trong một khối <code>unsafe</code>. Mã này biên dịch và in ra <code>COUNTER: 3</code> như chúng ta mong đợi vì nó chạy đơn luồng. Nếu có nhiều luồng truy cập <code>COUNTER</code>, rất có khả năng xảy ra <em>data races</em>.</p>
+<p>Với dữ liệu mutable có thể truy cập toàn cục, rất khó đảm bảo không có <em>data race</em>, đó là lý do Rust coi các biến static mutable là unsafe. Khi có thể, nên sử dụng các kỹ thuật đồng thời (concurrency) và các con trỏ thông minh an toàn với luồng (thread-safe smart pointers) mà chúng ta đã thảo luận ở Chương 16 để trình biên dịch kiểm tra rằng dữ liệu được truy cập từ các luồng khác nhau một cách an toàn.</p>
+<h3 id="triển-khai-một-unsafe-trait"><a class="header" href="#triển-khai-một-unsafe-trait">Triển khai một Unsafe Trait</a></h3>
+<p>Chúng ta có thể sử dụng <code>unsafe</code> để triển khai một unsafe trait. Một trait là unsafe khi ít nhất một trong các phương thức của nó có một bất biến (invariant) mà trình biên dịch không thể xác minh. Chúng ta khai báo một trait là <code>unsafe</code> bằng cách thêm từ khóa <code>unsafe</code> trước <code>trait</code> và đánh dấu việc triển khai trait đó cũng là <code>unsafe</code>, như được minh họa trong Listing 19-11.</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-11/src/main.rs}}
+<span class="boring">}</span></code></pre></pre>
+<p><span class="caption">Listing 19-11: Khai báo và triển khai một unsafe trait</span></p>
+<p>Bằng cách sử dụng <code>unsafe impl</code>, chúng ta hứa rằng sẽ tuân thủ các bất biến mà trình biên dịch không thể xác minh.</p>
+<p>Ví dụ, hãy nhớ lại các marker trait <code>Sync</code> và <code>Send</code> mà chúng ta đã thảo luận trong phần <a href="ch16-04-extensible-concurrency-sync-and-send.html#extensible-concurrency-with-the-sync-and-send-traits">“Extensible Concurrency with the <code>Sync</code> and <code>Send</code> Traits”</a><!-- ignore --> ở Chương 16: trình biên dịch sẽ triển khai các trait này tự động nếu các kiểu của chúng ta được cấu thành hoàn toàn từ các kiểu <code>Send</code> và <code>Sync</code>. Nếu chúng ta triển khai một kiểu chứa một kiểu không phải <code>Send</code> hoặc <code>Sync</code>, chẳng hạn như raw pointer, và muốn đánh dấu kiểu đó là <code>Send</code> hoặc <code>Sync</code>, chúng ta phải sử dụng <code>unsafe</code>. Rust không thể xác minh rằng kiểu của chúng ta tuân thủ các đảm bảo có thể gửi an toàn qua các luồng hoặc truy cập từ nhiều luồng; do đó, chúng ta cần thực hiện các kiểm tra này thủ công và chỉ ra điều đó bằng <code>unsafe</code>.</p>
+<h3 id="truy-cập-các-trường-của-một-union"><a class="header" href="#truy-cập-các-trường-của-một-union">Truy cập các trường của một Union</a></h3>
+<p>Hành động cuối cùng chỉ hoạt động với <code>unsafe</code> là truy cập các trường của một <em>union</em>. Một <code>union</code> tương tự như một <code>struct</code>, nhưng tại một thời điểm chỉ một trường được khai báo được sử dụng trong một thể hiện cụ thể. Union chủ yếu được dùng để tương tác với union trong mã C. Việc truy cập các trường của union là unsafe vì Rust không thể đảm bảo kiểu dữ liệu đang được lưu trữ trong thể hiện union là gì. Bạn có thể tìm hiểu thêm về union trong <a href="../reference/items/unions.html">the Rust Reference</a>.</p>
+<h3 id="khi-nào-nên-sử-dụng-mã-unsafe"><a class="header" href="#khi-nào-nên-sử-dụng-mã-unsafe">Khi nào nên sử dụng mã Unsafe</a></h3>
+<p>Việc sử dụng <code>unsafe</code> để thực hiện một trong năm hành động (siêu năng lực) vừa thảo luận không phải là sai hoặc bị coi thường. Nhưng việc viết mã <code>unsafe</code> đúng là khó hơn vì trình biên dịch không thể đảm bảo an toàn bộ nhớ. Khi bạn có lý do để sử dụng mã <code>unsafe</code>, bạn có thể làm như vậy, và việc có chú thích <code>unsafe</code> rõ ràng giúp dễ dàng theo dõi nguồn gốc của vấn đề khi chúng xảy ra.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch19-00-advanced-features.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch19-03-advanced-traits.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch19-00-advanced-features.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch19-03-advanced-traits.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,735 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Traits: Defining Shared Behavior - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="traits-Định-nghĩa-hành-vi-chung"><a class="header" href="#traits-Định-nghĩa-hành-vi-chung">Traits: Định nghĩa Hành vi Chung</a></h2>
+<p>Một <em>trait</em> định nghĩa các chức năng mà một type cụ thể có và có thể chia sẻ
+với các type khác. Chúng ta có thể sử dụng traits để định nghĩa hành vi
+chung theo cách trừu tượng. Chúng ta có thể dùng <em>trait bounds</em> để chỉ định
+rằng một generic type có thể là bất kỳ type nào mà có hành vi nhất định.</p>
+<blockquote>
+<p>Lưu ý: Traits tương tự như một tính năng thường được gọi là <em>interfaces</em>
+trong các ngôn ngữ khác, mặc dù có một số khác biệt.</p>
+</blockquote>
+<h3 id="defining-a-trait"><a class="header" href="#defining-a-trait">Defining a Trait</a></h3>
+<p>Hành vi của một type bao gồm các method mà chúng ta có thể gọi trên type đó.
+Các type khác nhau chia sẻ cùng một hành vi nếu chúng ta có thể gọi cùng
+một phương thức trên tất cả các type đó. Định nghĩa trait là một cách để
+nhóm các method signature lại với nhau nhằm xác định một tập hợp hành vi
+cần thiết để thực hiện một mục đích nào đó.</p>
+<p>Ví dụ, giả sử chúng ta có nhiều struct lưu trữ các loại và lượng text khác
+nhau: một struct <code>NewsArticle</code> chứa một bài báo được lưu trữ ở một địa
+điểm cụ thể, và một <code>Tweet</code> có tối đa 280 ký tự cùng với metadata chỉ
+ra đó là tweet mới, retweet, hay trả lời một tweet khác.</p>
+<p>Chúng ta muốn tạo một media aggregator library crate tên là <code>aggregator</code>
+có thể hiển thị tóm tắt dữ liệu có thể được lưu trong một instance của
+<code>NewsArticle</code> hoặc <code>Tweet</code>. Để làm điều này, chúng ta cần một bản tóm
+tắt từ mỗi type, và chúng ta sẽ yêu cầu bản tóm tắt đó bằng cách gọi
+method <code>summarize</code> trên một instance. Listing 10-12 hiển thị định nghĩa
+của một public <code>Summary</code> trait biểu thị hành vi này.</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">pub trait Summary {
+    fn summarize(&amp;self) -&gt; String;
+}</code></pre>
+<p><span class="caption">Listing 10-12: Một <code>Summary</code> trait bao gồm hành vi được
+cung cấp bởi method <code>summarize</code></span></p>
+<p>Ở đây, chúng ta khai báo một trait bằng từ khóa <code>trait</code> và sau đó là tên
+của trait, trong trường hợp này là <code>Summary</code>. Chúng ta cũng khai báo trait
+là <code>pub</code> để các crate phụ thuộc vào crate này cũng có thể sử dụng trait,
+như chúng ta sẽ thấy trong một vài ví dụ. Bên trong cặp ngoặc nhọn, chúng
+ta khai báo các method signature mô tả hành vi của các type triển khai trait
+này, trong trường hợp này là <code>fn summarize(&amp;self) -&gt; String</code>.</p>
+<p>Sau method signature, thay vì cung cấp phần implementation bên trong cặp
+ngoặc nhọn, chúng ta dùng dấu chấm phẩy. Mỗi type triển khai trait này
+phải cung cấp hành vi riêng cho thân của method. Compiler sẽ đảm bảo rằng
+bất kỳ type nào có trait <code>Summary</code> sẽ có method <code>summarize</code> được định nghĩa
+với signature chính xác như vậy.</p>
+<p>Một trait có thể có nhiều method trong thân của nó: các method signature
+được liệt kê từng dòng một và mỗi dòng kết thúc bằng dấu chấm phẩy.</p>
+<h3 id="triển-khai-trait-trên-một-type"><a class="header" href="#triển-khai-trait-trên-một-type">Triển khai Trait trên một Type</a></h3>
+<p>Bây giờ chúng ta đã định nghĩa các signature mong muốn của các method trong
+trait <code>Summary</code>, chúng ta có thể triển khai nó trên các type trong media
+aggregator của mình. Listing 10-13 hiển thị một triển khai của trait
+<code>Summary</code> trên struct <code>NewsArticle</code> sử dụng headline, author và location
+để tạo giá trị trả về của <code>summarize</code>. Đối với struct <code>Tweet</code>, chúng ta
+định nghĩa <code>summarize</code> là username theo sau là toàn bộ nội dung tweet,
+giả sử nội dung tweet đã bị giới hạn tối đa 280 ký tự.</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground"><span class="boring">pub trait Summary {
+</span><span class="boring">    fn summarize(&amp;self) -&gt; String;
+</span><span class="boring">}
+</span><span class="boring">
+</span>pub struct NewsArticle {
+    pub headline: String,
+    pub location: String,
+    pub author: String,
+    pub content: String,
+}
+
+impl Summary for NewsArticle {
+    fn summarize(&amp;self) -&gt; String {
+        format!("{}, by {} ({})", self.headline, self.author, self.location)
+    }
+}
+
+pub struct SocialPost {
+    pub username: String,
+    pub content: String,
+    pub reply: bool,
+    pub repost: bool,
+}
+
+impl Summary for SocialPost {
+    fn summarize(&amp;self) -&gt; String {
+        format!("{}: {}", self.username, self.content)
+    }
+}</code></pre>
+<p><span class="caption">Listing 10-13: Triển khai trait <code>Summary</code> trên các type
+<code>NewsArticle</code> và <code>Tweet</code></span></p>
+<p>Triển khai một trait trên một type tương tự như triển khai các method
+thường. Sự khác biệt là sau <code>impl</code>, chúng ta đặt tên trait muốn triển khai,
+sau đó dùng từ khóa <code>for</code>, và rồi chỉ định tên của type mà chúng ta muốn
+triển khai trait cho. Bên trong khối <code>impl</code>, chúng ta đặt các method
+signature mà định nghĩa trait đã định nghĩa. Thay vì thêm dấu chấm phẩy
+sau mỗi signature, chúng ta dùng cặp ngoặc nhọn và điền phần thân của
+method với hành vi cụ thể mà chúng ta muốn các method của trait có trên
+type cụ thể đó.</p>
+<p>Bây giờ khi thư viện đã triển khai trait <code>Summary</code> trên <code>NewsArticle</code> và
+<code>Tweet</code>, người dùng của crate có thể gọi các method của trait trên các
+instance của <code>NewsArticle</code> và <code>Tweet</code> theo cùng cách chúng ta gọi các
+method thường. Sự khác biệt duy nhất là người dùng phải đưa trait vào
+scope cũng như các type. Dưới đây là ví dụ về cách một binary crate có
+thể sử dụng thư viện <code>aggregator</code> của chúng ta:</p>
+<pre><code class="language-rust ignore">use aggregator::{SocialPost, Summary};
+
+fn main() {
+    let post = SocialPost {
+        username: String::from("horse_ebooks"),
+        content: String::from(
+            "of course, as you probably already know, people",
+        ),
+        reply: false,
+        repost: false,
+    };
+
+    println!("1 new post: {}", post.summarize());
+}</code></pre>
+<p>Đoạn code này in ra <code>1 new tweet: horse_ebooks: of course, as you probably already know, people</code>.</p>
+<p>Các crate khác phụ thuộc vào crate <code>aggregator</code> cũng có thể đưa trait <code>Summary</code>
+vào scope để triển khai <code>Summary</code> trên các type của riêng họ. Một hạn chế cần
+lưu ý là chúng ta chỉ có thể triển khai một trait trên một type nếu ít nhất
+một trong trait hoặc type là local với crate của chúng ta. Ví dụ, chúng ta
+có thể triển khai các trait trong standard library như <code>Display</code> trên một
+type tùy chỉnh như <code>Tweet</code> như một phần của chức năng crate <code>aggregator</code> của
+chúng ta, vì type <code>Tweet</code> là local với crate <code>aggregator</code> của chúng ta. Chúng
+ta cũng có thể triển khai <code>Summary</code> trên <code>Vec&lt;T&gt;</code> trong crate <code>aggregator</code> của
+chúng ta, vì trait <code>Summary</code> là local với crate <code>aggregator</code>.</p>
+<p>Nhưng chúng ta không thể triển khai các trait bên ngoài trên các type bên ngoài.
+Ví dụ, chúng ta không thể triển khai trait <code>Display</code> trên <code>Vec&lt;T&gt;</code> trong crate
+<code>aggregator</code> của chúng ta, vì <code>Display</code> và <code>Vec&lt;T&gt;</code> đều được định nghĩa trong
+standard library và không phải là local với crate <code>aggregator</code>. Hạn chế này
+là một phần của một đặc tính gọi là <em>coherence</em>, và cụ thể hơn là <em>orphan rule</em>,
+được gọi như vậy vì type cha không có mặt. Quy tắc này đảm bảo rằng code của
+người khác không thể phá vỡ code của bạn và ngược lại. Nếu không có quy tắc này,
+hai crate có thể triển khai cùng một trait cho cùng một type, và Rust sẽ không
+biết triển khai nào để sử dụng.</p>
+<h3 id="default-implementations"><a class="header" href="#default-implementations">Default Implementations</a></h3>
+<p>Đôi khi sẽ hữu ích khi có hành vi mặc định cho một số hoặc tất cả các method
+trong một trait thay vì yêu cầu phải triển khai tất cả các method trên mọi type.
+Khi đó, khi triển khai trait trên một type cụ thể, chúng ta có thể giữ nguyên
+hoặc ghi đè hành vi mặc định của từng method.</p>
+<p>Trong Listing 10-14, chúng ta xác định một chuỗi mặc định cho method <code>summarize</code>
+của trait <code>Summary</code> thay vì chỉ định nghĩa chữ ký của method, như chúng ta đã
+làm trong Listing 10-12.</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">pub trait Summary {
+    fn summarize(&amp;self) -&gt; String {
+        String::from("(Read more...)")
+    }
+}
+<span class="boring">
+</span><span class="boring">pub struct NewsArticle {
+</span><span class="boring">    pub headline: String,
+</span><span class="boring">    pub location: String,
+</span><span class="boring">    pub author: String,
+</span><span class="boring">    pub content: String,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl Summary for NewsArticle {}
+</span><span class="boring">
+</span><span class="boring">pub struct SocialPost {
+</span><span class="boring">    pub username: String,
+</span><span class="boring">    pub content: String,
+</span><span class="boring">    pub reply: bool,
+</span><span class="boring">    pub repost: bool,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl Summary for SocialPost {
+</span><span class="boring">    fn summarize(&amp;self) -&gt; String {
+</span><span class="boring">        format!("{}: {}", self.username, self.content)
+</span><span class="boring">    }
+</span><span class="boring">}</span></code></pre>
+<p><span class="caption">Listing 10-14: Định nghĩa trait <code>Summary</code> với
+cài đặt mặc định cho method <code>summarize</code></span></p>
+<p>Để sử dụng cài đặt mặc định để tóm tắt các instance của <code>NewsArticle</code>, chúng ta
+xác định một <code>impl</code> block rỗng với <code>impl Summary for NewsArticle {}</code>.</p>
+<p>Mặc dù bây giờ chúng ta không còn định nghĩa method <code>summarize</code> trực tiếp trên
+<code>NewsArticle</code>, chúng ta đã cung cấp một cài đặt mặc định và chỉ định rằng
+<code>NewsArticle</code> triển khai trait <code>Summary</code>. Kết quả là, chúng ta vẫn có thể gọi
+method <code>summarize</code> trên một instance của <code>NewsArticle</code>, như sau:</p>
+<pre><code class="language-rust ignore"><span class="boring">use aggregator::{self, NewsArticle, Summary};
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span>    let article = NewsArticle {
+        headline: String::from("Penguins win the Stanley Cup Championship!"),
+        location: String::from("Pittsburgh, PA, USA"),
+        author: String::from("Iceburgh"),
+        content: String::from(
+            "The Pittsburgh Penguins once again are the best \
+             hockey team in the NHL.",
+        ),
+    };
+
+    println!("New article available! {}", article.summarize());
+<span class="boring">}</span></code></pre>
+<p>Mã này sẽ in ra <code>New article available! (Read more...)</code>.</p>
+<p>Việc tạo một cài đặt mặc định không yêu cầu chúng ta thay đổi gì về
+cách triển khai trait <code>Summary</code> trên <code>Tweet</code> trong Listing 10-13. Lý do là cú pháp
+để ghi đè một cài đặt mặc định giống hệt cú pháp để triển khai một method của
+trait mà không có cài đặt mặc định.</p>
+<p>Các cài đặt mặc định có thể gọi các method khác trong cùng một trait, ngay cả
+khi các method đó không có cài đặt mặc định. Theo cách này, một trait có thể
+cung cấp nhiều chức năng hữu ích và chỉ yêu cầu người triển khai định nghĩa
+một phần nhỏ trong số đó. Ví dụ, chúng ta có thể định nghĩa trait <code>Summary</code>
+có một method <code>summarize_author</code> mà bắt buộc phải triển khai, rồi sau đó
+định nghĩa method <code>summarize</code> có cài đặt mặc định gọi đến <code>summarize_author</code>:</p>
+<pre><code class="language-rust noplayground">pub trait Summary {
+    fn summarize_author(&amp;self) -&gt; String;
+
+    fn summarize(&amp;self) -&gt; String {
+        format!("(Read more from {}...)", self.summarize_author())
+    }
+}
+<span class="boring">
+</span><span class="boring">pub struct SocialPost {
+</span><span class="boring">    pub username: String,
+</span><span class="boring">    pub content: String,
+</span><span class="boring">    pub reply: bool,
+</span><span class="boring">    pub repost: bool,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl Summary for SocialPost {
+</span><span class="boring">    fn summarize_author(&amp;self) -&gt; String {
+</span><span class="boring">        format!("@{}", self.username)
+</span><span class="boring">    }
+</span><span class="boring">}</span></code></pre>
+<p>Để sử dụng phiên bản <code>Summary</code> này, chúng ta chỉ cần định nghĩa <code>summarize_author</code>
+khi triển khai trait trên một kiểu:</p>
+<pre><code class="language-rust ignore"><span class="boring">pub trait Summary {
+</span><span class="boring">    fn summarize_author(&amp;self) -&gt; String;
+</span><span class="boring">
+</span><span class="boring">    fn summarize(&amp;self) -&gt; String {
+</span><span class="boring">        format!("(Read more from {}...)", self.summarize_author())
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">pub struct SocialPost {
+</span><span class="boring">    pub username: String,
+</span><span class="boring">    pub content: String,
+</span><span class="boring">    pub reply: bool,
+</span><span class="boring">    pub repost: bool,
+</span><span class="boring">}
+</span><span class="boring">
+</span>impl Summary for SocialPost {
+    fn summarize_author(&amp;self) -&gt; String {
+        format!("@{}", self.username)
+    }
+}</code></pre>
+<p>Sau khi chúng ta định nghĩa <code>summarize_author</code>,
+chúng ta có thể gọi <code>summarize</code> trên các instance của struct <code>Tweet</code>,
+và implementation mặc định của <code>summarize</code> sẽ gọi định nghĩa của <code>summarize_author</code> mà chúng ta đã cung cấp.
+Bởi vì chúng ta đã triển khai <code>summarize_author</code>, trait <code>Summary</code>
+đã cung cấp cho chúng ta hành vi của phương thức <code>summarize</code> mà không yêu cầu phải viết thêm bất kỳ code nào.</p>
+<pre><code class="language-rust ignore"><span class="boring">use aggregator::{self, SocialPost, Summary};
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span>    let post = SocialPost {
+        username: String::from("horse_ebooks"),
+        content: String::from(
+            "of course, as you probably already know, people",
+        ),
+        reply: false,
+        repost: false,
+    };
+
+    println!("1 new post: {}", post.summarize());
+<span class="boring">}</span></code></pre>
+<p>Mã này in ra <code>1 new tweet: (Read more from @horse_ebooks...)</code>.</p>
+<p>Lưu ý rằng không thể gọi triển khai mặc định từ một triển khai ghi đè của cùng phương thức đó.</p>
+<h3 id="traits-như-tham-số"><a class="header" href="#traits-như-tham-số">Traits như Tham Số</a></h3>
+<p>Bây giờ bạn đã biết cách định nghĩa và triển khai traits, chúng ta có thể khám phá cách sử dụng traits để định nghĩa các hàm nhận nhiều loại khác nhau. Chúng ta sẽ sử dụng trait <code>Summary</code> mà chúng ta đã triển khai trên các kiểu <code>NewsArticle</code> và <code>Tweet</code> trong Listing 10-13 để định nghĩa một hàm <code>notify</code> gọi phương thức <code>summarize</code> trên tham số <code>item</code> của nó, mà là một kiểu nào đó triển khai trait <code>Summary</code>. Để làm điều này, chúng ta sử dụng cú pháp <code>impl Trait</code>, như sau:</p>
+<pre><code class="language-rust ignore"><span class="boring">pub trait Summary {
+</span><span class="boring">    fn summarize(&amp;self) -&gt; String;
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">pub struct NewsArticle {
+</span><span class="boring">    pub headline: String,
+</span><span class="boring">    pub location: String,
+</span><span class="boring">    pub author: String,
+</span><span class="boring">    pub content: String,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl Summary for NewsArticle {
+</span><span class="boring">    fn summarize(&amp;self) -&gt; String {
+</span><span class="boring">        format!("{}, by {} ({})", self.headline, self.author, self.location)
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">pub struct SocialPost {
+</span><span class="boring">    pub username: String,
+</span><span class="boring">    pub content: String,
+</span><span class="boring">    pub reply: bool,
+</span><span class="boring">    pub repost: bool,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl Summary for SocialPost {
+</span><span class="boring">    fn summarize(&amp;self) -&gt; String {
+</span><span class="boring">        format!("{}: {}", self.username, self.content)
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span>pub fn notify(item: &amp;impl Summary) {
+    println!("Breaking news! {}", item.summarize());
+}</code></pre>
+<p>Thay vì một kiểu cụ thể cho tham số <code>item</code>, chúng ta chỉ định từ khóa <code>impl</code> và tên trait.
+Tham số này chấp nhận bất kỳ kiểu nào triển khai trait được chỉ định.
+Trong thân hàm <code>notify</code>, chúng ta có thể gọi bất kỳ phương thức nào trên <code>item</code> mà đến từ trait <code>Summary</code>,
+chẳng hạn như <code>summarize</code>. Chúng ta có thể gọi <code>notify</code> và truyền vào bất kỳ thể hiện nào của <code>NewsArticle</code> hoặc <code>Tweet</code>.
+Mã gọi hàm với bất kỳ kiểu nào khác, chẳng hạn như <code>String</code> hoặc <code>i32</code>,
+sẽ không biên dịch vì các kiểu đó không triển khai <code>Summary</code>.</p>
+<!-- Old headings. Do not remove or links may break. -->
+<p><a id="fixing-the-largest-function-with-trait-bounds"></a></p>
+<h4 id="cú-pháp-trait-bound"><a class="header" href="#cú-pháp-trait-bound">Cú pháp Trait Bound</a></h4>
+<p>Cú pháp <code>impl Trait</code> hoạt động cho các trường hợp đơn giản nhưng thực ra là cú pháp ngắn gọn cho một dạng dài hơn được gọi là <em>trait bound</em>; nó trông như sau:</p>
+<pre><code class="language-rust ignore">pub fn notify&lt;T: Summary&gt;(item: &amp;T) {
+    println!("Breaking news! {}", item.summarize());
+}</code></pre>
+<p>Phiên bản dài hơn này tương đương với ví dụ trong phần trước nhưng chi tiết hơn.
+Chúng ta đặt ràng buộc trait cùng với khai báo của tham số kiểu generic ngay sau dấu hai chấm và bên trong dấu ngoặc nhọn (<code>&lt;&gt;</code>).</p>
+<p>Cú pháp <code>impl Trait</code> tiện lợi và giúp viết code ngắn gọn hơn trong những trường hợp đơn giản,
+trong khi cú pháp ràng buộc trait đầy đủ có thể diễn đạt sự phức tạp hơn trong các trường hợp khác.
+Ví dụ, chúng ta có thể có hai tham số thực thi <code>Summary</code>. Việc làm này với cú pháp <code>impl Trait</code> sẽ trông như sau:</p>
+<pre><code class="language-rust ignore">pub fn notify(item1: &amp;impl Summary, item2: &amp;impl Summary) {</code></pre>
+<p>Việc sử dụng <code>impl Trait</code> là phù hợp nếu chúng ta muốn hàm này cho phép <code>item1</code> và
+<code>item2</code> có các kiểu khác nhau (miễn là cả hai kiểu đều thực thi <code>Summary</code>). Tuy nhiên, nếu
+chúng ta muốn buộc cả hai tham số phải cùng kiểu, thì phải sử dụng trait bound, như sau:</p>
+<pre><code class="language-rust ignore">pub fn notify&lt;T: Summary&gt;(item1: &amp;T, item2: &amp;T) {</code></pre>
+<p>Kiểu generic <code>T</code> được chỉ định làm kiểu của các tham số <code>item1</code> và <code>item2</code> giới hạn hàm sao cho kiểu cụ thể của giá trị được truyền vào <code>item1</code> và <code>item2</code> phải giống nhau.</p>
+<h4 id="chỉ-định-nhiều-ràng-buộc-trait-với-cú-pháp-"><a class="header" href="#chỉ-định-nhiều-ràng-buộc-trait-với-cú-pháp-">Chỉ định nhiều ràng buộc trait với cú pháp <code>+</code></a></h4>
+<p>Chúng ta cũng có thể chỉ định nhiều hơn một ràng buộc trait. Giả sử chúng ta muốn <code>notify</code> sử dụng cả định dạng hiển thị lẫn tóm tắt trên <code>item</code>: chúng ta chỉ định trong định nghĩa <code>notify</code> rằng <code>item</code> phải thực thi cả <code>Display</code> và <code>Summary</code>. Chúng ta có thể làm điều này bằng cú pháp <code>+</code>:</p>
+<pre><code class="language-rust ignore">pub fn notify(item: &amp;(impl Summary + Display)) {</code></pre>
+<p>Cú pháp <code>+</code> cũng hợp lệ với các ràng buộc trait trên các kiểu generic:</p>
+<pre><code class="language-rust ignore">pub fn notify&lt;T: Summary + Display&gt;(item: &amp;T) {</code></pre>
+<p>Với hai ràng buộc trait được chỉ định, thân của <code>notify</code> có thể gọi <code>summarize</code> và sử dụng <code>{}</code> để định dạng <code>item</code>.</p>
+<h4 id="ràng-buộc-trait-rõ-ràng-hơn-với-câu-lệnh-where"><a class="header" href="#ràng-buộc-trait-rõ-ràng-hơn-với-câu-lệnh-where">Ràng buộc trait rõ ràng hơn với câu lệnh <code>where</code></a></h4>
+<p>Sử dụng quá nhiều ràng buộc trait cũng có nhược điểm. Mỗi kiểu generic có các ràng buộc trait riêng, vì vậy các hàm với nhiều tham số kiểu generic có thể chứa rất nhiều thông tin ràng buộc trait giữa tên hàm và danh sách tham số, làm cho chữ ký hàm khó đọc. Vì lý do này, Rust có cú pháp thay thế để chỉ định ràng buộc trait bên trong một câu lệnh <code>where</code> sau chữ ký hàm. Thay vì viết như sau:</p>
+<pre><code class="language-rust ignore">fn some_function&lt;T: Display + Clone, U: Clone + Debug&gt;(t: &amp;T, u: &amp;U) -&gt; i32 {</code></pre>
+<p>we can use a <code>where</code> clause, like this:</p>
+<pre><code class="language-rust ignore">fn some_function&lt;T, U&gt;(t: &amp;T, u: &amp;U) -&gt; i32
+where
+    T: Display + Clone,
+    U: Clone + Debug,
+{
+<span class="boring">    unimplemented!()
+</span><span class="boring">}</span></code></pre>
+<p>Chữ ký của hàm này gọn gàng hơn: tên hàm, danh sách tham số và kiểu trả về được đặt gần nhau,
+tương tự như một hàm không có nhiều ràng buộc trait.</p>
+<h3 id="trả-về-các-kiểu-thực-thi-trait"><a class="header" href="#trả-về-các-kiểu-thực-thi-trait">Trả về các kiểu thực thi trait</a></h3>
+<p>Chúng ta cũng có thể sử dụng cú pháp <code>impl Trait</code> ở vị trí trả về để trả về một giá trị của kiểu nào đó thực thi một trait, như minh họa sau:</p>
+<pre><code class="language-rust ignore"><span class="boring">pub trait Summary {
+</span><span class="boring">    fn summarize(&amp;self) -&gt; String;
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">pub struct NewsArticle {
+</span><span class="boring">    pub headline: String,
+</span><span class="boring">    pub location: String,
+</span><span class="boring">    pub author: String,
+</span><span class="boring">    pub content: String,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl Summary for NewsArticle {
+</span><span class="boring">    fn summarize(&amp;self) -&gt; String {
+</span><span class="boring">        format!("{}, by {} ({})", self.headline, self.author, self.location)
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">pub struct SocialPost {
+</span><span class="boring">    pub username: String,
+</span><span class="boring">    pub content: String,
+</span><span class="boring">    pub reply: bool,
+</span><span class="boring">    pub repost: bool,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl Summary for SocialPost {
+</span><span class="boring">    fn summarize(&amp;self) -&gt; String {
+</span><span class="boring">        format!("{}: {}", self.username, self.content)
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn returns_summarizable() -&gt; impl Summary {
+    SocialPost {
+        username: String::from("horse_ebooks"),
+        content: String::from(
+            "of course, as you probably already know, people",
+        ),
+        reply: false,
+        repost: false,
+    }
+}</code></pre>
+<p>Bằng cách sử dụng <code>impl Summary</code> cho kiểu trả về, chúng ta chỉ định rằng hàm <code>returns_summarizable</code>
+trả về một kiểu nào đó thực thi trait <code>Summary</code> mà không cần đặt tên kiểu cụ thể. Trong trường hợp này,
+<code>returns_summarizable</code> trả về một <code>Tweet</code>, nhưng mã gọi hàm này không cần biết điều đó.</p>
+<p>Khả năng chỉ định kiểu trả về chỉ dựa trên trait mà nó thực thi đặc biệt hữu ích trong bối cảnh closures và iterators, được đề cập trong Chương 13. Closures và iterators tạo ra các kiểu mà chỉ trình biên dịch biết hoặc các kiểu rất dài để chỉ định. Cú pháp <code>impl Trait</code> cho phép bạn chỉ định một cách ngắn gọn rằng một hàm trả về một kiểu nào đó thực thi trait <code>Iterator</code> mà không cần viết ra kiểu rất dài.</p>
+<p>Tuy nhiên, bạn chỉ có thể sử dụng <code>impl Trait</code> nếu trả về một kiểu duy nhất. Ví dụ, đoạn mã này trả về hoặc một <code>NewsArticle</code> hoặc một <code>Tweet</code> với kiểu trả về được chỉ định là <code>impl Summary</code> sẽ không hoạt động:</p>
+<pre><code class="language-rust ignore does_not_compile"><span class="boring">pub trait Summary {
+</span><span class="boring">    fn summarize(&amp;self) -&gt; String;
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">pub struct NewsArticle {
+</span><span class="boring">    pub headline: String,
+</span><span class="boring">    pub location: String,
+</span><span class="boring">    pub author: String,
+</span><span class="boring">    pub content: String,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl Summary for NewsArticle {
+</span><span class="boring">    fn summarize(&amp;self) -&gt; String {
+</span><span class="boring">        format!("{}, by {} ({})", self.headline, self.author, self.location)
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">pub struct SocialPost {
+</span><span class="boring">    pub username: String,
+</span><span class="boring">    pub content: String,
+</span><span class="boring">    pub reply: bool,
+</span><span class="boring">    pub repost: bool,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl Summary for SocialPost {
+</span><span class="boring">    fn summarize(&amp;self) -&gt; String {
+</span><span class="boring">        format!("{}: {}", self.username, self.content)
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn returns_summarizable(switch: bool) -&gt; impl Summary {
+    if switch {
+        NewsArticle {
+            headline: String::from(
+                "Penguins win the Stanley Cup Championship!",
+            ),
+            location: String::from("Pittsburgh, PA, USA"),
+            author: String::from("Iceburgh"),
+            content: String::from(
+                "The Pittsburgh Penguins once again are the best \
+                 hockey team in the NHL.",
+            ),
+        }
+    } else {
+        SocialPost {
+            username: String::from("horse_ebooks"),
+            content: String::from(
+                "of course, as you probably already know, people",
+            ),
+            reply: false,
+            repost: false,
+        }
+    }
+}</code></pre>
+<p>Việc trả về hoặc một <code>NewsArticle</code> hoặc một <code>Tweet</code> không được phép do các hạn chế liên quan đến cách cú pháp <code>impl Trait</code> được triển khai trong trình biên dịch. Chúng ta sẽ đề cập cách viết một hàm với hành vi này trong phần <a href="ch17-02-trait-objects.html#using-trait-objects-that-allow-for-values-of-different-types">“Sử dụng Trait Objects cho các giá trị có kiểu khác nhau”</a><!-- ignore --> của Chương 17.</p>
+<h3 id="sử-dụng-ràng-buộc-trait-để-triển-khai-phương-thức-có-điều-kiện"><a class="header" href="#sử-dụng-ràng-buộc-trait-để-triển-khai-phương-thức-có-điều-kiện">Sử dụng ràng buộc trait để triển khai phương thức có điều kiện</a></h3>
+<p>Bằng cách sử dụng ràng buộc trait với một khối <code>impl</code> sử dụng tham số kiểu generic, chúng ta có thể triển khai phương thức có điều kiện cho các kiểu thực thi các trait đã chỉ định. Ví dụ, kiểu <code>Pair&lt;T&gt;</code> trong Listing 10-15 luôn triển khai hàm <code>new</code> để trả về một thể hiện mới của <code>Pair&lt;T&gt;</code> (nhớ lại từ phần <a href="ch05-03-method-syntax.html#defining-methods">“Định nghĩa phương thức”</a><!-- ignore --> của Chương 5 rằng <code>Self</code> là bí danh cho kiểu của khối <code>impl</code>, trong trường hợp này là <code>Pair&lt;T&gt;</code>). Nhưng trong khối <code>impl</code> tiếp theo, <code>Pair&lt;T&gt;</code> chỉ triển khai phương thức <code>cmp_display</code> nếu kiểu bên trong <code>T</code> thực thi trait <code>PartialOrd</code> cho phép so sánh <em>và</em> trait <code>Display</code> cho phép in ra.</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">use std::fmt::Display;
+
+struct Pair&lt;T&gt; {
+    x: T,
+    y: T,
+}
+
+impl&lt;T&gt; Pair&lt;T&gt; {
+    fn new(x: T, y: T) -&gt; Self {
+        Self { x, y }
+    }
+}
+
+impl&lt;T: Display + PartialOrd&gt; Pair&lt;T&gt; {
+    fn cmp_display(&amp;self) {
+        if self.x &gt;= self.y {
+            println!("The largest member is x = {}", self.x);
+        } else {
+            println!("The largest member is y = {}", self.y);
+        }
+    }
+}</code></pre>
+<p><span class="caption">Listing 10-15: Triển khai phương thức có điều kiện trên một kiểu generic tùy thuộc vào ràng buộc trait</span></p>
+<p>Chúng ta cũng có thể triển khai một trait có điều kiện cho bất kỳ kiểu nào thực thi một trait khác. Các triển khai của một trait trên bất kỳ kiểu nào thỏa mãn các ràng buộc trait được gọi là <em>blanket implementations</em> và được sử dụng rộng rãi trong thư viện chuẩn của Rust. Ví dụ, thư viện chuẩn triển khai trait <code>ToString</code> trên bất kỳ kiểu nào thực thi trait <code>Display</code>. Khối <code>impl</code> trong thư viện chuẩn trông tương tự như đoạn mã này:</p>
+<pre><code class="language-rust ignore">impl&lt;T: Display&gt; ToString for T {
+    // --snip--
+}</code></pre>
+<p>Vì thư viện chuẩn có triển khai blanket này, chúng ta có thể gọi phương thức <code>to_string</code> được định nghĩa bởi trait <code>ToString</code> trên bất kỳ kiểu nào thực thi trait <code>Display</code>. Ví dụ, chúng ta có thể chuyển các số nguyên thành giá trị <code>String</code> tương ứng như sau vì các số nguyên thực thi <code>Display</code>:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let s = 3.to_string();
+<span class="boring">}</span></code></pre></pre>
+<p>Các triển khai blanket xuất hiện trong tài liệu của trait ở phần “Implementors”.</p>
+<p>Traits và ràng buộc trait cho phép chúng ta viết code sử dụng tham số kiểu generic để giảm sự trùng lặp, đồng thời chỉ định cho trình biên dịch rằng chúng ta muốn kiểu generic có hành vi cụ thể. Trình biên dịch sau đó có thể sử dụng thông tin ràng buộc trait để kiểm tra rằng tất cả các kiểu cụ thể được sử dụng với code của chúng ta cung cấp hành vi đúng. Trong các ngôn ngữ kiểu động, chúng ta sẽ nhận lỗi tại thời điểm chạy nếu gọi một phương thức trên kiểu không định nghĩa phương thức đó. Nhưng Rust chuyển các lỗi này sang thời điểm biên dịch, buộc chúng ta phải sửa lỗi trước khi code có thể chạy. Thêm vào đó, chúng ta không phải viết code kiểm tra hành vi tại thời điểm chạy vì đã kiểm tra ở thời điểm biên dịch. Việc này cải thiện hiệu năng mà không phải hy sinh tính linh hoạt của generic.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch10-01-syntax.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch10-03-lifetime-syntax.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch10-01-syntax.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch10-03-lifetime-syntax.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

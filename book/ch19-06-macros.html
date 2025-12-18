@@ -1,0 +1,398 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Macros - The Rust Programming Language</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/rust-lang/book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="macros"><a class="header" href="#macros">Macros</a></h2>
+<p>Chúng ta đã sử dụng các macro như <code>println!</code> trong suốt cuốn sách này, nhưng chúng ta chưa khám phá đầy đủ macro là gì và cách chúng hoạt động. Thuật ngữ <em>macro</em> đề cập đến một tập hợp các tính năng trong Rust: <em>macro khai báo</em> với <code>macro_rules!</code> và ba loại <em>macro thủ tục</em>:</p>
+<ul>
+<li>Macro <code>#[derive]</code> tùy chỉnh, xác định mã được thêm với thuộc tính <code>derive</code> sử dụng trên struct và enum</li>
+<li>Macro kiểu thuộc tính, định nghĩa các thuộc tính tùy chỉnh có thể sử dụng trên bất kỳ item nào</li>
+<li>Macro kiểu hàm, trông giống như các lời gọi hàm nhưng hoạt động trên các token được chỉ định làm đối số</li>
+</ul>
+<p>Chúng ta sẽ lần lượt nói về từng loại, nhưng trước tiên, hãy xem lý do tại sao chúng ta cần macro khi đã có hàm.</p>
+<h3 id="sự-khác-biệt-giữa-macros-và-functions"><a class="header" href="#sự-khác-biệt-giữa-macros-và-functions">Sự khác biệt giữa Macros và Functions</a></h3>
+<p>Về cơ bản, macros là cách viết mã mà tự nó viết ra mã khác, điều này được gọi là <em>metaprogramming</em>. Trong Phụ lục C, chúng ta thảo luận về thuộc tính <code>derive</code>, tạo ra việc triển khai các trait khác nhau cho bạn. Chúng ta cũng đã sử dụng các macro <code>println!</code> và <code>vec!</code> trong suốt cuốn sách. Tất cả các macro này <em>mở rộng</em> để tạo ra nhiều mã hơn so với mã bạn viết thủ công.</p>
+<p>Metaprogramming hữu ích để giảm lượng mã bạn phải viết và duy trì, điều này cũng là một trong những vai trò của hàm. Tuy nhiên, macros có một số khả năng bổ sung mà hàm không có.</p>
+<p>Một chữ ký hàm phải khai báo số lượng và kiểu của các tham số mà hàm có. Ngược lại, macros có thể nhận một số lượng biến đổi của các tham số: chúng ta có thể gọi <code>println!("hello")</code> với một đối số hoặc <code>println!("hello {}", name)</code> với hai đối số. Ngoài ra, macros được mở rộng trước khi trình biên dịch giải thích ý nghĩa của mã, vì vậy một macro có thể, ví dụ, triển khai một trait trên một kiểu nhất định. Một hàm không thể làm được điều đó, vì nó được gọi tại runtime và một trait cần được triển khai tại compile time.</p>
+<p>Nhược điểm của việc triển khai macro thay vì hàm là các định nghĩa macro phức tạp hơn định nghĩa hàm vì bạn đang viết mã Rust mà tự nó viết ra mã Rust khác. Do sự gián tiếp này, các định nghĩa macro thường khó đọc, hiểu và duy trì hơn so với định nghĩa hàm.</p>
+<p>Một khác biệt quan trọng khác giữa macros và hàm là bạn phải định nghĩa macro hoặc đưa chúng vào phạm vi <em>trước</em> khi gọi chúng trong một file, khác với các hàm mà bạn có thể định nghĩa ở bất cứ đâu và gọi ở bất cứ đâu.</p>
+<h3 id="macros-khai-báo-với-macro_rules-cho-metaprogramming-chung"><a class="header" href="#macros-khai-báo-với-macro_rules-cho-metaprogramming-chung">Macros Khai Báo với <code>macro_rules!</code> cho Metaprogramming Chung</a></h3>
+<p>Hình thức macro được sử dụng rộng rãi nhất trong Rust là <em>macro khai báo</em>. Chúng đôi khi còn được gọi là “macros theo ví dụ”, “<code>macro_rules!</code> macros,” hoặc đơn giản là “macros.” Về bản chất, macro khai báo cho phép bạn viết một cái gì đó tương tự như biểu thức <code>match</code> trong Rust. Như đã thảo luận trong Chương 6, biểu thức <code>match</code> là các cấu trúc điều khiển nhận một biểu thức, so sánh giá trị kết quả của biểu thức với các pattern, và sau đó chạy mã liên quan đến pattern khớp. Macro cũng so sánh một giá trị với các pattern được liên kết với mã cụ thể: trong trường hợp này, giá trị là mã nguồn Rust literal được truyền vào macro; các pattern được so sánh với cấu trúc của mã nguồn đó; và mã liên kết với mỗi pattern, khi khớp, sẽ thay thế mã được truyền vào macro. Tất cả điều này xảy ra trong quá trình biên dịch.</p>
+<p>Để định nghĩa một macro, bạn sử dụng cấu trúc <code>macro_rules!</code>. Hãy cùng khám phá cách sử dụng <code>macro_rules!</code> bằng cách xem cách macro <code>vec!</code> được định nghĩa. Chương 8 đã đề cập cách chúng ta có thể sử dụng macro <code>vec!</code> để tạo một vector mới với các giá trị cụ thể. Ví dụ, macro sau tạo một vector mới chứa ba số nguyên:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let v: Vec&lt;u32&gt; = vec![1, 2, 3];
+<span class="boring">}</span></code></pre></pre>
+<p>Chúng ta cũng có thể sử dụng macro <code>vec!</code> để tạo một vector gồm hai số nguyên hoặc một vector gồm năm string slice. Chúng ta sẽ không thể sử dụng hàm để làm điều tương tự vì không biết trước số lượng hoặc kiểu của các giá trị.</p>
+<p>Listing 19-28 cho thấy một định nghĩa hơi đơn giản hóa của macro <code>vec!</code>.</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-28/src/lib.rs}}</code></pre>
+<p><span class="caption">Listing 19-28: Phiên bản đơn giản hóa của định nghĩa macro <code>vec!</code></span></p>
+<blockquote>
+<p>Lưu ý: Định nghĩa thực tế của macro <code>vec!</code> trong thư viện chuẩn bao gồm mã để cấp phát trước lượng bộ nhớ chính xác. Mã đó là một tối ưu hóa mà chúng ta không bao gồm ở đây để làm ví dụ đơn giản hơn.</p>
+</blockquote>
+<p>Chú thích <code>#[macro_export]</code> chỉ ra rằng macro này nên có sẵn bất cứ khi nào crate chứa macro được đưa vào phạm vi. Nếu không có chú thích này, macro sẽ không thể được đưa vào phạm vi.</p>
+<p>Chúng ta bắt đầu định nghĩa macro với <code>macro_rules!</code> và tên của macro mà chúng ta đang định nghĩa <em>không có</em> dấu chấm than. Tên, trong trường hợp này là <code>vec</code>, được theo sau bởi dấu ngoặc nhọn xác định thân của định nghĩa macro.</p>
+<p>Cấu trúc trong thân <code>vec!</code> tương tự cấu trúc của một biểu thức <code>match</code>. Ở đây chúng ta có một nhánh với pattern <code>( $( $x:expr ),* )</code>, theo sau bởi <code>=&gt;</code> và khối mã liên kết với pattern này. Nếu pattern khớp, khối mã liên kết sẽ được tạo ra. Vì đây là pattern duy nhất trong macro này, chỉ có một cách hợp lệ để khớp; bất kỳ pattern nào khác sẽ dẫn đến lỗi. Các macro phức tạp hơn sẽ có nhiều nhánh hơn.</p>
+<p>Cú pháp pattern hợp lệ trong định nghĩa macro khác với cú pháp pattern được trình bày trong Chương 18 vì các macro pattern được khớp với cấu trúc mã Rust thay vì giá trị. Hãy cùng phân tích các thành phần pattern trong Listing 19-28; để xem toàn bộ cú pháp pattern của macro, tham khảo <a href="../reference/macros-by-example.html">Rust Reference</a>.</p>
+<p>Đầu tiên, chúng ta sử dụng một cặp dấu ngoặc để bao quanh toàn bộ pattern. Chúng ta sử dụng dấu đô la (<code>$</code>) để khai báo một biến trong hệ thống macro sẽ chứa mã Rust khớp với pattern. Dấu đô la làm rõ rằng đây là một biến macro, khác với biến Rust thông thường. Tiếp theo là một cặp dấu ngoặc để bắt các giá trị khớp với pattern bên trong dấu ngoặc để sử dụng trong mã thay thế. Bên trong <code>$()</code> là <code>$x:expr</code>, khớp với bất kỳ biểu thức Rust nào và gán tên <code>$x</code> cho biểu thức đó.</p>
+<p>Dấu phẩy theo sau <code>$()</code> chỉ ra rằng một ký tự dấu phẩy thực tế có thể xuất hiện tùy chọn sau mã khớp với <code>$()</code>. Dấu <code>*</code> chỉ ra rằng pattern khớp với không hoặc nhiều lần bất cứ thứ gì đứng trước <code>*</code>.</p>
+<p>Khi chúng ta gọi macro này với <code>vec![1, 2, 3];</code>, pattern <code>$x</code> khớp ba lần với ba biểu thức <code>1</code>, <code>2</code>, và <code>3</code>.</p>
+<p>Bây giờ hãy xem pattern trong thân mã liên kết với nhánh này: <code>temp_vec.push()</code> trong <code>$()*</code> được sinh ra cho mỗi phần khớp với <code>$()</code> trong pattern không hoặc nhiều lần tùy thuộc vào số lần pattern khớp. <code>$x</code> được thay thế bằng mỗi biểu thức khớp. Khi chúng ta gọi macro này với <code>vec![1, 2, 3];</code>, mã được sinh ra thay thế cho lời gọi macro này sẽ là:</p>
+<pre><code class="language-rust ignore">{
+    let mut temp_vec = Vec::new();
+    temp_vec.push(1);
+    temp_vec.push(2);
+    temp_vec.push(3);
+    temp_vec
+}</code></pre>
+<p>Chúng ta đã định nghĩa một macro có thể nhận bất kỳ số lượng đối số nào với bất kỳ kiểu nào và có thể sinh mã để tạo một vector chứa các phần tử được chỉ định.</p>
+<p>Để tìm hiểu thêm về cách viết macro, tham khảo tài liệu trực tuyến hoặc các nguồn khác, chẳng hạn như <a href="https://veykril.github.io/tlborm/">“The Little Book of Rust Macros”</a> do Daniel Keep khởi xướng và tiếp tục bởi Lukas Wirth.</p>
+<h3 id="macros-thủ-tục-để-sinh-mã-từ-thuộc-tính"><a class="header" href="#macros-thủ-tục-để-sinh-mã-từ-thuộc-tính">Macros Thủ Tục để Sinh Mã từ Thuộc Tính</a></h3>
+<p>Hình thức thứ hai của macro là <em>macro thủ tục</em>, hoạt động giống như một hàm (và là một loại thủ tục). Macros thủ tục nhận một số mã làm đầu vào, thao tác trên mã đó, và tạo ra một số mã làm đầu ra thay vì so khớp với các pattern và thay thế mã như các macro khai báo. Ba loại macros thủ tục là custom derive, attribute-like, và function-like, và tất cả hoạt động theo cách tương tự.</p>
+<p>Khi tạo macros thủ tục, định nghĩa phải nằm trong một crate riêng với loại crate đặc biệt. Điều này do các lý do kỹ thuật phức tạp mà chúng ta hy vọng sẽ loại bỏ trong tương lai. Trong Listing 19-29, chúng ta minh họa cách định nghĩa một macro thủ tục, trong đó <code>some_attribute</code> là một chỗ giữ chỗ cho việc sử dụng một loại macro cụ thể.</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust ignore">use proc_macro;
+
+#[some_attribute]
+pub fn some_name(input: TokenStream) -&gt; TokenStream {
+}</code></pre>
+<p><span class="caption">Listing 19-29: Ví dụ về việc định nghĩa một procedural macro</span></p>
+<p>Hàm định nghĩa một procedural macro nhận một <code>TokenStream</code> làm đầu vào và tạo ra một <code>TokenStream</code> làm đầu ra. Kiểu <code>TokenStream</code> được định nghĩa bởi crate <code>proc_macro</code> đi kèm với Rust và đại diện cho một chuỗi các token. Đây là phần cốt lõi của macro: mã nguồn mà macro thao tác tạo thành <code>TokenStream</code> đầu vào, và mã mà macro sinh ra là <code>TokenStream</code> đầu ra. Hàm cũng có một thuộc tính đi kèm chỉ ra loại procedural macro mà chúng ta đang tạo. Chúng ta có thể có nhiều loại procedural macro trong cùng một crate.</p>
+<p>Hãy xem các loại procedural macro khác nhau. Chúng ta sẽ bắt đầu với một custom derive macro và sau đó giải thích những khác biệt nhỏ khiến các dạng khác khác nhau.</p>
+<h3 id="cách-viết-custom-derive-macro"><a class="header" href="#cách-viết-custom-derive-macro">Cách Viết Custom <code>derive</code> Macro</a></h3>
+<p>Hãy tạo một crate có tên <code>hello_macro</code> định nghĩa một trait có tên <code>HelloMacro</code> với một hàm liên kết là <code>hello_macro</code>. Thay vì yêu cầu người dùng triển khai trait <code>HelloMacro</code> cho từng kiểu của họ, chúng ta sẽ cung cấp một procedural macro để người dùng có thể chú thích kiểu của họ với <code>#[derive(HelloMacro)]</code> để nhận triển khai mặc định của hàm <code>hello_macro</code>. Triển khai mặc định sẽ in ra <code>Hello, Macro! My name is TypeName!</code>, trong đó <code>TypeName</code> là tên của kiểu mà trait này được định nghĩa. Nói cách khác, chúng ta sẽ viết một crate cho phép lập trình viên khác viết mã như Listing 19-30 sử dụng crate của chúng ta.</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile">{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-30/src/main.rs}}</code></pre>
+<p><span class="caption">Listing 19-30: Mã mà người dùng crate của chúng ta có thể viết khi sử dụng procedural macro</span></p>
+<p>Đoạn mã này sẽ in ra <code>Hello, Macro! My name is Pancakes!</code> khi hoàn tất. Bước đầu tiên là tạo một crate thư viện mới, như sau:</p>
+<pre><code class="language-console">$ cargo new hello_macro --lib
+</code></pre>
+<p>Tiếp theo, chúng ta sẽ định nghĩa trait <code>HelloMacro</code> và hàm liên kết của nó:</p>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><code class="language-rust noplayground">{{#rustdoc_include ../listings/ch19-advanced-features/no-listing-20-impl-hellomacro-for-pancakes/hello_macro/src/lib.rs}}</code></pre>
+<p>Chúng ta đã có một trait và hàm của nó. Tại thời điểm này, người dùng crate của chúng ta có thể triển khai trait để đạt được chức năng mong muốn, như sau:</p>
+<pre><code class="language-rust ignore">{{#rustdoc_include ../listings/ch19-advanced-features/no-listing-20-impl-hellomacro-for-pancakes/pancakes/src/main.rs}}</code></pre>
+<p>Tuy nhiên, họ sẽ phải viết khối triển khai cho từng kiểu mà họ muốn sử dụng với <code>hello_macro</code>; chúng ta muốn giúp họ khỏi phải làm việc này.</p>
+<p>Ngoài ra, chúng ta chưa thể cung cấp hàm <code>hello_macro</code> với triển khai mặc định in ra tên của kiểu mà trait được triển khai trên đó: Rust không có khả năng reflection, vì vậy không thể tra cứu tên kiểu tại runtime. Chúng ta cần một macro để sinh mã tại thời gian biên dịch.</p>
+<p>Bước tiếp theo là định nghĩa procedural macro. Tại thời điểm viết, các procedural macro cần nằm trong một crate riêng. Trong tương lai, hạn chế này có thể được loại bỏ. Quy ước cấu trúc crate và crate macro như sau: đối với một crate có tên <code>foo</code>, crate procedural macro custom derive sẽ được gọi là <code>foo_derive</code>. Hãy bắt đầu một crate mới có tên <code>hello_macro_derive</code> bên trong dự án <code>hello_macro</code> của chúng ta:</p>
+<pre><code class="language-console">$ cargo new hello_macro_derive --lib
+</code></pre>
+<p>Hai crate của chúng ta có mối quan hệ chặt chẽ, vì vậy chúng ta tạo crate procedural macro bên trong thư mục của crate <code>hello_macro</code>. Nếu chúng ta thay đổi định nghĩa trait trong <code>hello_macro</code>, chúng ta cũng sẽ phải thay đổi triển khai của procedural macro trong <code>hello_macro_derive</code>. Hai crate sẽ cần được phát hành riêng, và lập trình viên sử dụng các crate này sẽ cần thêm cả hai làm dependencies và đưa cả hai vào phạm vi. Chúng ta có thể để crate <code>hello_macro</code> sử dụng <code>hello_macro_derive</code> làm dependency và re-export mã procedural macro. Tuy nhiên, cách chúng ta cấu trúc dự án cho phép lập trình viên sử dụng <code>hello_macro</code> ngay cả khi họ không cần chức năng <code>derive</code>.</p>
+<p>Chúng ta cần khai báo crate <code>hello_macro_derive</code> là một procedural macro crate. Chúng ta cũng sẽ cần chức năng từ các crate <code>syn</code> và <code>quote</code>, như bạn sẽ thấy ngay sau đây, vì vậy cần thêm chúng làm dependencies. Thêm các dòng sau vào file <em>Cargo.toml</em> của <code>hello_macro_derive</code>:</p>
+<p><span class="filename">Filename: hello_macro_derive/Cargo.toml</span></p>
+<pre><code class="language-toml">{{#include ../listings/ch19-advanced-features/listing-19-31/hello_macro/hello_macro_derive/Cargo.toml:6:12}}
+</code></pre>
+<p>Để bắt đầu định nghĩa procedural macro, đặt mã trong Listing 19-31 vào file <em>src/lib.rs</em> của crate <code>hello_macro_derive</code>. Lưu ý rằng mã này sẽ chưa biên dịch cho đến khi chúng ta thêm định nghĩa cho hàm <code>impl_hello_macro</code>.</p>
+<p><span class="filename">Filename: hello_macro_derive/src/lib.rs</span></p>
+<pre><code class="language-rust ignore does_not_compile">{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-31/hello_macro/hello_macro_derive/src/lib.rs}}</code></pre>
+<p><span class="caption">Listing 19-31: Mã mà hầu hết các crate procedural macro sẽ cần để xử lý mã Rust</span></p>
+<p>Lưu ý rằng chúng ta đã tách mã thành hàm <code>hello_macro_derive</code>, chịu trách nhiệm phân tích <code>TokenStream</code>, và hàm <code>impl_hello_macro</code>, chịu trách nhiệm biến đổi cây cú pháp: điều này giúp việc viết procedural macro thuận tiện hơn. Mã trong hàm ngoài (<code>hello_macro_derive</code> trong trường hợp này) sẽ giống nhau cho hầu hết mọi crate procedural macro mà bạn thấy hoặc tạo. Mã bạn chỉ định trong thân của hàm bên trong (<code>impl_hello_macro</code> trong trường hợp này) sẽ khác nhau tùy thuộc vào mục đích của procedural macro của bạn.</p>
+<p>Chúng ta đã giới thiệu ba crate mới: <code>proc_macro</code>, <a href="https://crates.io/crates/syn"><code>syn</code></a> và <a href="https://crates.io/crates/quote"><code>quote</code></a>. Crate <code>proc_macro</code> đi kèm với Rust, vì vậy chúng ta không cần thêm nó vào dependencies trong <em>Cargo.toml</em>. Crate <code>proc_macro</code> là API của compiler cho phép chúng ta đọc và thao tác mã Rust từ mã của chính chúng ta.</p>
+<p>Crate <code>syn</code> phân tích mã Rust từ một chuỗi thành một cấu trúc dữ liệu mà chúng ta có thể thao tác. Crate <code>quote</code> biến các cấu trúc dữ liệu của <code>syn</code> trở lại thành mã Rust. Các crate này làm cho việc phân tích bất kỳ loại mã Rust nào mà chúng ta muốn xử lý trở nên đơn giản hơn nhiều: viết một parser đầy đủ cho mã Rust không phải là việc đơn giản.</p>
+<p>Hàm <code>hello_macro_derive</code> sẽ được gọi khi người dùng thư viện của chúng ta chỉ định <code>#[derive(HelloMacro)]</code> trên một kiểu. Điều này khả thi vì chúng ta đã chú thích hàm <code>hello_macro_derive</code> với <code>proc_macro_derive</code> và chỉ định tên <code>HelloMacro</code>, khớp với tên trait của chúng ta; đây là quy ước mà hầu hết procedural macro tuân theo.</p>
+<p>Hàm <code>hello_macro_derive</code> trước tiên chuyển <code>input</code> từ <code>TokenStream</code> thành một cấu trúc dữ liệu mà chúng ta có thể diễn giải và thao tác. Đây là nơi crate <code>syn</code> phát huy tác dụng. Hàm <code>parse</code> trong <code>syn</code> nhận một <code>TokenStream</code> và trả về một struct <code>DeriveInput</code> đại diện cho mã Rust đã được phân tích. Listing 19-32 hiển thị các phần liên quan của struct <code>DeriveInput</code> mà chúng ta nhận được từ việc phân tích chuỗi <code>struct Pancakes;</code>:</p>
+<pre><code class="language-rust ignore">DeriveInput {
+    // --snip--
+
+    ident: Ident {
+        ident: "Pancakes",
+        span: #0 bytes(95..103)
+    },
+    data: Struct(
+        DataStruct {
+            struct_token: Struct,
+            fields: Unit,
+            semi_token: Some(
+                Semi
+            )
+        }
+    )
+}</code></pre>
+<p><span class="caption">Listing 19-32: Instance <code>DeriveInput</code> chúng ta nhận được khi phân tích mã có thuộc tính macro trong Listing 19-30</span></p>
+<p>Các trường của struct này cho thấy mã Rust mà chúng ta đã phân tích là một unit struct với <code>ident</code> (identifier, nghĩa là tên) là <code>Pancakes</code>. Có nhiều trường khác trong struct này để mô tả đủ loại mã Rust; xem tài liệu <a href="https://docs.rs/syn/1.0/syn/struct.DeriveInput.html"><code>syn</code> về <code>DeriveInput</code></a> để biết thêm thông tin.</p>
+<p>Chúng ta sắp định nghĩa hàm <code>impl_hello_macro</code>, nơi chúng ta sẽ xây dựng mã Rust mới mà muốn thêm vào. Nhưng trước khi làm điều đó, lưu ý rằng đầu ra của macro derive của chúng ta cũng là một <code>TokenStream</code>. <code>TokenStream</code> trả về được thêm vào mã mà người dùng crate của chúng ta viết, vì vậy khi họ biên dịch crate của họ, họ sẽ nhận được chức năng bổ sung mà chúng ta cung cấp trong <code>TokenStream</code> đã được sửa đổi.</p>
+<p>Bạn có thể nhận thấy chúng ta đang gọi <code>unwrap</code> để làm cho hàm <code>hello_macro_derive</code> panic nếu lời gọi đến hàm <code>syn::parse</code> thất bại ở đây. Điều này cần thiết vì procedural macro của chúng ta phải panic khi có lỗi vì các hàm <code>proc_macro_derive</code> phải trả về <code>TokenStream</code> thay vì <code>Result</code> để tuân theo API procedural macro. Chúng ta đã đơn giản hóa ví dụ này bằng cách sử dụng <code>unwrap</code>; trong mã sản xuất, bạn nên cung cấp thông báo lỗi cụ thể hơn về những gì đã xảy ra bằng cách sử dụng <code>panic!</code> hoặc <code>expect</code>.</p>
+<p>Bây giờ khi chúng ta có mã để chuyển đổi mã Rust được chú thích từ <code>TokenStream</code> thành một instance <code>DeriveInput</code>, hãy sinh mã thực thi trait <code>HelloMacro</code> trên kiểu được chú thích, như được trình bày trong Listing 19-33.</p>
+<p><span class="filename">Filename: hello_macro_derive/src/lib.rs</span></p>
+<pre><code class="language-rust ignore">{{#rustdoc_include ../listings/ch19-advanced-features/listing-19-33/hello_macro/hello_macro_derive/src/lib.rs:here}}</code></pre>
+<p><span class="caption">Listing 19-33: Triển khai trait <code>HelloMacro</code> sử dụng mã Rust đã được phân tích</span></p>
+<p>Chúng ta nhận được một instance struct <code>Ident</code> chứa tên (identifier) của kiểu được chú thích bằng cách sử dụng <code>ast.ident</code>. Struct trong Listing 19-32 cho thấy khi chạy hàm <code>impl_hello_macro</code> trên mã trong Listing 19-30, <code>ident</code> nhận được sẽ có trường <code>ident</code> với giá trị <code>"Pancakes"</code>. Do đó, biến <code>name</code> trong Listing 19-33 sẽ chứa một instance struct <code>Ident</code> mà khi in ra sẽ là chuỗi <code>"Pancakes"</code>, tên của struct trong Listing 19-30.</p>
+<p>Macro <code>quote!</code> cho phép chúng ta định nghĩa mã Rust mà chúng ta muốn trả về. Compiler mong đợi thứ gì đó khác so với kết quả trực tiếp của việc thực thi macro <code>quote!</code>, vì vậy chúng ta cần chuyển đổi nó thành <code>TokenStream</code>. Chúng ta làm điều này bằng cách gọi phương thức <code>into</code>, phương thức này tiêu thụ biểu diễn trung gian và trả về giá trị kiểu <code>TokenStream</code> yêu cầu.</p>
+<p>Macro <code>quote!</code> cũng cung cấp cơ chế templating rất tiện lợi: chúng ta có thể viết <code>#name</code>, và <code>quote!</code> sẽ thay thế bằng giá trị trong biến <code>name</code>. Bạn thậm chí có thể thực hiện một số lặp lại tương tự cách hoạt động của các macro thông thường. Xem <a href="https://docs.rs/quote">tài liệu crate <code>quote</code></a> để có giới thiệu chi tiết.</p>
+<p>Chúng ta muốn procedural macro sinh ra triển khai trait <code>HelloMacro</code> cho kiểu mà người dùng đã chú thích, điều này có thể lấy bằng cách sử dụng <code>#name</code>. Triển khai trait có một hàm là <code>hello_macro</code>, thân hàm chứa chức năng mà chúng ta muốn cung cấp: in ra <code>Hello, Macro! My name is</code> và sau đó là tên của kiểu được chú thích.</p>
+<p>Macro <code>stringify!</code> được sử dụng ở đây là built-in trong Rust. Nó nhận một biểu thức Rust, chẳng hạn như <code>1 + 2</code>, và tại thời gian biên dịch chuyển biểu thức đó thành một literal string, ví dụ <code>"1 + 2"</code>. Điều này khác với <code>format!</code> hoặc <code>println!</code>, các macro này sẽ đánh giá biểu thức rồi chuyển kết quả thành một <code>String</code>. Có khả năng input <code>#name</code> là một biểu thức cần in ra nguyên văn, vì vậy chúng ta dùng <code>stringify!</code>. Sử dụng <code>stringify!</code> cũng tiết kiệm một phép cấp phát bằng cách chuyển <code>#name</code> thành literal string tại thời gian biên dịch.</p>
+<p>Ở thời điểm này, <code>cargo build</code> nên hoàn tất thành công cả trong <code>hello_macro</code> và <code>hello_macro_derive</code>. Hãy kết nối các crate này với mã trong Listing 19-30 để xem procedural macro hoạt động! Tạo một dự án nhị phân mới trong thư mục <em>projects</em> bằng lệnh <code>cargo new pancakes</code>. Chúng ta cần thêm <code>hello_macro</code> và <code>hello_macro_derive</code> làm dependencies trong <em>Cargo.toml</em> của crate <code>pancakes</code>. Nếu bạn xuất bản các phiên bản của <code>hello_macro</code> và <code>hello_macro_derive</code> lên <a href="https://crates.io/">crates.io</a>, chúng sẽ là dependencies thông thường; nếu không, bạn có thể chỉ định chúng là dependencies theo <code>path</code> như sau:</p>
+<pre><code class="language-toml">{{#include ../listings/ch19-advanced-features/no-listing-21-pancakes/pancakes/Cargo.toml:7:9}}
+</code></pre>
+<p>Đặt mã trong Listing 19-30 vào <em>src/main.rs</em>, và chạy <code>cargo run</code>: nó sẽ in ra <code>Hello, Macro! My name is Pancakes!</code>. Triển khai trait <code>HelloMacro</code> từ procedural macro đã được thêm vào mà crate <code>pancakes</code> không cần tự triển khai; <code>#[derive(HelloMacro)]</code> đã thêm triển khai trait này.</p>
+<p>Tiếp theo, hãy khám phá cách các loại procedural macro khác khác với custom derive macros.</p>
+<h3 id="macros-kiểu-attribute"><a class="header" href="#macros-kiểu-attribute">Macros kiểu Attribute</a></h3>
+<p>Macros kiểu attribute tương tự như custom derive macros, nhưng thay vì sinh mã cho thuộc tính <code>derive</code>, chúng cho phép bạn tạo các thuộc tính mới. Chúng cũng linh hoạt hơn: <code>derive</code> chỉ hoạt động cho structs và enums; các attribute có thể áp dụng cho các item khác, chẳng hạn như các hàm. Dưới đây là ví dụ sử dụng macro kiểu attribute: giả sử bạn có một attribute tên <code>route</code> để chú thích các hàm khi sử dụng một framework ứng dụng web:</p>
+<pre><code class="language-rust ignore">#[route(GET, "/")]
+fn index() {</code></pre>
+<p>Attribute <code>#[route]</code> này sẽ được framework định nghĩa như một procedural macro. Chữ ký của hàm định nghĩa macro sẽ trông như sau:</p>
+<pre><code class="language-rust ignore">#[proc_macro_attribute]
+pub fn route(attr: TokenStream, item: TokenStream) -&gt; TokenStream {</code></pre>
+<p>Ở đây, chúng ta có hai tham số kiểu <code>TokenStream</code>. Tham số đầu tiên dành cho nội dung của attribute: phần <code>GET, "/"</code>. Tham số thứ hai là thân của item mà attribute được gắn vào: trong trường hợp này là <code>fn index() {}</code> và phần còn lại của thân hàm.</p>
+<p>Ngoài ra, macros kiểu attribute hoạt động giống hệt như custom derive macros: bạn tạo một crate với loại crate <code>proc-macro</code> và triển khai một hàm sinh ra mã bạn muốn!</p>
+<h3 id="macros-kiểu-function"><a class="header" href="#macros-kiểu-function">Macros kiểu Function</a></h3>
+<p>Macros kiểu function định nghĩa các macro trông giống như lời gọi hàm. Tương tự như các macro <code>macro_rules!</code>, chúng linh hoạt hơn các hàm thông thường; ví dụ, chúng có thể nhận số lượng đối số không xác định. Tuy nhiên, các macro <code>macro_rules!</code> chỉ có thể được định nghĩa bằng cú pháp giống match mà chúng ta đã thảo luận trong phần <a href="#declarative-macros-with-macro_rules-for-general-metaprogramming">“Declarative Macros with <code>macro_rules!</code> for General Metaprogramming”</a><!-- ignore --> trước đó. Các macro kiểu function nhận một tham số <code>TokenStream</code> và định nghĩa của chúng thao tác với <code>TokenStream</code> đó bằng mã Rust giống như hai loại procedural macro khác. Một ví dụ về macro kiểu function là macro <code>sql!</code> có thể được gọi như sau:</p>
+<pre><code class="language-rust ignore">let sql = sql!(SELECT * FROM posts WHERE id=1);</code></pre>
+<p>Macro này sẽ phân tích câu lệnh SQL bên trong nó và kiểm tra xem cú pháp có đúng hay không, điều này phức tạp hơn nhiều so với những gì một macro <code>macro_rules!</code> có thể làm. Macro <code>sql!</code> sẽ được định nghĩa như sau:</p>
+<pre><code class="language-rust ignore">#[proc_macro]
+pub fn sql(input: TokenStream) -&gt; TokenStream {</code></pre>
+<p>Định nghĩa này tương tự như chữ ký của macro custom derive: chúng ta nhận các token bên trong dấu ngoặc và trả về mã mà chúng ta muốn sinh ra.</p>
+<h2 id="tóm-tắt"><a class="header" href="#tóm-tắt">Tóm tắt</a></h2>
+<p>Hú! Bây giờ bạn đã có một số tính năng Rust trong hộp công cụ của mình mà có thể bạn sẽ không dùng thường xuyên, nhưng bạn sẽ biết chúng khả dụng trong những tình huống rất cụ thể. Chúng ta đã giới thiệu một số chủ đề phức tạp để khi gặp chúng trong gợi ý lỗi hoặc trong mã của người khác, bạn sẽ nhận biết được các khái niệm và cú pháp này. Sử dụng chương này như một tài liệu tham khảo để hướng dẫn bạn đến các giải pháp.</p>
+<p>Tiếp theo, chúng ta sẽ đưa tất cả những gì đã thảo luận trong suốt cuốn sách vào thực hành và làm thêm một dự án nữa!</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch19-05-advanced-functions-and-closures.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch20-00-final-project-a-web-server.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch19-05-advanced-functions-and-closures.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch20-00-final-project-a-web-server.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+
+    </div>
+    </body>
+</html>
