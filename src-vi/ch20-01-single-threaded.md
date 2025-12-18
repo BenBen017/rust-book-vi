@@ -136,24 +136,22 @@ headers CRLF
 message-body
 ```
 
-The first line is a *status line* that contains the HTTP version used in the
-response, a numeric status code that summarizes the result of the request, and
-a reason phrase that provides a text description of the status code. After the
-CRLF sequence are any headers, another CRLF sequence, and the body of the
-response.
+Dòng đầu tiên là một *dòng trạng thái* chứa phiên bản HTTP được sử dụng trong
+phản hồi, một mã trạng thái dạng số tóm tắt kết quả của yêu cầu, và một
+cụm từ lý do cung cấp mô tả văn bản về mã trạng thái. Sau chuỗi CRLF là
+các header (nếu có), một chuỗi CRLF khác, và phần thân của phản hồi.
 
-Here is an example response that uses HTTP version 1.1, has a status code of
-200, an OK reason phrase, no headers, and no body:
+Dưới đây là một ví dụ về phản hồi sử dụng HTTP phiên bản 1.1, có mã trạng
+thái 200, cụm từ lý do OK, không có header, và không có thân:
 
 ```text
 HTTP/1.1 200 OK\r\n\r\n
 ```
 
-The status code 200 is the standard success response. The text is a tiny
-successful HTTP response. Let’s write this to the stream as our response to a
-successful request! From the `handle_connection` function, remove the
-`println!` that was printing the request data and replace it with the code in
-Listing 20-3.
+Mã trạng thái 200 là phản hồi thành công chuẩn. Văn bản là một phản hồi HTTP
+nhỏ thành công. Hãy ghi điều này vào stream như phản hồi của chúng ta cho
+một yêu cầu thành công! Từ hàm `handle_connection`, xóa `println!` đang
+in dữ liệu yêu cầu và thay thế bằng mã trong Listing 20-3.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -161,28 +159,28 @@ Listing 20-3.
 {{#rustdoc_include ../listings/ch20-web-server/listing-20-03/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 20-3: Writing a tiny successful HTTP response to
-the stream</span>
+<span class="caption">Listing 20-3: Ghi một phản hồi HTTP nhỏ thành công vào
+stream</span>
 
-The first new line defines the `response` variable that holds the success
-message’s data. Then we call `as_bytes` on our `response` to convert the string
-data to bytes. The `write_all` method on `stream` takes a `&[u8]` and sends
-those bytes directly down the connection. Because the `write_all` operation
-could fail, we use `unwrap` on any error result as before. Again, in a real
-application you would add error handling here.
+Dòng mới đầu tiên định nghĩa biến `response` chứa dữ liệu thông điệp thành
+công. Sau đó chúng ta gọi `as_bytes` trên `response` để chuyển dữ liệu
+chuỗi thành bytes. Phương thức `write_all` trên `stream` nhận một `&[u8]`
+và gửi trực tiếp các byte đó xuống kết nối. Vì thao tác `write_all` có thể
+thất bại, chúng ta dùng `unwrap` trên kết quả lỗi như trước. Một lần nữa, trong
+ứng dụng thực tế bạn nên thêm xử lý lỗi ở đây.
 
-With these changes, let’s run our code and make a request. We’re no longer
-printing any data to the terminal, so we won’t see any output other than the
-output from Cargo. When you load *127.0.0.1:7878* in a web browser, you should
-get a blank page instead of an error. You’ve just hand-coded receiving an HTTP
-request and sending a response!
+Với những thay đổi này, hãy chạy code và thực hiện một yêu cầu. Chúng ta
+không còn in dữ liệu ra terminal, nên sẽ không thấy bất kỳ output nào ngoài
+output từ Cargo. Khi bạn load *127.0.0.1:7878* trong trình duyệt web, bạn
+sẽ nhận được một trang trắng thay vì một lỗi. Bạn vừa tự tay viết code để
+nhận một yêu cầu HTTP và gửi một phản hồi!
 
-### Returning Real HTML
+### Trả về HTML thực
 
-Let’s implement the functionality for returning more than a blank page. Create
-the new file *hello.html* in the root of your project directory, not in the
-*src* directory. You can input any HTML you want; Listing 20-4 shows one
-possibility.
+Hãy triển khai chức năng để trả về nhiều hơn một trang trắng. Tạo file mới
+*hello.html* ở thư mục gốc của dự án, không phải trong thư mục *src*. Bạn
+có thể nhập bất kỳ HTML nào bạn muốn; Listing 20-4 cho thấy một ví dụ
+khả thi.
 
 <span class="filename">Filename: hello.html</span>
 
@@ -190,13 +188,12 @@ possibility.
 {{#include ../listings/ch20-web-server/listing-20-05/hello.html}}
 ```
 
-<span class="caption">Listing 20-4: A sample HTML file to return in a
-response</span>
+<span class="caption">Listing 20-4: Một file HTML mẫu để trả về trong phản hồi</span>
 
-This is a minimal HTML5 document with a heading and some text. To return this
-from the server when a request is received, we’ll modify `handle_connection` as
-shown in Listing 20-5 to read the HTML file, add it to the response as a body,
-and send it.
+Đây là một tài liệu HTML5 tối giản với một tiêu đề và một vài đoạn văn bản.
+Để trả về file này từ server khi nhận được một yêu cầu, chúng ta sẽ chỉnh
+sửa `handle_connection` như trong Listing 20-5 để đọc file HTML, thêm nó vào
+phản hồi dưới dạng phần thân, và gửi đi.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -204,39 +201,39 @@ and send it.
 {{#rustdoc_include ../listings/ch20-web-server/listing-20-05/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 20-5: Sending the contents of *hello.html* as the
-body of the response</span>
+<span class="caption">Listing 20-5: Gửi nội dung của *hello.html* như phần
+thân của phản hồi</span>
 
-We’ve added `fs` to the `use` statement to bring the standard library’s
-filesystem module into scope. The code for reading the contents of a file to a
-string should look familiar; we used it in Chapter 12 when we read the contents
-of a file for our I/O project in Listing 12-4.
+Chúng ta đã thêm `fs` vào câu lệnh `use` để đưa module filesystem của thư viện
+chuẩn vào phạm vi sử dụng. Code để đọc nội dung của một file thành một
+chuỗi có thể sẽ quen thuộc; chúng ta đã dùng nó ở Chương 12 khi đọc
+nội dung file cho dự án I/O trong Listing 12-4.
 
-Next, we use `format!` to add the file’s contents as the body of the success
-response. To ensure a valid HTTP response, we add the `Content-Length` header
-which is set to the size of our response body, in this case the size of
-`hello.html`.
+Tiếp theo, chúng ta sử dụng `format!` để thêm nội dung file làm phần thân của
+phản hồi thành công. Để đảm bảo một phản hồi HTTP hợp lệ, chúng ta thêm
+header `Content-Length`, được đặt bằng kích thước của phần thân phản hồi, trong
+trường hợp này là kích thước của `hello.html`.
 
-Run this code with `cargo run` and load *127.0.0.1:7878* in your browser; you
-should see your HTML rendered!
+Chạy code này với `cargo run` và load *127.0.0.1:7878* trong trình duyệt;
+bạn sẽ thấy HTML của bạn được hiển thị!
 
-Currently, we’re ignoring the request data in `http_request` and just sending
-back the contents of the HTML file unconditionally. That means if you try
-requesting *127.0.0.1:7878/something-else* in your browser, you’ll still get
-back this same HTML response. At the moment, our server is very limited and
-does not do what most web servers do. We want to customize our responses
-depending on the request and only send back the HTML file for a well-formed
-request to */*.
+Hiện tại, chúng ta đang bỏ qua dữ liệu yêu cầu trong `http_request` và chỉ
+gửi lại nội dung của file HTML một cách vô điều kiện. Điều này có nghĩa là
+nếu bạn thử yêu cầu *127.0.0.1:7878/something-else* trong trình duyệt, bạn
+vẫn sẽ nhận được cùng phản hồi HTML này. Hiện tại, server của chúng ta rất
+hạn chế và không thực hiện những gì hầu hết các web server làm. Chúng ta
+muốn tùy chỉnh phản hồi dựa trên yêu cầu và chỉ gửi file HTML cho một yêu
+cầu hợp lệ tới */*.
 
-### Validating the Request and Selectively Responding
+### Xác thực yêu cầu và phản hồi có chọn lọc
 
-Right now, our web server will return the HTML in the file no matter what the
-client requested. Let’s add functionality to check that the browser is
-requesting */* before returning the HTML file and return an error if the
-browser requests anything else. For this we need to modify `handle_connection`,
-as shown in Listing 20-6. This new code checks the content of the request
-received against what we know a request for */* looks like and adds `if` and
-`else` blocks to treat requests differently.
+Hiện tại, web server của chúng ta sẽ trả về HTML trong file bất kể client
+yêu cầu gì. Hãy thêm chức năng kiểm tra rằng trình duyệt đang yêu cầu */*
+trước khi trả về file HTML và trả lỗi nếu trình duyệt yêu cầu bất cứ thứ gì
+khác. Để làm điều này, chúng ta cần chỉnh sửa `handle_connection`, như
+trong Listing 20-6. Code mới này kiểm tra nội dung yêu cầu nhận được với
+cái mà chúng ta biết là một yêu cầu tới */*, và thêm các khối `if` và `else`
+để xử lý các yêu cầu khác nhau.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -244,33 +241,32 @@ received against what we know a request for */* looks like and adds `if` and
 {{#rustdoc_include ../listings/ch20-web-server/listing-20-06/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 20-6: Handling requests to */* differently from
-other requests</span>
+<span class="caption">Listing 20-6: Xử lý các yêu cầu tới */* khác với các
+yêu cầu khác</span>
 
-We’re only going to be looking at the first line of the HTTP request, so rather
-than reading the entire request into a vector, we’re calling `next` to get the
-first item from the iterator. The first `unwrap` takes care of the `Option` and
-stops the program if the iterator has no items. The second `unwrap` handles the
-`Result` and has the same effect as the `unwrap` that was in the `map` added in
-Listing 20-2.
+Chúng ta chỉ xem dòng đầu tiên của yêu cầu HTTP, vì vậy thay vì đọc toàn bộ
+yêu cầu vào một vector, chúng ta gọi `next` để lấy phần tử đầu tiên từ iterator.
+`unwrap` đầu tiên xử lý `Option` và dừng chương trình nếu iterator không có
+phần tử nào. `unwrap` thứ hai xử lý `Result` và có cùng hiệu ứng như `unwrap`
+trong `map` được thêm ở Listing 20-2.
 
-Next, we check the `request_line` to see if it equals the request line of a GET
-request to the */* path. If it does, the `if` block returns the contents of our
-HTML file.
+Tiếp theo, chúng ta kiểm tra `request_line` xem nó có bằng dòng yêu cầu của
+một GET request tới đường dẫn */* hay không. Nếu có, khối `if` trả về
+nội dung file HTML của chúng ta.
 
-If the `request_line` does *not* equal the GET request to the */* path, it
-means we’ve received some other request. We’ll add code to the `else` block in
-a moment to respond to all other requests.
+Nếu `request_line` *không* bằng GET request tới đường dẫn */*, điều đó
+có nghĩa là chúng ta nhận được một yêu cầu khác. Chúng ta sẽ thêm code vào
+khối `else` trong một lúc để phản hồi tất cả các yêu cầu khác.
 
-Run this code now and request *127.0.0.1:7878*; you should get the HTML in
-*hello.html*. If you make any other request, such as
-*127.0.0.1:7878/something-else*, you’ll get a connection error like those you
-saw when running the code in Listing 20-1 and Listing 20-2.
+Chạy code này ngay và yêu cầu *127.0.0.1:7878*; bạn sẽ nhận được HTML trong
+*hello.html*. Nếu bạn thực hiện bất kỳ yêu cầu nào khác, chẳng hạn như
+*127.0.0.1:7878/something-else*, bạn sẽ nhận được lỗi kết nối giống như khi
+chạy code ở Listing 20-1 và Listing 20-2.
 
-Now let’s add the code in Listing 20-7 to the `else` block to return a response
-with the status code 404, which signals that the content for the request was
-not found. We’ll also return some HTML for a page to render in the browser
-indicating the response to the end user.
+Bây giờ hãy thêm code trong Listing 20-7 vào khối `else` để trả về phản hồi
+với mã trạng thái 404, báo hiệu rằng nội dung cho yêu cầu không tìm thấy.
+Chúng ta cũng sẽ trả về một số HTML cho một trang hiển thị trong trình duyệt
+để báo phản hồi tới người dùng cuối.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -278,13 +274,13 @@ indicating the response to the end user.
 {{#rustdoc_include ../listings/ch20-web-server/listing-20-07/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 20-7: Responding with status code 404 and an
-error page if anything other than */* was requested</span>
+<span class="caption">Listing 20-7: Phản hồi với mã trạng thái 404 và trang
+lỗi nếu có yêu cầu khác ngoài */*</span>
 
-Here, our response has a status line with status code 404 and the reason phrase
-`NOT FOUND`. The body of the response will be the HTML in the file *404.html*.
-You’ll need to create a *404.html* file next to *hello.html* for the error
-page; again feel free to use any HTML you want or use the example HTML in
+Ở đây, phản hồi của chúng ta có một dòng trạng thái với mã 404 và cụm từ lý
+do `NOT FOUND`. Phần thân của phản hồi sẽ là HTML trong file *404.html*. Bạn
+sẽ cần tạo một file *404.html* bên cạnh *hello.html* cho trang lỗi; một lần
+nữa, bạn có thể sử dụng bất kỳ HTML nào bạn muốn hoặc dùng ví dụ HTML trong
 Listing 20-8.
 
 <span class="filename">Filename: 404.html</span>
@@ -293,23 +289,22 @@ Listing 20-8.
 {{#include ../listings/ch20-web-server/listing-20-07/404.html}}
 ```
 
-<span class="caption">Listing 20-8: Sample content for the page to send back
-with any 404 response</span>
+<span class="caption">Listing 20-8: Nội dung mẫu cho trang trả về với
+bất kỳ phản hồi 404 nào</span>
 
-With these changes, run your server again. Requesting *127.0.0.1:7878* should
-return the contents of *hello.html*, and any other request, like
-*127.0.0.1:7878/foo*, should return the error HTML from *404.html*.
+Với những thay đổi này, hãy chạy lại server của bạn. Yêu cầu *127.0.0.1:7878*
+sẽ trả về nội dung của *hello.html*, và bất kỳ yêu cầu nào khác, như
+*127.0.0.1:7878/foo*, sẽ trả về HTML lỗi từ *404.html*.
 
-### A Touch of Refactoring
+### Một chút refactoring
 
-At the moment the `if` and `else` blocks have a lot of repetition: they’re both
-reading files and writing the contents of the files to the stream. The only
-differences are the status line and the filename. Let’s make the code more
-concise by pulling out those differences into separate `if` and `else` lines
-that will assign the values of the status line and the filename to variables;
-we can then use those variables unconditionally in the code to read the file
-and write the response. Listing 20-9 shows the resulting code after replacing
-the large `if` and `else` blocks.
+Hiện tại, các khối `if` và `else` có nhiều đoạn lặp lại: cả hai đều đọc file
+và ghi nội dung file vào stream. Sự khác biệt duy nhất là dòng trạng thái
+và tên file. Hãy làm code ngắn gọn hơn bằng cách tách những khác biệt đó
+ra các dòng `if` và `else` riêng, gán giá trị dòng trạng thái và tên file
+vào các biến; sau đó chúng ta có thể sử dụng các biến này một cách
+vô điều kiện trong code để đọc file và ghi phản hồi. Listing 20-9 cho thấy
+code kết quả sau khi thay thế các khối `if` và `else` lớn.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -317,26 +312,25 @@ the large `if` and `else` blocks.
 {{#rustdoc_include ../listings/ch20-web-server/listing-20-09/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 20-9: Refactoring the `if` and `else` blocks to
-contain only the code that differs between the two cases</span>
+<span class="caption">Listing 20-9: Refactoring các khối `if` và `else` chỉ
+chứa code khác nhau giữa hai trường hợp</span>
 
-Now the `if` and `else` blocks only return the appropriate values for the
-status line and filename in a tuple; we then use destructuring to assign these
-two values to `status_line` and `filename` using a pattern in the `let`
-statement, as discussed in Chapter 18.
+Bây giờ các khối `if` và `else` chỉ trả về các giá trị thích hợp cho dòng
+trạng thái và tên file dưới dạng một tuple; sau đó chúng ta dùng
+destructuring để gán hai giá trị này vào `status_line` và `filename`
+sử dụng pattern trong câu lệnh `let`, như đã thảo luận trong Chương 18.
 
-The previously duplicated code is now outside the `if` and `else` blocks and
-uses the `status_line` and `filename` variables. This makes it easier to see
-the difference between the two cases, and it means we have only one place to
-update the code if we want to change how the file reading and response writing
-work. The behavior of the code in Listing 20-9 will be the same as that in
-Listing 20-8.
+Code bị lặp trước đó giờ nằm ngoài các khối `if` và `else` và sử dụng
+các biến `status_line` và `filename`. Điều này giúp dễ nhìn thấy sự khác
+biệt giữa hai trường hợp, và có nghĩa là chúng ta chỉ có một chỗ để
+cập nhật code nếu muốn thay đổi cách đọc file và ghi phản hồi. Hành vi
+của code trong Listing 20-9 sẽ giống với Listing 20-8.
 
-Awesome! We now have a simple web server in approximately 40 lines of Rust code
-that responds to one request with a page of content and responds to all other
-requests with a 404 response.
+Tuyệt vời! Bây giờ chúng ta có một web server đơn giản với khoảng 40 dòng
+code Rust, phản hồi một yêu cầu với một trang nội dung và phản hồi tất cả
+các yêu cầu khác với phản hồi 404.
 
-Currently, our server runs in a single thread, meaning it can only serve one
-request at a time. Let’s examine how that can be a problem by simulating some
-slow requests. Then we’ll fix it so our server can handle multiple requests at
-once.
+Hiện tại, server của chúng ta chạy trong một thread duy nhất, nghĩa là
+chỉ có thể phục vụ một yêu cầu tại một thời điểm. Hãy xem điều này có thể
+gây ra vấn đề như thế nào bằng cách mô phỏng một số yêu cầu chậm. Sau đó
+chúng ta sẽ sửa để server có thể xử lý nhiều yêu cầu cùng lúc.
