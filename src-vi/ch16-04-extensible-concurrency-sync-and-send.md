@@ -1,89 +1,95 @@
-## Extensible Concurrency with the `Sync` and `Send` Traits
+## Concurrency Có Thể Mở Rộng với các Trait `Sync` và `Send`
 
-Interestingly, the Rust language has *very* few concurrency features. Almost
-every concurrency feature we’ve talked about so far in this chapter has been
-part of the standard library, not the language. Your options for handling
-concurrency are not limited to the language or the standard library; you can
-write your own concurrency features or use those written by others.
+Thật thú vị là ngôn ngữ Rust có *rất* ít tính năng concurrency được tích hợp
+trực tiếp. Gần như mọi khái niệm concurrency mà chúng ta đã nói tới trong
+chương này đều thuộc về thư viện chuẩn, chứ không phải bản thân ngôn ngữ. Các
+lựa chọn để xử lý concurrency của bạn không bị giới hạn trong ngôn ngữ hay thư
+viện chuẩn; bạn hoàn toàn có thể tự viết các cơ chế concurrency của riêng mình
+hoặc sử dụng những cơ chế do người khác viết.
 
-However, two concurrency concepts are embedded in the language: the
-`std::marker` traits `Sync` and `Send`.
+Tuy nhiên, có hai khái niệm concurrency được nhúng trực tiếp vào ngôn ngữ: các
+marker trait `Sync` và `Send` trong module `std::marker`.
 
-### Allowing Transference of Ownership Between Threads with `Send`
+### Cho Phép Chuyển Quyền Sở Hữu Giữa Các Thread với `Send`
 
-The `Send` marker trait indicates that ownership of values of the type
-implementing `Send` can be transferred between threads. Almost every Rust type
-is `Send`, but there are some exceptions, including `Rc<T>`: this cannot be
-`Send` because if you cloned an `Rc<T>` value and tried to transfer ownership
-of the clone to another thread, both threads might update the reference count
-at the same time. For this reason, `Rc<T>` is implemented for use in
-single-threaded situations where you don’t want to pay the thread-safe
-performance penalty.
+Marker trait `Send` cho biết rằng quyền sở hữu của các giá trị thuộc kiểu triển
+khai `Send` có thể được chuyển giữa các thread. Hầu như mọi kiểu dữ liệu trong
+Rust đều là `Send`, nhưng vẫn có một số ngoại lệ, trong đó có `Rc<T>`: kiểu này
+không thể là `Send` bởi vì nếu bạn clone một giá trị `Rc<T>` và cố gắng chuyển
+quyền sở hữu của bản clone đó sang một thread khác, thì cả hai thread có thể
+cập nhật bộ đếm tham chiếu cùng lúc. Vì lý do này, `Rc<T>` được triển khai để
+sử dụng trong các tình huống single-thread, nơi bạn không muốn trả chi phí hiệu
+năng cho tính an toàn với thread.
 
-Therefore, Rust’s type system and trait bounds ensure that you can never
-accidentally send an `Rc<T>` value across threads unsafely. When we tried to do
-this in Listing 16-14, we got the error `the trait Send is not implemented for
-Rc<Mutex<i32>>`. When we switched to `Arc<T>`, which is `Send`, the code
-compiled.
+Do đó, hệ thống kiểu dữ liệu và các trait bound của Rust đảm bảo rằng bạn không
+thể vô tình gửi một giá trị `Rc<T>` qua các thread theo cách không an toàn. Khi
+chúng ta cố gắng làm điều này trong Listing 16-14, chúng ta đã nhận được lỗi
+`the trait Send is not implemented for Rc<Mutex<i32>>`. Khi chúng ta chuyển sang
+dùng `Arc<T>`, vốn là `Send`, thì đoạn mã đã biên dịch thành công.
 
-Any type composed entirely of `Send` types is automatically marked as `Send` as
-well. Almost all primitive types are `Send`, aside from raw pointers, which
-we’ll discuss in Chapter 19.
+Bất kỳ kiểu dữ liệu nào được cấu thành hoàn toàn từ các kiểu `Send` cũng sẽ tự
+động được đánh dấu là `Send`. Hầu hết các kiểu primitive đều là `Send`, ngoại
+trừ raw pointer, thứ mà chúng ta sẽ bàn tới trong Chương 19.
 
-### Allowing Access from Multiple Threads with `Sync`
+### Cho Phép Truy Cập Từ Nhiều Thread với `Sync`
 
-The `Sync` marker trait indicates that it is safe for the type implementing
-`Sync` to be referenced from multiple threads. In other words, any type `T` is
-`Sync` if `&T` (an immutable reference to `T`) is `Send`, meaning the reference
-can be sent safely to another thread. Similar to `Send`, primitive types are
-`Sync`, and types composed entirely of types that are `Sync` are also `Sync`.
+Marker trait `Sync` cho biết rằng kiểu dữ liệu triển khai `Sync` là an toàn khi
+được tham chiếu từ nhiều thread. Nói cách khác, một kiểu `T` là `Sync` nếu `&T`
+(một immutable reference tới `T`) là `Send`, tức là reference đó có thể được gửi
+sang một thread khác một cách an toàn. Tương tự như `Send`, các kiểu primitive
+là `Sync`, và các kiểu được cấu thành hoàn toàn từ các kiểu `Sync` cũng sẽ là
+`Sync`.
 
-The smart pointer `Rc<T>` is also not `Sync` for the same reasons that it’s not
-`Send`. The `RefCell<T>` type (which we talked about in Chapter 15) and the
-family of related `Cell<T>` types are not `Sync`. The implementation of borrow
-checking that `RefCell<T>` does at runtime is not thread-safe. The smart
-pointer `Mutex<T>` is `Sync` and can be used to share access with multiple
-threads as you saw in the [“Sharing a `Mutex<T>` Between Multiple
-Threads”][sharing-a-mutext-between-multiple-threads]<!-- ignore --> section.
+Smart pointer `Rc<T>` cũng không phải là `Sync` vì những lý do giống như việc nó
+không phải là `Send`. Kiểu `RefCell<T>` (mà chúng ta đã nói tới trong Chương 15)
+và họ các kiểu liên quan `Cell<T>` không phải là `Sync`. Cơ chế kiểm tra borrow
+mà `RefCell<T>` thực hiện tại runtime là không an toàn với thread. Smart pointer
+`Mutex<T>` thì là `Sync` và có thể được dùng để chia sẻ quyền truy cập giữa
+nhiều thread, như bạn đã thấy trong phần
+[“Chia Sẻ `Mutex<T>` Giữa Nhiều Thread”][sharing-a-mutext-between-multiple-threads]<!-- ignore -->.
 
-### Implementing `Send` and `Sync` Manually Is Unsafe
+### Việc Tự Triển Khai `Send` và `Sync` Là Không An Toàn
 
-Because types that are made up of `Send` and `Sync` traits are automatically
-also `Send` and `Sync`, we don’t have to implement those traits manually. As
-marker traits, they don’t even have any methods to implement. They’re just
-useful for enforcing invariants related to concurrency.
+Bởi vì các kiểu dữ liệu được tạo thành từ những thành phần `Send` và `Sync` sẽ
+tự động cũng là `Send` và `Sync`, nên chúng ta không cần phải tự tay triển khai
+những trait này. Là các marker trait, chúng thậm chí còn không có phương thức
+nào để triển khai. Chúng chỉ đơn thuần hữu ích trong việc đảm bảo các bất biến
+(invariant) liên quan đến concurrency.
 
-Manually implementing these traits involves implementing unsafe Rust code.
-We’ll talk about using unsafe Rust code in Chapter 19; for now, the important
-information is that building new concurrent types not made up of `Send` and
-`Sync` parts requires careful thought to uphold the safety guarantees. [“The
-Rustonomicon”][nomicon] has more information about these guarantees and how to
-uphold them.
+Việc triển khai thủ công các trait này đồng nghĩa với việc viết mã Rust không
+an toàn (unsafe). Chúng ta sẽ nói về việc sử dụng unsafe Rust trong Chương 19;
+còn tại thời điểm này, điều quan trọng cần biết là việc xây dựng các kiểu dữ
+liệu đồng thời mới, không được cấu thành từ các thành phần `Send` và `Sync`, đòi
+hỏi phải suy nghĩ rất cẩn trọng để duy trì các đảm bảo an toàn. [“The
+Rustonomicon”][nomicon] có thêm thông tin về những đảm bảo này và cách duy trì
+chúng.
 
-## Summary
+## Tóm Tắt
 
-This isn’t the last you’ll see of concurrency in this book: the project in
-Chapter 20 will use the concepts in this chapter in a more realistic situation
-than the smaller examples discussed here.
+Đây chưa phải là lần cuối cùng bạn gặp concurrency trong cuốn sách này: dự án ở
+Chương 20 sẽ sử dụng các khái niệm trong chương này trong một bối cảnh thực tế
+hơn so với những ví dụ nhỏ đã được thảo luận ở đây.
 
-As mentioned earlier, because very little of how Rust handles concurrency is
-part of the language, many concurrency solutions are implemented as crates.
-These evolve more quickly than the standard library, so be sure to search
-online for the current, state-of-the-art crates to use in multithreaded
-situations.
+Như đã đề cập trước đó, bởi vì rất ít cách Rust xử lý concurrency là một phần
+của chính ngôn ngữ, nên nhiều giải pháp concurrency được triển khai dưới dạng
+crate. Những crate này phát triển nhanh hơn so với thư viện chuẩn, vì vậy hãy
+nhớ tìm kiếm trên mạng để cập nhật những crate hiện đại và tốt nhất hiện nay
+để sử dụng trong các tình huống đa luồng.
 
-The Rust standard library provides channels for message passing and smart
-pointer types, such as `Mutex<T>` and `Arc<T>`, that are safe to use in
-concurrent contexts. The type system and the borrow checker ensure that the
-code using these solutions won’t end up with data races or invalid references.
-Once you get your code to compile, you can rest assured that it will happily
-run on multiple threads without the kinds of hard-to-track-down bugs common in
-other languages. Concurrent programming is no longer a concept to be afraid of:
-go forth and make your programs concurrent, fearlessly!
+Thư viện chuẩn của Rust cung cấp các channel để truyền thông điệp và các kiểu
+smart pointer, chẳng hạn như `Mutex<T>` và `Arc<T>`, an toàn khi sử dụng trong
+bối cảnh đồng thời. Hệ thống kiểu dữ liệu và borrow checker đảm bảo rằng đoạn mã
+sử dụng các giải pháp này sẽ không rơi vào tình trạng data race hay reference
+không hợp lệ. Một khi bạn đã làm cho chương trình biên dịch thành công, bạn có
+thể yên tâm rằng nó sẽ chạy ổn định trên nhiều thread mà không gặp phải những
+lỗi khó truy vết thường thấy ở các ngôn ngữ khác. Lập trình đồng thời không còn
+là một khái niệm đáng sợ nữa: hãy tiến lên và làm cho chương trình của bạn trở
+nên đồng thời, một cách không sợ hãi!
 
-Next, we’ll talk about idiomatic ways to model problems and structure solutions
-as your Rust programs get bigger. In addition, we’ll discuss how Rust’s idioms
-relate to those you might be familiar with from object-oriented programming.
+Tiếp theo, chúng ta sẽ nói về những cách làm mang tính idiomatic để mô hình hóa
+vấn đề và cấu trúc lời giải khi chương trình Rust của bạn ngày càng lớn. Ngoài
+ra, chúng ta cũng sẽ thảo luận về cách các idiom của Rust liên hệ với những gì
+bạn có thể đã quen thuộc trong lập trình hướng đối tượng.
 
 [sharing-a-mutext-between-multiple-threads]:
 ch16-03-shared-state.html#sharing-a-mutext-between-multiple-threads

@@ -1,39 +1,39 @@
-## Using `Box<T>` to Point to Data on the Heap
+## Sử dụng `Box<T>` để trỏ đến dữ liệu trên Heap
 
-The most straightforward smart pointer is a *box*, whose type is written
-`Box<T>`. Boxes allow you to store data on the heap rather than the stack. What
-remains on the stack is the pointer to the heap data. Refer to Chapter 4 to
-review the difference between the stack and the heap.
+Smart pointer đơn giản nhất là *box*, với kiểu được viết là `Box<T>`. Boxes
+cho phép bạn lưu trữ dữ liệu trên heap thay vì trên stack. Trên stack chỉ còn
+pointer trỏ đến dữ liệu trên heap. Tham khảo Chương 4 để ôn lại sự khác biệt
+giữa stack và heap.
 
-Boxes don’t have performance overhead, other than storing their data on the
-heap instead of on the stack. But they don’t have many extra capabilities
-either. You’ll use them most often in these situations:
+Boxes không có chi phí hiệu năng nào, ngoài việc lưu dữ liệu trên heap thay vì
+trên stack. Tuy nhiên, chúng cũng không có nhiều khả năng bổ sung. Bạn sẽ
+sử dụng chúng thường xuyên nhất trong các trường hợp sau:
 
-* When you have a type whose size can’t be known at compile time and you want
-  to use a value of that type in a context that requires an exact size
-* When you have a large amount of data and you want to transfer ownership but
-  ensure the data won’t be copied when you do so
-* When you want to own a value and you care only that it’s a type that
-  implements a particular trait rather than being of a specific type
+* Khi bạn có một kiểu mà kích thước không thể biết tại thời điểm biên dịch và
+  bạn muốn sử dụng giá trị của kiểu đó trong một ngữ cảnh yêu cầu kích thước
+  chính xác
+* Khi bạn có một lượng dữ liệu lớn và muốn chuyển quyền sở hữu nhưng muốn
+  đảm bảo dữ liệu không bị sao chép khi làm vậy
+* Khi bạn muốn sở hữu một giá trị và bạn chỉ quan tâm rằng nó là một kiểu
+  triển khai một trait cụ thể, thay vì phải là một kiểu cụ thể
 
-We’ll demonstrate the first situation in the [“Enabling Recursive Types with
-Boxes”](#enabling-recursive-types-with-boxes)<!-- ignore --> section. In the
-second case, transferring ownership of a large amount of data can take a long
-time because the data is copied around on the stack. To improve performance in
-this situation, we can store the large amount of data on the heap in a box.
-Then, only the small amount of pointer data is copied around on the stack,
-while the data it references stays in one place on the heap. The third case is
-known as a *trait object*, and Chapter 17 devotes an entire section, [“Using
-Trait Objects That Allow for Values of Different Types,”][trait-objects]<!--
-ignore --> just to that topic. So what you learn here you’ll apply again in
-Chapter 17!
+Chúng ta sẽ minh họa tình huống đầu tiên trong phần [“Enabling Recursive Types
+with Boxes”](#enabling-recursive-types-with-boxes). Trong trường hợp thứ hai,
+việc chuyển quyền sở hữu một lượng lớn dữ liệu có thể mất nhiều thời gian
+bởi vì dữ liệu bị sao chép trên stack. Để cải thiện hiệu năng trong trường
+hợp này, chúng ta có thể lưu lượng dữ liệu lớn trên heap trong một box.
+Khi đó, chỉ một lượng nhỏ dữ liệu pointer được sao chép trên stack, trong khi
+dữ liệu mà nó tham chiếu vẫn nằm nguyên vị trí trên heap. Trường hợp thứ ba
+được gọi là *trait object*, và Chương 17 dành hẳn một phần, [“Using Trait
+Objects That Allow for Values of Different Types,”][trait-objects], để thảo luận
+về chủ đề này. Vì vậy những gì bạn học ở đây sẽ được áp dụng lại ở Chương 17!
 
-### Using a `Box<T>` to Store Data on the Heap
+### Sử dụng `Box<T>` để lưu dữ liệu trên Heap
 
-Before we discuss the heap storage use case for `Box<T>`, we’ll cover the
-syntax and how to interact with values stored within a `Box<T>`.
+Trước khi thảo luận về trường hợp lưu trữ trên heap cho `Box<T>`, chúng ta sẽ
+xem cú pháp và cách tương tác với các giá trị được lưu trữ bên trong `Box<T>`.
 
-Listing 15-1 shows how to use a box to store an `i32` value on the heap:
+Listing 15-1 minh họa cách sử dụng box để lưu một giá trị `i32` trên heap:
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -41,70 +41,69 @@ Listing 15-1 shows how to use a box to store an `i32` value on the heap:
 {{#rustdoc_include ../listings/ch15-smart-pointers/listing-15-01/src/main.rs}}
 ```
 
-<span class="caption">Listing 15-1: Storing an `i32` value on the heap using a
-box</span>
+<span class="caption">Listing 15-1: Lưu một giá trị `i32` trên heap bằng box</span>
 
-We define the variable `b` to have the value of a `Box` that points to the
-value `5`, which is allocated on the heap. This program will print `b = 5`; in
-this case, we can access the data in the box similar to how we would if this
-data were on the stack. Just like any owned value, when a box goes out of
-scope, as `b` does at the end of `main`, it will be deallocated. The
-deallocation happens both for the box (stored on the stack) and the data it
-points to (stored on the heap).
+Chúng ta định nghĩa biến `b` là một `Box` trỏ đến giá trị `5`, được cấp phát
+trên heap. Chương trình này sẽ in ra `b = 5`; trong trường hợp này, chúng ta
+có thể truy cập dữ liệu trong box tương tự như khi dữ liệu nằm trên stack. Giống
+như bất kỳ giá trị nào mà chúng ta sở hữu, khi một box ra khỏi phạm vi, như
+`b` ở cuối `main`, nó sẽ được giải phóng bộ nhớ. Việc giải phóng xảy ra cả với
+box (lưu trên stack) và dữ liệu mà nó trỏ đến (lưu trên heap).
 
-Putting a single value on the heap isn’t very useful, so you won’t use boxes by
-themselves in this way very often. Having values like a single `i32` on the
-stack, where they’re stored by default, is more appropriate in the majority of
-situations. Let’s look at a case where boxes allow us to define types that we
-wouldn’t be allowed to if we didn’t have boxes.
+Việc đặt một giá trị đơn lẻ trên heap không thực sự hữu ích, vì vậy bạn sẽ ít
+khi dùng boxes một mình theo cách này. Việc lưu giá trị như một `i32` trên stack,
+nơi chúng được lưu mặc định, là phù hợp hơn trong hầu hết các trường hợp. Hãy
+xem một ví dụ mà boxes cho phép chúng ta định nghĩa các kiểu mà nếu không có
+boxes thì sẽ không làm được.
 
-### Enabling Recursive Types with Boxes
+### Cho phép kiểu đệ quy với Boxes
 
-A value of *recursive type* can have another value of the same type as part of
-itself. Recursive types pose an issue because at compile time Rust needs to
-know how much space a type takes up. However, the nesting of values of
-recursive types could theoretically continue infinitely, so Rust can’t know how
-much space the value needs. Because boxes have a known size, we can enable
-recursive types by inserting a box in the recursive type definition.
+Một giá trị của *kiểu đệ quy* có thể chứa một giá trị khác cùng kiểu bên trong
+nó. Kiểu đệ quy gặp vấn đề vì tại thời điểm biên dịch Rust cần biết một kiểu
+chiếm bao nhiêu không gian. Tuy nhiên, việc lồng các giá trị kiểu đệ quy về lý
+thuyết có thể tiếp tục vô hạn, vì vậy Rust không thể biết chính xác kích thước
+cần thiết. Vì boxes có kích thước xác định, chúng ta có thể cho phép kiểu đệ
+quy bằng cách chèn một box trong định nghĩa kiểu đệ quy.
 
-As an example of a recursive type, let’s explore the *cons list*. This is a data
-type commonly found in functional programming languages. The cons list type
-we’ll define is straightforward except for the recursion; therefore, the
-concepts in the example we’ll work with will be useful any time you get into
-more complex situations involving recursive types.
+Lấy ví dụ về một kiểu đệ quy, hãy xem xét *cons list*. Đây là một kiểu dữ liệu
+thường thấy trong các ngôn ngữ lập trình hàm. Kiểu cons list chúng ta sẽ định
+nghĩa khá đơn giản, ngoại trừ phần đệ quy; do đó, các khái niệm trong ví dụ này
+sẽ hữu ích mỗi khi bạn gặp các tình huống phức tạp hơn liên quan đến kiểu đệ
+quy.
 
-#### More Information About the Cons List
+#### Thông tin thêm về Cons List
 
-A *cons list* is a data structure that comes from the Lisp programming language
-and its dialects and is made up of nested pairs, and is the Lisp version of a
-linked list. Its name comes from the `cons` function (short for “construct
-function”) in Lisp that constructs a new pair from its two arguments. By
-calling `cons` on a pair consisting of a value and another pair, we can
-construct cons lists made up of recursive pairs.
+*Cons list* là một cấu trúc dữ liệu xuất phát từ ngôn ngữ lập trình Lisp và các
+biến thể của nó, được tạo từ các cặp lồng nhau, và là phiên bản Lisp của
+linked list. Tên của nó xuất phát từ hàm `cons` (viết tắt của “construct
+function”) trong Lisp, dùng để tạo một cặp mới từ hai đối số. Bằng cách gọi
+`cons` trên một cặp gồm một giá trị và một cặp khác, chúng ta có thể tạo
+cons lists gồm các cặp đệ quy.
 
-For example, here’s a pseudocode representation of a cons list containing the
-list 1, 2, 3 with each pair in parentheses:
+Ví dụ, dưới đây là biểu diễn giả mã của một cons list chứa danh sách 1, 2, 3
+với mỗi cặp được đặt trong dấu ngoặc:
 
 ```text
 (1, (2, (3, Nil)))
 ```
 
-Each item in a cons list contains two elements: the value of the current item
-and the next item. The last item in the list contains only a value called `Nil`
-without a next item. A cons list is produced by recursively calling the `cons`
-function. The canonical name to denote the base case of the recursion is `Nil`.
-Note that this is not the same as the “null” or “nil” concept in Chapter 6,
-which is an invalid or absent value.
+Mỗi phần tử trong cons list chứa hai thành phần: giá trị của phần tử hiện tại
+và phần tử tiếp theo. Phần tử cuối cùng trong danh sách chỉ chứa một giá trị
+gọi là `Nil` mà không có phần tử tiếp theo. Một cons list được tạo ra bằng cách
+gọi đệ quy hàm `cons`. Tên chuẩn để chỉ trường hợp cơ sở của đệ quy là `Nil`.
+Lưu ý rằng đây không phải là cùng khái niệm “null” hay “nil” trong Chương 6,
+mà là một giá trị không hợp lệ hoặc vắng mặt.
 
-The cons list isn’t a commonly used data structure in Rust. Most of the time
-when you have a list of items in Rust, `Vec<T>` is a better choice to use.
-Other, more complex recursive data types *are* useful in various situations,
-but by starting with the cons list in this chapter, we can explore how boxes
-let us define a recursive data type without much distraction.
+Cons list không phải là một cấu trúc dữ liệu thường được sử dụng trong Rust.
+Hầu hết thời gian khi bạn cần một danh sách các phần tử trong Rust, `Vec<T>`
+là lựa chọn tốt hơn. Các kiểu dữ liệu đệ quy phức tạp khác *có* thể hữu ích
+trong nhiều tình huống, nhưng bắt đầu với cons list trong chương này giúp
+chúng ta khám phá cách boxes cho phép định nghĩa kiểu đệ quy mà không bị
+xao nhãng quá nhiều.
 
-Listing 15-2 contains an enum definition for a cons list. Note that this code
-won’t compile yet because the `List` type doesn’t have a known size, which
-we’ll demonstrate.
+Listing 15-2 chứa định nghĩa enum cho một cons list. Lưu ý rằng mã này sẽ
+chưa biên dịch được vì kiểu `List` chưa có kích thước xác định, điều này
+chúng ta sẽ minh họa tiếp theo.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -112,15 +111,15 @@ we’ll demonstrate.
 {{#rustdoc_include ../listings/ch15-smart-pointers/listing-15-02/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 15-2: The first attempt at defining an enum to
-represent a cons list data structure of `i32` values</span>
+<span class="caption">Listing 15-2: Lần thử đầu tiên định nghĩa enum để
+biểu diễn cấu trúc dữ liệu cons list chứa các giá trị `i32`</span>
 
-> Note: We’re implementing a cons list that holds only `i32` values for the
-> purposes of this example. We could have implemented it using generics, as we
-> discussed in Chapter 10, to define a cons list type that could store values of
-> any type.
+> Lưu ý: Chúng ta đang triển khai một cons list chỉ chứa các giá trị `i32`
+> cho ví dụ này. Chúng ta hoàn toàn có thể dùng generics, như đã thảo luận
+> trong Chương 10, để định nghĩa một cons list có thể lưu trữ giá trị của
+> bất kỳ kiểu nào.
 
-Using the `List` type to store the list `1, 2, 3` would look like the code in
+Sử dụng kiểu `List` để lưu danh sách `1, 2, 3` sẽ trông như mã trong
 Listing 15-3:
 
 <span class="filename">Filename: src/main.rs</span>
@@ -129,64 +128,65 @@ Listing 15-3:
 {{#rustdoc_include ../listings/ch15-smart-pointers/listing-15-03/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 15-3: Using the `List` enum to store the list `1,
+<span class="caption">Listing 15-3: Sử dụng enum `List` để lưu danh sách `1,
 2, 3`</span>
 
-The first `Cons` value holds `1` and another `List` value. This `List` value is
-another `Cons` value that holds `2` and another `List` value. This `List` value
-is one more `Cons` value that holds `3` and a `List` value, which is finally
-`Nil`, the non-recursive variant that signals the end of the list.
+Giá trị `Cons` đầu tiên chứa `1` và một giá trị `List` khác. Giá trị `List`
+này là một giá trị `Cons` khác chứa `2` và một giá trị `List` khác nữa. Giá
+trị `List` này là một `Cons` nữa chứa `3` và một giá trị `List`, cuối cùng là
+`Nil`, biến thể không đệ quy đánh dấu kết thúc của danh sách.
 
-If we try to compile the code in Listing 15-3, we get the error shown in
-Listing 15-4:
+Nếu chúng ta cố gắng biên dịch mã trong Listing 15-3, chúng ta sẽ nhận được
+lỗi như trong Listing 15-4:
 
 ```console
 {{#include ../listings/ch15-smart-pointers/listing-15-03/output.txt}}
 ```
 
-<span class="caption">Listing 15-4: The error we get when attempting to define
-a recursive enum</span>
+<span class="caption">Listing 15-4: Lỗi nhận được khi cố gắng định nghĩa
+một enum đệ quy</span>
 
-The error shows this type “has infinite size.” The reason is that we’ve defined
-`List` with a variant that is recursive: it holds another value of itself
-directly. As a result, Rust can’t figure out how much space it needs to store a
-`List` value. Let’s break down why we get this error. First, we’ll look at how
-Rust decides how much space it needs to store a value of a non-recursive type.
+Lỗi này cho thấy kiểu này “có kích thước vô hạn”. Nguyên nhân là chúng ta đã
+định nghĩa `List` với một biến thể đệ quy: nó trực tiếp chứa một giá trị của
+chính nó. Do đó, Rust không thể xác định cần bao nhiêu không gian để lưu một
+giá trị `List`. Hãy phân tích lý do chúng ta nhận được lỗi này. Trước tiên, ta
+xem cách Rust tính toán kích thước cần thiết để lưu một giá trị của kiểu không
+đệ quy.
 
-#### Computing the Size of a Non-Recursive Type
+#### Tính Kích Thước của Kiểu Không Đệ Quy
 
-Recall the `Message` enum we defined in Listing 6-2 when we discussed enum
-definitions in Chapter 6:
+Nhớ lại enum `Message` mà chúng ta đã định nghĩa trong Listing 6-2 khi bàn
+về định nghĩa enum trong Chương 6:
 
 ```rust
 {{#rustdoc_include ../listings/ch06-enums-and-pattern-matching/listing-06-02/src/main.rs:here}}
 ```
 
-To determine how much space to allocate for a `Message` value, Rust goes
-through each of the variants to see which variant needs the most space. Rust
-sees that `Message::Quit` doesn’t need any space, `Message::Move` needs enough
-space to store two `i32` values, and so forth. Because only one variant will be
-used, the most space a `Message` value will need is the space it would take to
-store the largest of its variants.
+Để xác định bao nhiêu không gian cần cấp phát cho một giá trị `Message`, Rust
+sẽ xem qua từng biến thể để xem biến thể nào cần nhiều không gian nhất. Rust
+thấy rằng `Message::Quit` không cần không gian, `Message::Move` cần đủ không
+gian để lưu hai giá trị `i32`, v.v. Vì chỉ có một biến thể được sử dụng tại
+một thời điểm, nên không gian tối đa mà một giá trị `Message` cần chính là
+không gian cần để lưu biến thể lớn nhất.
 
-Contrast this with what happens when Rust tries to determine how much space a
-recursive type like the `List` enum in Listing 15-2 needs. The compiler starts
-by looking at the `Cons` variant, which holds a value of type `i32` and a value
-of type `List`. Therefore, `Cons` needs an amount of space equal to the size of
-an `i32` plus the size of a `List`. To figure out how much memory the `List`
-type needs, the compiler looks at the variants, starting with the `Cons`
-variant. The `Cons` variant holds a value of type `i32` and a value of type
-`List`, and this process continues infinitely, as shown in Figure 15-1.
+So sánh với trường hợp khi Rust cố xác định kích thước cần thiết cho một
+kiểu đệ quy như enum `List` trong Listing 15-2. Trình biên dịch bắt đầu bằng
+việc xem biến thể `Cons`, chứa một giá trị kiểu `i32` và một giá trị kiểu
+`List`. Do đó, `Cons` cần một lượng không gian bằng kích thước của `i32` cộng
+với kích thước của `List`. Để tính kích thước của kiểu `List`, trình biên
+dịch nhìn vào các biến thể, bắt đầu với `Cons`. Biến thể `Cons` chứa một
+giá trị kiểu `i32` và một giá trị kiểu `List`, và quá trình này tiếp tục
+vô hạn, như minh họa trong Hình 15-1.
 
-<img alt="An infinite Cons list" src="img/trpl15-01.svg" class="center" style="width: 50%;" />
+<img alt="Danh sách Cons vô hạn" src="img/trpl15-01.svg" class="center" style="width: 50%;" />
 
-<span class="caption">Figure 15-1: An infinite `List` consisting of infinite
-`Cons` variants</span>
+<span class="caption">Hình 15-1: Một `List` vô hạn gồm các biến thể `Cons`
+vô hạn</span>
 
-#### Using `Box<T>` to Get a Recursive Type with a Known Size
+#### Sử dụng `Box<T>` để có kiểu đệ quy với kích thước đã biết
 
-Because Rust can’t figure out how much space to allocate for recursively
-defined types, the compiler gives an error with this helpful suggestion:
+Vì Rust không thể xác định bao nhiêu không gian cần cấp phát cho các kiểu
+được định nghĩa đệ quy, trình biên dịch sẽ đưa ra lỗi kèm theo gợi ý hữu ích:
 
 <!-- manual-regeneration
 after doing automatic regeneration, look at listings/ch15-smart-pointers/listing-15-03/output.txt and copy the relevant line
@@ -199,21 +199,22 @@ help: insert some indirection (e.g., a `Box`, `Rc`, or `&`) to make `List` repre
   |               ++++    +
 ```
 
-In this suggestion, “indirection” means that instead of storing a value
-directly, we should change the data structure to store the value indirectly by
-storing a pointer to the value instead.
+Trong gợi ý này, “điều hướng gián tiếp” (indirection) có nghĩa là thay vì lưu
+một giá trị trực tiếp, chúng ta nên thay đổi cấu trúc dữ liệu để lưu giá trị
+một cách gián tiếp bằng cách lưu một con trỏ tới giá trị đó.
 
-Because a `Box<T>` is a pointer, Rust always knows how much space a `Box<T>`
-needs: a pointer’s size doesn’t change based on the amount of data it’s
-pointing to. This means we can put a `Box<T>` inside the `Cons` variant instead
-of another `List` value directly. The `Box<T>` will point to the next `List`
-value that will be on the heap rather than inside the `Cons` variant.
-Conceptually, we still have a list, created with lists holding other lists, but
-this implementation is now more like placing the items next to one another
-rather than inside one another.
+Vì `Box<T>` là một con trỏ, Rust luôn biết kích thước của một `Box<T>` cần
+bao nhiêu: kích thước của con trỏ không thay đổi dựa trên lượng dữ liệu mà nó
+trỏ tới. Điều này có nghĩa là chúng ta có thể đặt một `Box<T>` bên trong
+biến thể `Cons` thay vì một giá trị `List` khác trực tiếp. `Box<T>` sẽ trỏ
+tới giá trị `List` tiếp theo, giá trị này sẽ nằm trên heap thay vì bên trong
+biến thể `Cons`. Về mặt khái niệm, chúng ta vẫn có một danh sách, được tạo ra
+bằng cách các danh sách chứa các danh sách khác, nhưng việc triển khai này
+bây giờ giống như đặt các phần tử cạnh nhau thay vì bên trong nhau.
 
-We can change the definition of the `List` enum in Listing 15-2 and the usage
-of the `List` in Listing 15-3 to the code in Listing 15-5, which will compile:
+Chúng ta có thể thay đổi định nghĩa của enum `List` trong Listing 15-2 và
+cách sử dụng `List` trong Listing 15-3 sang mã trong Listing 15-5, mã này sẽ
+biên dịch được:
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -221,35 +222,16 @@ of the `List` in Listing 15-3 to the code in Listing 15-5, which will compile:
 {{#rustdoc_include ../listings/ch15-smart-pointers/listing-15-05/src/main.rs}}
 ```
 
-<span class="caption">Listing 15-5: Definition of `List` that uses `Box<T>` in
-order to have a known size</span>
+<span class="caption">Listing 15-5: Định nghĩa `List` sử dụng `Box<T>` để có kích thước xác định</span>
 
-The `Cons` variant needs the size of an `i32` plus the space to store the
-box’s pointer data. The `Nil` variant stores no values, so it needs less space
-than the `Cons` variant. We now know that any `List` value will take up the
-size of an `i32` plus the size of a box’s pointer data. By using a box, we’ve
-broken the infinite, recursive chain, so the compiler can figure out the size
-it needs to store a `List` value. Figure 15-2 shows what the `Cons` variant
-looks like now.
+Biến thể `Cons` cần kích thước của một `i32` cộng với không gian để lưu con trỏ của box. Biến thể `Nil` không lưu trữ giá trị nào, vì vậy nó cần ít không gian hơn biến thể `Cons`. Bây giờ chúng ta biết rằng bất kỳ giá trị `List` nào sẽ chiếm kích thước của một `i32` cộng với kích thước của con trỏ trong box. Bằng cách sử dụng box, chúng ta đã phá vỡ chuỗi đệ quy vô tận, vì vậy compiler có thể tính được kích thước cần thiết để lưu một giá trị `List`. Hình 15-2 minh họa biến thể `Cons` hiện nay trông như thế nào.
 
 <img alt="A finite Cons list" src="img/trpl15-02.svg" class="center" />
 
-<span class="caption">Figure 15-2: A `List` that is not infinitely sized
-because `Cons` holds a `Box`</span>
+<span class="caption">Hình 15-2: Một `List` không vô tận vì `Cons` chứa một `Box`</span>
 
-Boxes provide only the indirection and heap allocation; they don’t have any
-other special capabilities, like those we’ll see with the other smart pointer
-types. They also don’t have the performance overhead that these special
-capabilities incur, so they can be useful in cases like the cons list where the
-indirection is the only feature we need. We’ll look at more use cases for boxes
-in Chapter 17, too.
+Box chỉ cung cấp cơ chế gián tiếp và cấp phát trên heap; nó không có bất kỳ khả năng đặc biệt nào khác, như những gì chúng ta sẽ thấy với các loại smart pointer khác. Nó cũng không gây overhead về hiệu năng mà các khả năng đặc biệt đó mang lại, vì vậy nó có thể hữu ích trong các trường hợp như cons list, nơi cơ chế gián tiếp là tính năng duy nhất mà chúng ta cần. Chúng ta cũng sẽ xem thêm các trường hợp sử dụng box trong Chương 17.
 
-The `Box<T>` type is a smart pointer because it implements the `Deref` trait,
-which allows `Box<T>` values to be treated like references. When a `Box<T>`
-value goes out of scope, the heap data that the box is pointing to is cleaned
-up as well because of the `Drop` trait implementation. These two traits will be
-even more important to the functionality provided by the other smart pointer
-types we’ll discuss in the rest of this chapter. Let’s explore these two traits
-in more detail.
+Kiểu `Box<T>` là một smart pointer vì nó triển khai trait `Deref`, cho phép giá trị `Box<T>` được sử dụng như tham chiếu. Khi một giá trị `Box<T>` ra khỏi phạm vi, dữ liệu trên heap mà box trỏ tới cũng được giải phóng nhờ triển khai trait `Drop`. Hai trait này sẽ còn quan trọng hơn nữa đối với chức năng mà các loại smart pointer khác cung cấp mà chúng ta sẽ thảo luận trong phần còn lại của chương. Hãy cùng khám phá hai trait này chi tiết hơn.
 
 [trait-objects]: ch17-02-trait-objects.html#using-trait-objects-that-allow-for-values-of-different-types

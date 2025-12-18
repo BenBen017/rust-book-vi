@@ -1,33 +1,23 @@
 ## Cargo Workspaces
 
-In Chapter 12, we built a package that included a binary crate and a library
-crate. As your project develops, you might find that the library crate
-continues to get bigger and you want to split your package further into
-multiple library crates. Cargo offers a feature called *workspaces* that can
-help manage multiple related packages that are developed in tandem.
+Trong Chương 12, chúng ta đã xây dựng một package bao gồm một crate nhị phân (binary crate) và một crate thư viện (library crate). Khi dự án phát triển, bạn có thể thấy rằng crate thư viện ngày càng lớn và muốn tách package thành nhiều crate thư viện hơn. Cargo cung cấp một tính năng gọi là *workspaces* giúp quản lý nhiều package liên quan được phát triển đồng thời.
 
-### Creating a Workspace
+### Tạo Workspace
 
-A *workspace* is a set of packages that share the same *Cargo.lock* and output
-directory. Let’s make a project using a workspace—we’ll use trivial code so we
-can concentrate on the structure of the workspace. There are multiple ways to
-structure a workspace, so we'll just show one common way. We’ll have a
-workspace containing a binary and two libraries. The binary, which will provide
-the main functionality, will depend on the two libraries. One library will
-provide an `add_one` function, and a second library an `add_two` function.
-These three crates will be part of the same workspace. We’ll start by creating
-a new directory for the workspace:
+Một *workspace* là một tập hợp các package chia sẻ cùng một *Cargo.lock* và thư mục đầu ra (output directory). Hãy tạo một dự án sử dụng workspace — chúng ta sẽ dùng mã đơn giản để tập trung vào cấu trúc của workspace. Có nhiều cách để cấu trúc workspace, ở đây chúng ta sẽ giới thiệu một cách phổ biến:
+
+- Workspace sẽ chứa một crate nhị phân và hai crate thư viện.
+- Crate nhị phân cung cấp chức năng chính và sẽ phụ thuộc vào hai crate thư viện.
+- Một crate thư viện sẽ cung cấp hàm `add_one`, và crate thư viện thứ hai cung cấp hàm `add_two`.
+
+Ba crate này sẽ nằm trong cùng một workspace. Trước tiên, chúng ta tạo một thư mục mới cho workspace:
 
 ```console
 $ mkdir add
 $ cd add
 ```
 
-Next, in the *add* directory, we create the *Cargo.toml* file that will
-configure the entire workspace. This file won’t have a `[package]` section.
-Instead, it will start with a `[workspace]` section that will allow us to add
-members to the workspace by specifying the path to the package with our binary
-crate; in this case, that path is *adder*:
+Tiếp theo, trong thư mục *add*, chúng ta tạo tệp *Cargo.toml* để cấu hình toàn bộ workspace. Tệp này sẽ **không** có phần `[package]`. Thay vào đó, nó sẽ bắt đầu với phần `[workspace]` cho phép chúng ta thêm các thành viên (members) vào workspace bằng cách chỉ định đường dẫn tới package chứa crate nhị phân; trong ví dụ này, đường dẫn là *adder*:
 
 <span class="filename">Filename: Cargo.toml</span>
 
@@ -35,8 +25,7 @@ crate; in this case, that path is *adder*:
 {{#include ../listings/ch14-more-about-cargo/no-listing-01-workspace-with-adder-crate/add/Cargo.toml}}
 ```
 
-Next, we’ll create the `adder` binary crate by running `cargo new` within the
-*add* directory:
+Tiếp theo, chúng ta sẽ tạo crate nhị phân `adder` bằng cách chạy `cargo new` trong thư mục *add*:
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/output-only-01-adder-crate/add
@@ -50,8 +39,7 @@ $ cargo new adder
      Created binary (application) `adder` package
 ```
 
-At this point, we can build the workspace by running `cargo build`. The files
-in your *add* directory should look like this:
+Tại thời điểm này, chúng ta có thể build workspace bằng lệnh `cargo build`. Các tệp trong thư mục *add* của bạn sẽ trông như sau:
 
 ```text
 ├── Cargo.lock
@@ -63,22 +51,11 @@ in your *add* directory should look like this:
 └── target
 ```
 
-The workspace has one *target* directory at the top level that the compiled
-artifacts will be placed into; the `adder` package doesn’t have its own
-*target* directory. Even if we were to run `cargo build` from inside the
-*adder* directory, the compiled artifacts would still end up in *add/target*
-rather than *add/adder/target*. Cargo structures the *target* directory in a
-workspace like this because the crates in a workspace are meant to depend on
-each other. If each crate had its own *target* directory, each crate would have
-to recompile each of the other crates in the workspace to place the artifacts
-in its own *target* directory. By sharing one *target* directory, the crates
-can avoid unnecessary rebuilding.
+Workspace này có một thư mục *target* duy nhất ở cấp trên, nơi các artifact được biên dịch sẽ được đặt; gói `adder` không có thư mục *target* riêng. Ngay cả khi chúng ta chạy `cargo build` từ bên trong thư mục *adder*, các artifact biên dịch vẫn sẽ nằm trong *add/target* thay vì *add/adder/target*. Cargo cấu trúc thư mục *target* trong một workspace như vậy vì các crate trong workspace dự định phụ thuộc lẫn nhau. Nếu mỗi crate có thư mục *target* riêng, mỗi crate sẽ phải biên dịch lại tất cả các crate khác trong workspace để đặt artifact vào thư mục *target* riêng của nó. Bằng cách chia sẻ một thư mục *target*, các crate có thể tránh việc biên dịch lại không cần thiết.
 
-### Creating the Second Package in the Workspace
+### Tạo Gói Thứ Hai Trong Workspace
 
-Next, let’s create another member package in the workspace and call it
-`add_one`. Change the top-level *Cargo.toml* to specify the *add_one* path in
-the `members` list:
+Tiếp theo, chúng ta sẽ tạo một gói thành viên khác trong workspace và gọi nó là `add_one`. Thay đổi tệp *Cargo.toml* ở cấp trên để chỉ định đường dẫn *add_one* trong danh sách `members`:
 
 <span class="filename">Filename: Cargo.toml</span>
 
@@ -116,7 +93,7 @@ Your *add* directory should now have these directories and files:
 └── target
 ```
 
-In the *add_one/src/lib.rs* file, let’s add an `add_one` function:
+Trong tệp *add_one/src/lib.rs*, chúng ta thêm một hàm `add_one`:
 
 <span class="filename">Filename: add_one/src/lib.rs</span>
 
@@ -124,9 +101,7 @@ In the *add_one/src/lib.rs* file, let’s add an `add_one` function:
 {{#rustdoc_include ../listings/ch14-more-about-cargo/no-listing-02-workspace-with-two-crates/add/add_one/src/lib.rs}}
 ```
 
-Now we can have the `adder` package with our binary depend on the `add_one`
-package that has our library. First, we’ll need to add a path dependency on
-`add_one` to *adder/Cargo.toml*.
+Bây giờ, gói `adder` với binary có thể phụ thuộc vào gói `add_one` chứa thư viện của chúng ta. Trước tiên, chúng ta cần thêm một *path dependency* tới `add_one` trong tệp *adder/Cargo.toml*:
 
 <span class="filename">Filename: adder/Cargo.toml</span>
 
@@ -134,13 +109,9 @@ package that has our library. First, we’ll need to add a path dependency on
 {{#include ../listings/ch14-more-about-cargo/no-listing-02-workspace-with-two-crates/add/adder/Cargo.toml:6:7}}
 ```
 
-Cargo doesn’t assume that crates in a workspace will depend on each other, so
-we need to be explicit about the dependency relationships.
+Cargo không tự động cho rằng các crate trong một workspace sẽ phụ thuộc lẫn nhau, vì vậy chúng ta cần chỉ rõ mối quan hệ phụ thuộc.
 
-Next, let’s use the `add_one` function (from the `add_one` crate) in the
-`adder` crate. Open the *adder/src/main.rs* file and add a `use` line at the
-top to bring the new `add_one` library crate into scope. Then change the `main`
-function to call the `add_one` function, as in Listing 14-7.
+Tiếp theo, hãy sử dụng hàm `add_one` (từ crate `add_one`) trong crate `adder`. Mở tệp *adder/src/main.rs* và thêm một dòng `use` ở đầu để đưa crate thư viện `add_one` vào scope. Sau đó, thay đổi hàm `main` để gọi hàm `add_one`, như trong Listing 14-7.
 
 <span class="filename">Filename: adder/src/main.rs</span>
 
@@ -148,11 +119,9 @@ function to call the `add_one` function, as in Listing 14-7.
 {{#rustdoc_include ../listings/ch14-more-about-cargo/listing-14-07/add/adder/src/main.rs}}
 ```
 
-<span class="caption">Listing 14-7: Using the `add_one` library crate from the
- `adder` crate</span>
+<span class="caption">Listing 14-7: Sử dụng crate thư viện `add_one` từ crate `adder`</span>
 
-Let’s build the workspace by running `cargo build` in the top-level *add*
-directory!
+Hãy biên dịch toàn bộ workspace bằng cách chạy lệnh `cargo build` trong thư mục cấp cao *add*!
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/listing-14-07/add
@@ -167,9 +136,7 @@ $ cargo build
     Finished dev [unoptimized + debuginfo] target(s) in 0.68s
 ```
 
-To run the binary crate from the *add* directory, we can specify which
-package in the workspace we want to run by using the `-p` argument and the
-package name with `cargo run`:
+Để chạy crate nhị phân từ thư mục *add*, chúng ta có thể chỉ định gói muốn chạy trong workspace bằng cách sử dụng tham số `-p` cùng tên gói với lệnh `cargo run`:
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/listing-14-07/add
@@ -184,19 +151,15 @@ $ cargo run -p adder
 Hello, world! 10 plus one is 11!
 ```
 
-This runs the code in *adder/src/main.rs*, which depends on the `add_one` crate.
+Điều này sẽ chạy code trong *adder/src/main.rs*, crate nhị phân này phụ thuộc vào crate `add_one`.
 
-#### Depending on an External Package in a Workspace
+#### Phụ thuộc vào Gói Bên Ngoài trong Workspace
 
-Notice that the workspace has only one *Cargo.lock* file at the top level,
-rather than having a *Cargo.lock* in each crate’s directory. This ensures that
-all crates are using the same version of all dependencies. If we add the `rand`
-package to the *adder/Cargo.toml* and *add_one/Cargo.toml* files, Cargo will
-resolve both of those to one version of `rand` and record that in the one
-*Cargo.lock*. Making all crates in the workspace use the same dependencies
-means the crates will always be compatible with each other. Let’s add the
-`rand` crate to the `[dependencies]` section in the *add_one/Cargo.toml* file
-so we can use the `rand` crate in the `add_one` crate:
+Lưu ý rằng workspace chỉ có một file *Cargo.lock* ở cấp cao nhất, thay vì mỗi crate có một *Cargo.lock* riêng. Điều này đảm bảo tất cả các crate đang sử dụng cùng một phiên bản của tất cả các dependencies. 
+
+Nếu chúng ta thêm gói `rand` vào cả *adder/Cargo.toml* và *add_one/Cargo.toml*, Cargo sẽ giải quyết cả hai về một phiên bản của `rand` và ghi lại trong cùng một *Cargo.lock*. Việc tất cả các crate trong workspace sử dụng cùng một phiên bản dependency đảm bảo các crate luôn tương thích với nhau.
+
+Hãy thêm crate `rand` vào phần `[dependencies]` trong file *add_one/Cargo.toml* để có thể sử dụng crate `rand` trong crate `add_one`:
 
 <!-- When updating the version of `rand` used, also update the version of
 `rand` used in these files so they all match:
@@ -210,10 +173,7 @@ so we can use the `rand` crate in the `add_one` crate:
 {{#include ../listings/ch14-more-about-cargo/no-listing-03-workspace-with-external-dependency/add/add_one/Cargo.toml:6:7}}
 ```
 
-We can now add `use rand;` to the *add_one/src/lib.rs* file, and building the
-whole workspace by running `cargo build` in the *add* directory will bring in
-and compile the `rand` crate. We will get one warning because we aren’t
-referring to the `rand` we brought into scope:
+Bây giờ chúng ta có thể thêm `use rand;` vào file *add_one/src/lib.rs*, và khi build toàn bộ workspace bằng cách chạy `cargo build` trong thư mục *add*, Cargo sẽ tự động tải và biên dịch crate `rand`. Chúng ta sẽ nhận được một cảnh báo vì hiện tại chưa sử dụng đến `rand` đã được đưa vào scope:
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/no-listing-03-workspace-with-external-dependency/add
@@ -241,11 +201,7 @@ warning: `add_one` (lib) generated 1 warning
     Finished dev [unoptimized + debuginfo] target(s) in 10.18s
 ```
 
-The top-level *Cargo.lock* now contains information about the dependency of
-`add_one` on `rand`. However, even though `rand` is used somewhere in the
-workspace, we can’t use it in other crates in the workspace unless we add
-`rand` to their *Cargo.toml* files as well. For example, if we add `use rand;`
-to the *adder/src/main.rs* file for the `adder` package, we’ll get an error:
+File *Cargo.lock* ở cấp trên cùng bây giờ chứa thông tin về việc crate `add_one` phụ thuộc vào `rand`. Tuy nhiên, mặc dù `rand` được sử dụng trong một crate trong workspace, chúng ta không thể dùng nó trong các crate khác trừ khi thêm `rand` vào file *Cargo.toml* của các crate đó. Ví dụ, nếu thêm `use rand;` vào file *adder/src/main.rs* của crate `adder`, chúng ta sẽ gặp lỗi:
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/output-only-03-use-rand/add
@@ -264,18 +220,11 @@ error[E0432]: unresolved import `rand`
   |     ^^^^ no external crate `rand`
 ```
 
-To fix this, edit the *Cargo.toml* file for the `adder` package and indicate
-that `rand` is a dependency for it as well. Building the `adder` package will
-add `rand` to the list of dependencies for `adder` in *Cargo.lock*, but no
-additional copies of `rand` will be downloaded. Cargo has ensured that every
-crate in every package in the workspace using the `rand` package will be using
-the same version, saving us space and ensuring that the crates in the workspace
-will be compatible with each other.
+Để khắc phục vấn đề này, chỉnh sửa file *Cargo.toml* của package `adder` và chỉ ra rằng `rand` cũng là một dependency cho nó. Việc build package `adder` sẽ thêm `rand` vào danh sách dependencies của `adder` trong *Cargo.lock*, nhưng sẽ không tải thêm bản sao nào của `rand`. Cargo đảm bảo rằng mọi crate trong mọi package trong workspace sử dụng package `rand` đều dùng cùng một phiên bản, tiết kiệm không gian và đảm bảo các crate trong workspace tương thích với nhau.
 
-#### Adding a Test to a Workspace
+#### Thêm Test vào Workspace
 
-For another enhancement, let’s add a test of the `add_one::add_one` function
-within the `add_one` crate:
+Một cải tiến khác, hãy thêm một test cho hàm `add_one::add_one` trong crate `add_one`:
 
 <span class="filename">Filename: add_one/src/lib.rs</span>
 
@@ -283,9 +232,8 @@ within the `add_one` crate:
 {{#rustdoc_include ../listings/ch14-more-about-cargo/no-listing-04-workspace-with-tests/add/add_one/src/lib.rs}}
 ```
 
-Now run `cargo test` in the top-level *add* directory. Running `cargo test` in
-a workspace structured like this one will run the tests for all the crates in
-the workspace:
+Bây giờ chạy `cargo test` trong thư mục *add* cấp cao nhất. Chạy `cargo test` 
+trong một workspace được cấu trúc như thế này sẽ chạy các test cho tất cả các crate trong workspace:
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/no-listing-04-workspace-with-tests/add
@@ -319,14 +267,12 @@ running 0 tests
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 ```
 
-The first section of the output shows that the `it_works` test in the `add_one`
-crate passed. The next section shows that zero tests were found in the `adder`
-crate, and then the last section shows zero documentation tests were found in
-the `add_one` crate.
+Phần đầu ra đầu tiên cho thấy test `it_works` trong crate `add_one` đã chạy thành công. 
+Phần tiếp theo cho thấy không có test nào được tìm thấy trong crate `adder`, 
+và phần cuối cùng cho thấy không có test tài liệu nào được tìm thấy trong crate `add_one`.
 
-We can also run tests for one particular crate in a workspace from the
-top-level directory by using the `-p` flag and specifying the name of the crate
-we want to test:
+Chúng ta cũng có thể chạy test cho một crate cụ thể trong workspace từ thư mục cấp cao bằng cách sử dụng flag `-p` 
+và chỉ định tên crate mà ta muốn test:
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/no-listing-04-workspace-with-tests/add
@@ -351,18 +297,10 @@ running 0 tests
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 ```
 
-This output shows `cargo test` only ran the tests for the `add_one` crate and
-didn’t run the `adder` crate tests.
+Phần đầu ra này cho thấy `cargo test` chỉ chạy các test cho crate `add_one` và không chạy các test của crate `adder`.
 
-If you publish the crates in the workspace to [crates.io](https://crates.io/),
-each crate in the workspace will need to be published separately. Like `cargo
-test`, we can publish a particular crate in our workspace by using the `-p`
-flag and specifying the name of the crate we want to publish.
+Nếu bạn muốn publish các crate trong workspace lên [crates.io](https://crates.io/), mỗi crate sẽ cần được publish riêng biệt. Tương tự như `cargo test`, bạn có thể publish một crate cụ thể trong workspace bằng cách sử dụng flag `-p` và chỉ định tên crate mà bạn muốn publish.
 
-For additional practice, add an `add_two` crate to this workspace in a similar
-way as the `add_one` crate!
+Để luyện tập thêm, bạn có thể thêm một crate `add_two` vào workspace này theo cách tương tự như crate `add_one`.
 
-As your project grows, consider using a workspace: it’s easier to understand
-smaller, individual components than one big blob of code. Furthermore, keeping
-the crates in a workspace can make coordination between crates easier if they
-are often changed at the same time.
+Khi dự án của bạn lớn lên, hãy cân nhắc sử dụng workspace: việc hiểu các thành phần nhỏ, riêng lẻ sẽ dễ hơn là một khối code lớn. Hơn nữa, giữ các crate trong workspace sẽ giúp việc phối hợp giữa các crate dễ dàng hơn nếu chúng thường được thay đổi cùng lúc.

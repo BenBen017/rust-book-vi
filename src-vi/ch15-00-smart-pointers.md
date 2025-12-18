@@ -1,53 +1,53 @@
 # Smart Pointers
 
-A *pointer* is a general concept for a variable that contains an address in
-memory. This address refers to, or “points at,” some other data. The most
-common kind of pointer in Rust is a reference, which you learned about in
-Chapter 4. References are indicated by the `&` symbol and borrow the value they
-point to. They don’t have any special capabilities other than referring to
-data, and have no overhead.
+Một *pointer* là một khái niệm chung cho một biến chứa một địa chỉ trong bộ nhớ.
+Địa chỉ này tham chiếu đến, hay "chỉ vào," một dữ liệu khác. Loại pointer phổ
+biến nhất trong Rust là reference, mà bạn đã học trong Chương 4. References được
+biểu thị bằng ký hiệu `&` và mượn giá trị mà chúng trỏ tới. Chúng không có
+khả năng đặc biệt nào ngoài việc tham chiếu dữ liệu và không có chi phí overhead.
 
-*Smart pointers*, on the other hand, are data structures that act like a
-pointer but also have additional metadata and capabilities. The concept of
-smart pointers isn’t unique to Rust: smart pointers originated in C++ and exist
-in other languages as well. Rust has a variety of smart pointers defined in the
-standard library that provide functionality beyond that provided by references.
-To explore the general concept, we’ll look at a couple of different examples of
-smart pointers, including a *reference counting* smart pointer type. This
-pointer enables you to allow data to have multiple owners by keeping track of
-the number of owners and, when no owners remain, cleaning up the data.
+*Smart pointers*, ngược lại, là các cấu trúc dữ liệu hoạt động như một pointer
+nhưng cũng có metadata và khả năng bổ sung. Khái niệm smart pointer không chỉ
+có ở Rust: smart pointer bắt nguồn từ C++ và tồn tại trong các ngôn ngữ khác.
+Rust có nhiều smart pointer được định nghĩa trong thư viện chuẩn cung cấp chức
+năng vượt trội hơn so với references. Để khám phá khái niệm chung, chúng ta sẽ
+xem một vài ví dụ về smart pointers, bao gồm một loại *reference counting*.
+Loại pointer này cho phép dữ liệu có nhiều chủ sở hữu bằng cách theo dõi số lượng
+chủ sở hữu, và khi không còn chủ sở hữu nào, sẽ dọn dẹp dữ liệu.
 
-Rust, with its concept of ownership and borrowing, has an additional difference
-between references and smart pointers: while references only borrow data, in
-many cases, smart pointers *own* the data they point to.
+Rust, với khái niệm ownership và borrowing, có thêm sự khác biệt giữa references
+và smart pointers: trong khi references chỉ mượn dữ liệu, trong nhiều trường
+hợp, smart pointers *sở hữu* dữ liệu mà chúng trỏ tới.
 
-Though we didn’t call them as such at the time, we’ve already encountered a few
-smart pointers in this book, including `String` and `Vec<T>` in Chapter 8. Both
-these types count as smart pointers because they own some memory and allow you
-to manipulate it. They also have metadata and extra capabilities or guarantees.
-`String`, for example, stores its capacity as metadata and has the extra
-ability to ensure its data will always be valid UTF-8.
+Mặc dù chúng ta chưa gọi chúng là smart pointers trước đây, nhưng chúng ta đã
+gặp một vài smart pointers trong cuốn sách này, bao gồm `String` và `Vec<T>`
+trong Chương 8. Cả hai loại này được coi là smart pointers vì chúng sở hữu một
+số bộ nhớ và cho phép bạn thao tác với nó. Chúng cũng có metadata và khả năng
+bổ sung hoặc đảm bảo thêm. Ví dụ, `String` lưu trữ dung lượng của nó như
+metadata và có khả năng đảm bảo dữ liệu luôn hợp lệ UTF-8.
 
-Smart pointers are usually implemented using structs. Unlike an ordinary
-struct, smart pointers implement the `Deref` and `Drop` traits. The `Deref`
-trait allows an instance of the smart pointer struct to behave like a reference
-so you can write your code to work with either references or smart pointers.
-The `Drop` trait allows you to customize the code that’s run when an instance
-of the smart pointer goes out of scope. In this chapter, we’ll discuss both
-traits and demonstrate why they’re important to smart pointers.
+Smart pointers thường được triển khai bằng struct. Không giống như một struct
+bình thường, smart pointers triển khai các trait `Deref` và `Drop`. Trait `Deref`
+cho phép một instance của smart pointer struct hoạt động như một reference để
+bạn có thể viết code làm việc với references hoặc smart pointers. Trait `Drop`
+cho phép bạn tùy chỉnh code được chạy khi một instance của smart pointer ra
+khỏi scope. Trong chương này, chúng ta sẽ thảo luận về cả hai trait và chứng
+minh lý do chúng quan trọng với smart pointers.
 
-Given that the smart pointer pattern is a general design pattern used
-frequently in Rust, this chapter won’t cover every existing smart pointer. Many
-libraries have their own smart pointers, and you can even write your own. We’ll
-cover the most common smart pointers in the standard library:
+Với việc pattern smart pointer là một pattern thiết kế phổ biến được sử dụng
+thường xuyên trong Rust, chương này sẽ không đề cập đến tất cả các smart
+pointer hiện có. Nhiều thư viện có smart pointer riêng, và bạn thậm chí có thể
+tự viết smart pointer của mình. Chúng ta sẽ đề cập đến các smart pointer phổ
+biến trong thư viện chuẩn:
 
-* `Box<T>` for allocating values on the heap
-* `Rc<T>`, a reference counting type that enables multiple ownership
-* `Ref<T>` and `RefMut<T>`, accessed through `RefCell<T>`, a type that enforces
-  the borrowing rules at runtime instead of compile time
+* `Box<T>` để cấp phát giá trị trên heap
+* `Rc<T>`, một kiểu reference counting cho phép nhiều chủ sở hữu
+* `Ref<T>` và `RefMut<T>`, truy cập thông qua `RefCell<T>`, một kiểu
+  thực thi các quy tắc borrowing lúc runtime thay vì compile time
 
-In addition, we’ll cover the *interior mutability* pattern where an immutable
-type exposes an API for mutating an interior value. We’ll also discuss
-*reference cycles*: how they can leak memory and how to prevent them.
+Ngoài ra, chúng ta sẽ thảo luận về pattern *interior mutability* nơi một kiểu
+immutable cung cấp API để thay đổi giá trị bên trong. Chúng ta cũng sẽ bàn về
+*các vòng tham chiếu (reference cycles)*: cách chúng có thể gây rò rỉ bộ nhớ
+và cách phòng tránh.
 
-Let’s dive in!
+Hãy cùng khám phá!

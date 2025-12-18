@@ -1,47 +1,24 @@
 ## Advanced Traits
 
-We first covered traits in the [“Traits: Defining Shared
-Behavior”][traits-defining-shared-behavior]<!-- ignore --> section of Chapter
-10, but we didn’t discuss the more advanced details. Now that you know more
-about Rust, we can get into the nitty-gritty.
+Chúng ta đã lần đầu tiên tìm hiểu về traits trong phần [“Traits: Defining Shared Behavior”][traits-defining-shared-behavior]<!-- ignore --> ở Chương 10, nhưng chưa thảo luận về các chi tiết nâng cao hơn. Giờ khi bạn đã biết thêm về Rust, chúng ta có thể đi vào các chi tiết kỹ thuật.
 
-### Specifying Placeholder Types in Trait Definitions with Associated Types
+### Chỉ định loại placeholder trong định nghĩa Trait với Associated Types
 
-*Associated types* connect a type placeholder with a trait such that the trait
-method definitions can use these placeholder types in their signatures. The
-implementor of a trait will specify the concrete type to be used instead of the
-placeholder type for the particular implementation. That way, we can define a
-trait that uses some types without needing to know exactly what those types are
-until the trait is implemented.
+*Associated types* kết nối một placeholder type với một trait sao cho các định nghĩa phương thức của trait có thể sử dụng các loại placeholder này trong chữ ký của chúng. Người triển khai một trait sẽ chỉ định loại cụ thể sẽ được sử dụng thay cho placeholder type cho triển khai đó. Nhờ đó, chúng ta có thể định nghĩa một trait sử dụng một số loại mà không cần biết chính xác các loại đó là gì cho đến khi trait được triển khai.
 
-We’ve described most of the advanced features in this chapter as being rarely
-needed. Associated types are somewhere in the middle: they’re used more rarely
-than features explained in the rest of the book but more commonly than many of
-the other features discussed in this chapter.
+Chúng tôi đã mô tả hầu hết các tính năng nâng cao trong chương này là hiếm khi cần đến. Associated types nằm ở mức trung gian: chúng được sử dụng ít hơn các tính năng được giải thích trong phần còn lại của cuốn sách nhưng phổ biến hơn nhiều so với các tính năng khác được thảo luận trong chương này.
 
-One example of a trait with an associated type is the `Iterator` trait that the
-standard library provides. The associated type is named `Item` and stands in
-for the type of the values the type implementing the `Iterator` trait is
-iterating over. The definition of the `Iterator` trait is as shown in Listing
-19-12.
+Một ví dụ về trait với associated type là trait `Iterator` mà thư viện chuẩn cung cấp. Associated type được đặt tên là `Item` và đại diện cho kiểu giá trị mà kiểu triển khai trait `Iterator` đang lặp qua. Định nghĩa của trait `Iterator` được trình bày như trong Listing 19-12.
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch19-advanced-features/listing-19-12/src/lib.rs}}
 ```
 
-<span class="caption">Listing 19-12: The definition of the `Iterator` trait
-that has an associated type `Item`</span>
+<span class="caption">Listing 19-12: Định nghĩa trait `Iterator` với associated type `Item`</span>
 
-The type `Item` is a placeholder, and the `next` method’s definition shows that
-it will return values of type `Option<Self::Item>`. Implementors of the
-`Iterator` trait will specify the concrete type for `Item`, and the `next`
-method will return an `Option` containing a value of that concrete type.
+Kiểu `Item` là một placeholder, và định nghĩa phương thức `next` cho thấy nó sẽ trả về các giá trị kiểu `Option<Self::Item>`. Người triển khai trait `Iterator` sẽ chỉ định kiểu cụ thể cho `Item`, và phương thức `next` sẽ trả về một `Option` chứa giá trị của kiểu cụ thể đó.
 
-Associated types might seem like a similar concept to generics, in that the
-latter allow us to define a function without specifying what types it can
-handle. To examine the difference between the two concepts, we’ll look at an
-implementation of the `Iterator` trait on a type named `Counter` that specifies
-the `Item` type is `u32`:
+Associated types có vẻ giống với generics, vì generics cho phép chúng ta định nghĩa một hàm mà không cần chỉ định các kiểu mà nó có thể xử lý. Để xem sự khác biệt giữa hai khái niệm này, chúng ta sẽ xem một triển khai trait `Iterator` trên một kiểu có tên là `Counter` mà chỉ định kiểu `Item` là `u32`:
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -49,54 +26,27 @@ the `Item` type is `u32`:
 {{#rustdoc_include ../listings/ch19-advanced-features/no-listing-22-iterator-on-counter/src/lib.rs:ch19}}
 ```
 
-This syntax seems comparable to that of generics. So why not just define the
-`Iterator` trait with generics, as shown in Listing 19-13?
+Cú pháp này có vẻ tương tự như cú pháp của generics. Vậy tại sao không định nghĩa trait `Iterator` với generics, như được trình bày trong Listing 19-13?
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch19-advanced-features/listing-19-13/src/lib.rs}}
 ```
 
-<span class="caption">Listing 19-13: A hypothetical definition of the
-`Iterator` trait using generics</span>
+<span class="caption">Listing 19-13: Một định nghĩa giả tưởng của trait `Iterator` sử dụng generics</span>
 
-The difference is that when using generics, as in Listing 19-13, we must
-annotate the types in each implementation; because we can also implement
-`Iterator<String> for Counter` or any other type, we could have multiple
-implementations of `Iterator` for `Counter`. In other words, when a trait has a
-generic parameter, it can be implemented for a type multiple times, changing
-the concrete types of the generic type parameters each time. When we use the
-`next` method on `Counter`, we would have to provide type annotations to
-indicate which implementation of `Iterator` we want to use.
+Sự khác biệt là khi sử dụng generics, như trong Listing 19-13, chúng ta phải chú thích các kiểu trong mỗi triển khai; vì chúng ta cũng có thể triển khai `Iterator<String> for Counter` hoặc bất kỳ kiểu nào khác, chúng ta có thể có nhiều triển khai của `Iterator` cho `Counter`. Nói cách khác, khi một trait có tham số generic, nó có thể được triển khai cho một kiểu nhiều lần, thay đổi các kiểu cụ thể của các tham số generic mỗi lần. Khi chúng ta sử dụng phương thức `next` trên `Counter`, chúng ta phải cung cấp chú thích kiểu để chỉ ra triển khai `Iterator` nào muốn sử dụng.
 
-With associated types, we don’t need to annotate types because we can’t
-implement a trait on a type multiple times. In Listing 19-12 with the
-definition that uses associated types, we can only choose what the type of
-`Item` will be once, because there can only be one `impl Iterator for Counter`.
-We don’t have to specify that we want an iterator of `u32` values everywhere
-that we call `next` on `Counter`.
+Với associated types, chúng ta không cần chú thích kiểu vì chúng ta không thể triển khai một trait trên cùng một kiểu nhiều lần. Trong Listing 19-12 với định nghĩa sử dụng associated types, chúng ta chỉ có thể chọn kiểu của `Item` một lần, vì chỉ có một `impl Iterator for Counter`. Chúng ta không cần phải chỉ định rằng muốn một iterator của các giá trị `u32` ở mọi nơi mà gọi `next` trên `Counter`.
 
-Associated types also become part of the trait’s contract: implementors of the
-trait must provide a type to stand in for the associated type placeholder.
-Associated types often have a name that describes how the type will be used,
-and documenting the associated type in the API documentation is good practice.
+Associated types cũng trở thành một phần của hợp đồng của trait: người triển khai trait phải cung cấp một kiểu để thay thế cho placeholder của associated type. Associated types thường có một tên mô tả cách sử dụng kiểu đó, và việc tài liệu hóa associated type trong tài liệu API là một thực hành tốt.
 
-### Default Generic Type Parameters and Operator Overloading
+### Tham số kiểu Generic mặc định và Nạp chồng toán tử (Operator Overloading)
 
-When we use generic type parameters, we can specify a default concrete type for
-the generic type. This eliminates the need for implementors of the trait to
-specify a concrete type if the default type works. You specify a default type
-when declaring a generic type with the `<PlaceholderType=ConcreteType>` syntax.
+Khi sử dụng tham số kiểu generic, chúng ta có thể chỉ định một kiểu cụ thể mặc định cho generic type. Điều này loại bỏ nhu cầu người triển khai trait phải chỉ định kiểu cụ thể nếu kiểu mặc định phù hợp. Bạn chỉ định kiểu mặc định khi khai báo một kiểu generic với cú pháp `<PlaceholderType=ConcreteType>`.
 
-A great example of a situation where this technique is useful is with *operator
-overloading*, in which you customize the behavior of an operator (such as `+`)
-in particular situations.
+Một ví dụ tuyệt vời về tình huống mà kỹ thuật này hữu ích là với *operator overloading*, trong đó bạn tùy chỉnh hành vi của một toán tử (chẳng hạn `+`) trong các tình huống cụ thể.
 
-Rust doesn’t allow you to create your own operators or overload arbitrary
-operators. But you can overload the operations and corresponding traits listed
-in `std::ops` by implementing the traits associated with the operator. For
-example, in Listing 19-14 we overload the `+` operator to add two `Point`
-instances together. We do this by implementing the `Add` trait on a `Point`
-struct:
+Rust không cho phép bạn tạo toán tử riêng hoặc nạp chồng các toán tử tùy ý. Nhưng bạn có thể nạp chồng các phép toán và trait tương ứng được liệt kê trong `std::ops` bằng cách triển khai các trait liên quan đến toán tử đó. Ví dụ, trong Listing 19-14 chúng ta nạp chồng toán tử `+` để cộng hai thể hiện `Point` với nhau. Chúng ta làm điều này bằng cách triển khai trait `Add` trên struct `Point`:
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -104,16 +54,11 @@ struct:
 {{#rustdoc_include ../listings/ch19-advanced-features/listing-19-14/src/main.rs}}
 ```
 
-<span class="caption">Listing 19-14: Implementing the `Add` trait to overload
-the `+` operator for `Point` instances</span>
+<span class="caption">Listing 19-14: Triển khai trait `Add` để nạp chồng toán tử `+` cho các thể hiện `Point`</span>
 
-The `add` method adds the `x` values of two `Point` instances and the `y`
-values of two `Point` instances to create a new `Point`. The `Add` trait has an
-associated type named `Output` that determines the type returned from the `add`
-method.
+Phương thức `add` cộng các giá trị `x` của hai thể hiện `Point` và các giá trị `y` của hai thể hiện `Point` để tạo ra một `Point` mới. Trait `Add` có một associated type tên là `Output` xác định kiểu được trả về từ phương thức `add`.
 
-The default generic type in this code is within the `Add` trait. Here is its
-definition:
+Tham số kiểu generic mặc định trong mã này nằm trong trait `Add`. Đây là định nghĩa của nó:
 
 ```rust
 trait Add<Rhs=Self> {
@@ -123,26 +68,11 @@ trait Add<Rhs=Self> {
 }
 ```
 
-This code should look generally familiar: a trait with one method and an
-associated type. The new part is `Rhs=Self`: this syntax is called *default
-type parameters*. The `Rhs` generic type parameter (short for “right hand
-side”) defines the type of the `rhs` parameter in the `add` method. If we don’t
-specify a concrete type for `Rhs` when we implement the `Add` trait, the type
-of `Rhs` will default to `Self`, which will be the type we’re implementing
-`Add` on.
+Mã này có vẻ khá quen thuộc: một trait với một phương thức và một associated type. Phần mới là `Rhs=Self`: cú pháp này được gọi là *default type parameters*. Tham số kiểu generic `Rhs` (viết tắt của “right hand side”) xác định kiểu của tham số `rhs` trong phương thức `add`. Nếu chúng ta không chỉ định một kiểu cụ thể cho `Rhs` khi triển khai trait `Add`, kiểu của `Rhs` sẽ mặc định là `Self`, tức là kiểu mà chúng ta đang triển khai `Add`.
 
-When we implemented `Add` for `Point`, we used the default for `Rhs` because we
-wanted to add two `Point` instances. Let’s look at an example of implementing
-the `Add` trait where we want to customize the `Rhs` type rather than using the
-default.
+Khi chúng ta triển khai `Add` cho `Point`, chúng ta sử dụng mặc định cho `Rhs` vì muốn cộng hai thể hiện `Point`. Hãy xem một ví dụ về việc triển khai trait `Add` mà chúng ta muốn tùy chỉnh kiểu `Rhs` thay vì sử dụng mặc định.
 
-We have two structs, `Millimeters` and `Meters`, holding values in different
-units. This thin wrapping of an existing type in another struct is known as the
-*newtype pattern*, which we describe in more detail in the [“Using the Newtype
-Pattern to Implement External Traits on External Types”][newtype]<!-- ignore
---> section. We want to add values in millimeters to values in meters and have
-the implementation of `Add` do the conversion correctly. We can implement `Add`
-for `Millimeters` with `Meters` as the `Rhs`, as shown in Listing 19-15.
+Chúng ta có hai struct, `Millimeters` và `Meters`, chứa các giá trị ở các đơn vị khác nhau. Việc bao bọc mỏng một kiểu hiện có trong một struct khác được gọi là *newtype pattern*, mà chúng ta mô tả chi tiết hơn trong phần [“Using the Newtype Pattern to Implement External Traits on External Types”][newtype]<!-- ignore -->. Chúng ta muốn cộng các giá trị millimeters với các giá trị meters và đảm bảo việc triển khai `Add` thực hiện chuyển đổi đúng. Chúng ta có thể triển khai `Add` cho `Millimeters` với `Meters` là `Rhs`, như được trình bày trong Listing 19-15.
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -150,41 +80,24 @@ for `Millimeters` with `Meters` as the `Rhs`, as shown in Listing 19-15.
 {{#rustdoc_include ../listings/ch19-advanced-features/listing-19-15/src/lib.rs}}
 ```
 
-<span class="caption">Listing 19-15: Implementing the `Add` trait on
-`Millimeters` to add `Millimeters` to `Meters`</span>
+<span class="caption">Listing 19-15: Triển khai trait `Add` trên `Millimeters` để cộng `Millimeters` với `Meters`</span>
 
-To add `Millimeters` and `Meters`, we specify `impl Add<Meters>` to set the
-value of the `Rhs` type parameter instead of using the default of `Self`.
+Để cộng `Millimeters` và `Meters`, chúng ta chỉ định `impl Add<Meters>` để đặt giá trị của tham số kiểu `Rhs` thay vì sử dụng mặc định là `Self`.
 
-You’ll use default type parameters in two main ways:
+Bạn sẽ sử dụng default type parameters theo hai cách chính:
 
-* To extend a type without breaking existing code
-* To allow customization in specific cases most users won’t need
+* Mở rộng một kiểu mà không phá vỡ mã hiện có
+* Cho phép tùy chỉnh trong các trường hợp cụ thể mà hầu hết người dùng không cần đến
 
-The standard library’s `Add` trait is an example of the second purpose:
-usually, you’ll add two like types, but the `Add` trait provides the ability to
-customize beyond that. Using a default type parameter in the `Add` trait
-definition means you don’t have to specify the extra parameter most of the
-time. In other words, a bit of implementation boilerplate isn’t needed, making
-it easier to use the trait.
+Trait `Add` trong thư viện chuẩn là một ví dụ cho mục đích thứ hai: thường thì bạn sẽ cộng hai kiểu giống nhau, nhưng trait `Add` cung cấp khả năng tùy chỉnh vượt ra ngoài điều đó. Việc sử dụng default type parameter trong định nghĩa trait `Add` có nghĩa là bạn không cần chỉ định tham số bổ sung hầu hết thời gian. Nói cách khác, một chút boilerplate khi triển khai không cần thiết, giúp trait dễ sử dụng hơn.
 
-The first purpose is similar to the second but in reverse: if you want to add a
-type parameter to an existing trait, you can give it a default to allow
-extension of the functionality of the trait without breaking the existing
-implementation code.
+Mục đích thứ nhất tương tự mục đích thứ hai nhưng ngược lại: nếu bạn muốn thêm một tham số kiểu vào một trait hiện có, bạn có thể cung cấp giá trị mặc định để mở rộng chức năng của trait mà không phá vỡ mã triển khai hiện có.
 
-### Fully Qualified Syntax for Disambiguation: Calling Methods with the Same Name
+### Cú pháp đầy đủ để phân biệt: Gọi phương thức cùng tên
 
-Nothing in Rust prevents a trait from having a method with the same name as
-another trait’s method, nor does Rust prevent you from implementing both traits
-on one type. It’s also possible to implement a method directly on the type with
-the same name as methods from traits.
+Rust không ngăn cản một trait có phương thức cùng tên với phương thức của trait khác, và cũng không ngăn cản bạn triển khai cả hai trait trên cùng một kiểu. Cũng có thể triển khai phương thức trực tiếp trên kiểu với cùng tên như các phương thức từ trait.
 
-When calling methods with the same name, you’ll need to tell Rust which one you
-want to use. Consider the code in Listing 19-16 where we’ve defined two traits,
-`Pilot` and `Wizard`, that both have a method called `fly`. We then implement
-both traits on a type `Human` that already has a method named `fly` implemented
-on it. Each `fly` method does something different.
+Khi gọi các phương thức cùng tên, bạn cần thông báo cho Rust biết bạn muốn sử dụng phương thức nào. Xem xét mã trong Listing 19-16, nơi chúng ta đã định nghĩa hai trait, `Pilot` và `Wizard`, đều có phương thức gọi là `fly`. Sau đó, chúng ta triển khai cả hai trait trên kiểu `Human`, mà kiểu này đã có một phương thức tên là `fly` được triển khai trực tiếp. Mỗi phương thức `fly` thực hiện một hành động khác nhau.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -192,12 +105,9 @@ on it. Each `fly` method does something different.
 {{#rustdoc_include ../listings/ch19-advanced-features/listing-19-16/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 19-16: Two traits are defined to have a `fly`
-method and are implemented on the `Human` type, and a `fly` method is
-implemented on `Human` directly</span>
+<span class="caption">Listing 19-16: Hai trait được định nghĩa có phương thức `fly` và được triển khai trên kiểu `Human`, đồng thời một phương thức `fly` được triển khai trực tiếp trên `Human`</span>
 
-When we call `fly` on an instance of `Human`, the compiler defaults to calling
-the method that is directly implemented on the type, as shown in Listing 19-17.
+Khi chúng ta gọi `fly` trên một thể hiện của `Human`, trình biên dịch mặc định sẽ gọi phương thức được triển khai trực tiếp trên kiểu, như được trình bày trong Listing 19-17.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -205,15 +115,11 @@ the method that is directly implemented on the type, as shown in Listing 19-17.
 {{#rustdoc_include ../listings/ch19-advanced-features/listing-19-17/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 19-17: Calling `fly` on an instance of
-`Human`</span>
+<span class="caption">Listing 19-17: Gọi `fly` trên một thể hiện của `Human`</span>
 
-Running this code will print `*waving arms furiously*`, showing that Rust
-called the `fly` method implemented on `Human` directly.
+Chạy mã này sẽ in ra `*waving arms furiously*`, cho thấy Rust đã gọi phương thức `fly` được triển khai trực tiếp trên `Human`.
 
-To call the `fly` methods from either the `Pilot` trait or the `Wizard` trait,
-we need to use more explicit syntax to specify which `fly` method we mean.
-Listing 19-18 demonstrates this syntax.
+Để gọi các phương thức `fly` từ trait `Pilot` hoặc trait `Wizard`, chúng ta cần sử dụng cú pháp rõ ràng hơn để chỉ định phương thức `fly` mà chúng ta muốn. Listing 19-18 minh họa cú pháp này.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -221,33 +127,19 @@ Listing 19-18 demonstrates this syntax.
 {{#rustdoc_include ../listings/ch19-advanced-features/listing-19-18/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 19-18: Specifying which trait’s `fly` method we
-want to call</span>
+<span class="caption">Listing 19-18: Chỉ định phương thức `fly` của trait nào mà chúng ta muốn gọi</span>
 
-Specifying the trait name before the method name clarifies to Rust which
-implementation of `fly` we want to call. We could also write
-`Human::fly(&person)`, which is equivalent to the `person.fly()` that we used
-in Listing 19-18, but this is a bit longer to write if we don’t need to
-disambiguate.
+Việc chỉ định tên trait trước tên phương thức giúp Rust hiểu rõ chúng ta muốn gọi triển khai `fly` nào. Chúng ta cũng có thể viết `Human::fly(&person)`, điều này tương đương với `person.fly()` mà chúng ta đã sử dụng trong Listing 19-18, nhưng cú pháp này dài hơn một chút nếu không cần phân biệt.
 
-Running this code prints the following:
+Chạy mã này sẽ in ra:
 
 ```console
 {{#include ../listings/ch19-advanced-features/listing-19-18/output.txt}}
 ```
 
-Because the `fly` method takes a `self` parameter, if we had two *types* that
-both implement one *trait*, Rust could figure out which implementation of a
-trait to use based on the type of `self`.
+Vì phương thức `fly` nhận một tham số `self`, nếu chúng ta có hai *kiểu* đều triển khai cùng một *trait*, Rust có thể xác định triển khai của trait nào sẽ được sử dụng dựa trên kiểu của `self`.
 
-However, associated functions that are not methods don’t have a `self`
-parameter. When there are multiple types or traits that define non-method
-functions with the same function name, Rust doesn't always know which type you
-mean unless you use *fully qualified syntax*. For example, in Listing 19-19 we
-create a trait for an animal shelter that wants to name all baby dogs *Spot*.
-We make an `Animal` trait with an associated non-method function `baby_name`.
-The `Animal` trait is implemented for the struct `Dog`, on which we also
-provide an associated non-method function `baby_name` directly.
+Tuy nhiên, các hàm liên quan (associated functions) mà không phải là phương thức thì không có tham số `self`. Khi có nhiều kiểu hoặc trait định nghĩa các hàm không phải phương thức với cùng tên hàm, Rust không luôn biết bạn muốn dùng kiểu nào trừ khi bạn sử dụng *fully qualified syntax*. Ví dụ, trong Listing 19-19, chúng ta tạo một trait cho một trại động vật muốn đặt tên tất cả chó con là *Spot*. Chúng ta tạo trait `Animal` với một hàm liên quan không phải phương thức `baby_name`. Trait `Animal` được triển khai cho struct `Dog`, trên đó chúng ta cũng cung cấp một hàm liên quan không phải phương thức `baby_name` trực tiếp.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -255,28 +147,17 @@ provide an associated non-method function `baby_name` directly.
 {{#rustdoc_include ../listings/ch19-advanced-features/listing-19-19/src/main.rs}}
 ```
 
-<span class="caption">Listing 19-19: A trait with an associated function and a
-type with an associated function of the same name that also implements the
-trait</span>
+<span class="caption">Listing 19-19: Một trait với một associated function và một kiểu có associated function cùng tên, đồng thời triển khai trait đó</span>
 
-We implement the code for naming all puppies Spot in the `baby_name` associated
-function that is defined on `Dog`. The `Dog` type also implements the trait
-`Animal`, which describes characteristics that all animals have. Baby dogs are
-called puppies, and that is expressed in the implementation of the `Animal`
-trait on `Dog` in the `baby_name` function associated with the `Animal` trait.
+Chúng ta triển khai mã để đặt tên tất cả chó con là Spot trong hàm liên quan `baby_name` được định nghĩa trực tiếp trên `Dog`. Kiểu `Dog` cũng triển khai trait `Animal`, mô tả các đặc điểm mà tất cả động vật có. Chó con được gọi là puppies, và điều này được thể hiện trong việc triển khai trait `Animal` trên `Dog` trong hàm `baby_name` liên quan đến trait `Animal`.
 
-In `main`, we call the `Dog::baby_name` function, which calls the associated
-function defined on `Dog` directly. This code prints the following:
+Trong `main`, chúng ta gọi hàm `Dog::baby_name`, phương thức này gọi hàm liên quan được định nghĩa trực tiếp trên `Dog`. Mã này sẽ in ra:
 
 ```console
 {{#include ../listings/ch19-advanced-features/listing-19-19/output.txt}}
 ```
 
-This output isn’t what we wanted. We want to call the `baby_name` function that
-is part of the `Animal` trait that we implemented on `Dog` so the code prints
-`A baby dog is called a puppy`. The technique of specifying the trait name that
-we used in Listing 19-18 doesn’t help here; if we change `main` to the code in
-Listing 19-20, we’ll get a compilation error.
+Kết quả này không phải là điều chúng ta muốn. Chúng ta muốn gọi hàm `baby_name` là một phần của trait `Animal` mà chúng ta đã triển khai trên `Dog` để mã in ra `A baby dog is called a puppy`. Kỹ thuật chỉ định tên trait mà chúng ta đã sử dụng trong Listing 19-18 không giúp được ở đây; nếu chúng ta thay đổi `main` thành mã trong Listing 19-20, sẽ xảy ra lỗi biên dịch.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -284,22 +165,15 @@ Listing 19-20, we’ll get a compilation error.
 {{#rustdoc_include ../listings/ch19-advanced-features/listing-19-20/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 19-20: Attempting to call the `baby_name`
-function from the `Animal` trait, but Rust doesn’t know which implementation to
-use</span>
+<span class="caption">Listing 19-20: Thử gọi hàm `baby_name` từ trait `Animal`, nhưng Rust không biết triển khai nào sẽ sử dụng</span>
 
-Because `Animal::baby_name` doesn’t have a `self` parameter, and there could be
-other types that implement the `Animal` trait, Rust can’t figure out which
-implementation of `Animal::baby_name` we want. We’ll get this compiler error:
+Vì `Animal::baby_name` không có tham số `self`, và có thể có các kiểu khác triển khai trait `Animal`, Rust không thể xác định triển khai nào của `Animal::baby_name` mà chúng ta muốn sử dụng. Chúng ta sẽ nhận được lỗi biên dịch sau:
 
 ```console
 {{#include ../listings/ch19-advanced-features/listing-19-20/output.txt}}
 ```
 
-To disambiguate and tell Rust that we want to use the implementation of
-`Animal` for `Dog` as opposed to the implementation of `Animal` for some other
-type, we need to use fully qualified syntax. Listing 19-21 demonstrates how to
-use fully qualified syntax.
+Để phân biệt và cho Rust biết rằng chúng ta muốn sử dụng triển khai của `Animal` cho `Dog` thay vì triển khai của `Animal` cho một kiểu khác, chúng ta cần sử dụng cú pháp đầy đủ (fully qualified syntax). Listing 19-21 minh họa cách sử dụng cú pháp đầy đủ.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -307,47 +181,27 @@ use fully qualified syntax.
 {{#rustdoc_include ../listings/ch19-advanced-features/listing-19-21/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 19-21: Using fully qualified syntax to specify
-that we want to call the `baby_name` function from the `Animal` trait as
-implemented on `Dog`</span>
+<span class="caption">Listing 19-21: Sử dụng cú pháp đầy đủ để chỉ định rằng chúng ta muốn gọi hàm `baby_name` từ trait `Animal` được triển khai trên `Dog`</span>
 
-We’re providing Rust with a type annotation within the angle brackets, which
-indicates we want to call the `baby_name` method from the `Animal` trait as
-implemented on `Dog` by saying that we want to treat the `Dog` type as an
-`Animal` for this function call. This code will now print what we want:
+Chúng ta cung cấp cho Rust một chú thích kiểu trong dấu ngoặc nhọn, cho biết chúng ta muốn gọi phương thức `baby_name` từ trait `Animal` như được triển khai trên `Dog` bằng cách nói rằng chúng ta muốn coi kiểu `Dog` như một `Animal` cho lần gọi hàm này. Mã này bây giờ sẽ in ra kết quả như mong muốn:
 
 ```console
 {{#include ../listings/ch19-advanced-features/listing-19-21/output.txt}}
 ```
 
-In general, fully qualified syntax is defined as follows:
+Nói chung, cú pháp đầy đủ (fully qualified syntax) được định nghĩa như sau:
 
 ```rust,ignore
 <Type as Trait>::function(receiver_if_method, next_arg, ...);
 ```
 
-For associated functions that aren’t methods, there would not be a `receiver`:
-there would only be the list of other arguments. You could use fully qualified
-syntax everywhere that you call functions or methods. However, you’re allowed
-to omit any part of this syntax that Rust can figure out from other information
-in the program. You only need to use this more verbose syntax in cases where
-there are multiple implementations that use the same name and Rust needs help
-to identify which implementation you want to call.
+Đối với các hàm liên quan (associated functions) không phải là phương thức, sẽ không có `receiver`: chỉ có danh sách các tham số khác. Bạn có thể sử dụng cú pháp đầy đủ ở bất cứ nơi nào gọi hàm hoặc phương thức. Tuy nhiên, bạn được phép bỏ bất kỳ phần nào của cú pháp này mà Rust có thể suy ra từ các thông tin khác trong chương trình. Bạn chỉ cần sử dụng cú pháp dài dòng hơn này trong những trường hợp có nhiều triển khai sử dụng cùng một tên và Rust cần giúp xác định triển khai nào bạn muốn gọi.
 
-### Using Supertraits to Require One Trait’s Functionality Within Another Trait
+### Sử dụng Supertraits để yêu cầu chức năng của một trait trong một trait khác
 
-Sometimes, you might write a trait definition that depends on another trait:
-for a type to implement the first trait, you want to require that type to also
-implement the second trait. You would do this so that your trait definition can
-make use of the associated items of the second trait. The trait your trait
-definition is relying on is called a *supertrait* of your trait.
+Đôi khi, bạn có thể viết một định nghĩa trait phụ thuộc vào một trait khác: để một kiểu triển khai trait đầu tiên, bạn muốn yêu cầu kiểu đó cũng phải triển khai trait thứ hai. Bạn làm điều này để định nghĩa trait của bạn có thể sử dụng các thành phần liên quan (associated items) của trait thứ hai. Trait mà định nghĩa trait của bạn dựa vào được gọi là *supertrait* của trait đó.
 
-For example, let’s say we want to make an `OutlinePrint` trait with an
-`outline_print` method that will print a given value formatted so that it's
-framed in asterisks. That is, given a `Point` struct that implements the
-standard library trait `Display` to result in `(x, y)`, when we call
-`outline_print` on a `Point` instance that has `1` for `x` and `3` for `y`, it
-should print the following:
+Ví dụ, giả sử chúng ta muốn tạo một trait `OutlinePrint` với một phương thức `outline_print` sẽ in một giá trị sao cho được khung bởi các dấu sao. Tức là, với struct `Point` triển khai trait `Display` của thư viện chuẩn để hiển thị `(x, y)`, khi chúng ta gọi `outline_print` trên một thể hiện `Point` có `x = 1` và `y = 3`, nó sẽ in ra:
 
 ```text
 **********
@@ -357,13 +211,7 @@ should print the following:
 **********
 ```
 
-In the implementation of the `outline_print` method, we want to use the
-`Display` trait’s functionality. Therefore, we need to specify that the
-`OutlinePrint` trait will work only for types that also implement `Display` and
-provide the functionality that `OutlinePrint` needs. We can do that in the
-trait definition by specifying `OutlinePrint: Display`. This technique is
-similar to adding a trait bound to the trait. Listing 19-22 shows an
-implementation of the `OutlinePrint` trait.
+Trong việc triển khai phương thức `outline_print`, chúng ta muốn sử dụng chức năng của trait `Display`. Do đó, chúng ta cần chỉ định rằng trait `OutlinePrint` sẽ chỉ hoạt động cho các kiểu cũng triển khai `Display` và cung cấp các chức năng mà `OutlinePrint` cần. Chúng ta có thể làm điều đó trong định nghĩa trait bằng cách chỉ định `OutlinePrint: Display`. Kỹ thuật này tương tự như việc thêm một trait bound vào trait. Listing 19-22 trình bày một triển khai của trait `OutlinePrint`.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -371,18 +219,11 @@ implementation of the `OutlinePrint` trait.
 {{#rustdoc_include ../listings/ch19-advanced-features/listing-19-22/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 19-22: Implementing the `OutlinePrint` trait that
-requires the functionality from `Display`</span>
+<span class="caption">Listing 19-22: Triển khai trait `OutlinePrint` yêu cầu chức năng từ `Display`</span>
 
-Because we’ve specified that `OutlinePrint` requires the `Display` trait, we
-can use the `to_string` function that is automatically implemented for any type
-that implements `Display`. If we tried to use `to_string` without adding a
-colon and specifying the `Display` trait after the trait name, we’d get an
-error saying that no method named `to_string` was found for the type `&Self` in
-the current scope.
+Vì chúng ta đã chỉ định rằng `OutlinePrint` yêu cầu trait `Display`, chúng ta có thể sử dụng hàm `to_string` được triển khai tự động cho bất kỳ kiểu nào triển khai `Display`. Nếu chúng ta thử sử dụng `to_string` mà không thêm dấu hai chấm và chỉ định trait `Display` sau tên trait, chúng ta sẽ nhận được lỗi nói rằng không tìm thấy phương thức nào tên là `to_string` cho kiểu `&Self` trong phạm vi hiện tại.
 
-Let’s see what happens when we try to implement `OutlinePrint` on a type that
-doesn’t implement `Display`, such as the `Point` struct:
+Hãy xem điều gì xảy ra khi chúng ta cố triển khai `OutlinePrint` trên một kiểu không triển khai `Display`, chẳng hạn như struct `Point`:
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -390,14 +231,13 @@ doesn’t implement `Display`, such as the `Point` struct:
 {{#rustdoc_include ../listings/ch19-advanced-features/no-listing-02-impl-outlineprint-for-point/src/main.rs:here}}
 ```
 
-We get an error saying that `Display` is required but not implemented:
+Chúng ta sẽ nhận được lỗi nói rằng trait `Display` là bắt buộc nhưng chưa được triển khai:
 
 ```console
 {{#include ../listings/ch19-advanced-features/no-listing-02-impl-outlineprint-for-point/output.txt}}
 ```
 
-To fix this, we implement `Display` on `Point` and satisfy the constraint that
-`OutlinePrint` requires, like so:
+Để khắc phục, chúng ta triển khai trait `Display` trên `Point` và thỏa mãn ràng buộc mà `OutlinePrint` yêu cầu, như sau:
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -405,31 +245,13 @@ To fix this, we implement `Display` on `Point` and satisfy the constraint that
 {{#rustdoc_include ../listings/ch19-advanced-features/no-listing-03-impl-display-for-point/src/main.rs:here}}
 ```
 
-Then implementing the `OutlinePrint` trait on `Point` will compile
-successfully, and we can call `outline_print` on a `Point` instance to display
-it within an outline of asterisks.
+Sau đó, việc triển khai trait `OutlinePrint` trên `Point` sẽ biên dịch thành công, và chúng ta có thể gọi `outline_print` trên một thể hiện của `Point` để hiển thị nó trong một khung dấu sao.
 
-### Using the Newtype Pattern to Implement External Traits on External Types
+### Sử dụng Newtype Pattern để triển khai các trait bên ngoài trên các kiểu bên ngoài
 
-In Chapter 10 in the [“Implementing a Trait on a
-Type”][implementing-a-trait-on-a-type]<!-- ignore --> section, we mentioned the
-orphan rule that states we’re only allowed to implement a trait on a type if
-either the trait or the type are local to our crate. It’s possible to get
-around this restriction using the *newtype pattern*, which involves creating a
-new type in a tuple struct. (We covered tuple structs in the [“Using Tuple
-Structs without Named Fields to Create Different Types”][tuple-structs]<!--
-ignore --> section of Chapter 5.) The tuple struct will have one field and be a
-thin wrapper around the type we want to implement a trait for. Then the wrapper
-type is local to our crate, and we can implement the trait on the wrapper.
-*Newtype* is a term that originates from the Haskell programming language.
-There is no runtime performance penalty for using this pattern, and the wrapper
-type is elided at compile time.
+Trong Chương 10, trong phần [“Implementing a Trait on a Type”][implementing-a-trait-on-a-type]<!-- ignore -->, chúng ta đã đề cập đến quy tắc orphan (orphan rule) cho rằng chúng ta chỉ được phép triển khai một trait trên một kiểu nếu trait hoặc kiểu đó là cục bộ trong crate của chúng ta. Có thể vượt qua giới hạn này bằng cách sử dụng *newtype pattern*, liên quan đến việc tạo một kiểu mới trong một tuple struct. (Chúng ta đã học về tuple structs trong phần [“Using Tuple Structs without Named Fields to Create Different Types”][tuple-structs]<!-- ignore --> của Chương 5.) Tuple struct sẽ có một trường và là một wrapper mỏng quanh kiểu mà chúng ta muốn triển khai trait. Khi đó, kiểu wrapper là cục bộ trong crate của chúng ta, và chúng ta có thể triển khai trait trên wrapper. Thuật ngữ *newtype* xuất phát từ ngôn ngữ lập trình Haskell. Việc sử dụng pattern này không ảnh hưởng tới hiệu năng khi chạy, và kiểu wrapper sẽ bị loại bỏ tại thời điểm biên dịch.
 
-As an example, let’s say we want to implement `Display` on `Vec<T>`, which the
-orphan rule prevents us from doing directly because the `Display` trait and the
-`Vec<T>` type are defined outside our crate. We can make a `Wrapper` struct
-that holds an instance of `Vec<T>`; then we can implement `Display` on
-`Wrapper` and use the `Vec<T>` value, as shown in Listing 19-23.
+Ví dụ, giả sử chúng ta muốn triển khai `Display` trên `Vec<T>`, điều mà quy tắc orphan ngăn cản chúng ta làm trực tiếp vì trait `Display` và kiểu `Vec<T>` được định nghĩa bên ngoài crate của chúng ta. Chúng ta có thể tạo một struct `Wrapper` chứa một thể hiện của `Vec<T>`; sau đó triển khai `Display` trên `Wrapper` và sử dụng giá trị `Vec<T>`, như được minh họa trong Listing 19-23.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -437,27 +259,13 @@ that holds an instance of `Vec<T>`; then we can implement `Display` on
 {{#rustdoc_include ../listings/ch19-advanced-features/listing-19-23/src/main.rs}}
 ```
 
-<span class="caption">Listing 19-23: Creating a `Wrapper` type around
-`Vec<String>` to implement `Display`</span>
+<span class="caption">Listing 19-23: Tạo một kiểu `Wrapper` quanh `Vec<String>` để triển khai `Display`</span>
 
-The implementation of `Display` uses `self.0` to access the inner `Vec<T>`,
-because `Wrapper` is a tuple struct and `Vec<T>` is the item at index 0 in the
-tuple. Then we can use the functionality of the `Display` type on `Wrapper`.
+Việc triển khai `Display` sử dụng `self.0` để truy cập vào `Vec<T>` bên trong, vì `Wrapper` là một tuple struct và `Vec<T>` là phần tử ở chỉ số 0 trong tuple. Sau đó, chúng ta có thể sử dụng các chức năng của kiểu `Display` trên `Wrapper`.
 
-The downside of using this technique is that `Wrapper` is a new type, so it
-doesn’t have the methods of the value it’s holding. We would have to implement
-all the methods of `Vec<T>` directly on `Wrapper` such that the methods
-delegate to `self.0`, which would allow us to treat `Wrapper` exactly like a
-`Vec<T>`. If we wanted the new type to have every method the inner type has,
-implementing the `Deref` trait (discussed in Chapter 15 in the [“Treating Smart
-Pointers Like Regular References with the `Deref`
-Trait”][smart-pointer-deref]<!-- ignore --> section) on the `Wrapper` to return
-the inner type would be a solution. If we don’t want the `Wrapper` type to have
-all the methods of the inner type—for example, to restrict the `Wrapper` type’s
-behavior—we would have to implement just the methods we do want manually.
+Nhược điểm của kỹ thuật này là `Wrapper` là một kiểu mới, vì vậy nó không có các phương thức của giá trị mà nó đang chứa. Chúng ta sẽ phải triển khai tất cả các phương thức của `Vec<T>` trực tiếp trên `Wrapper` sao cho các phương thức ủy quyền (delegate) tới `self.0`, điều này cho phép chúng ta sử dụng `Wrapper` giống hệt như một `Vec<T>`. Nếu muốn kiểu mới có mọi phương thức mà kiểu bên trong có, việc triển khai trait `Deref` (được thảo luận trong Chương 15, phần [“Treating Smart Pointers Like Regular References with the `Deref` Trait”][smart-pointer-deref]<!-- ignore -->) trên `Wrapper` để trả về kiểu bên trong sẽ là một giải pháp. Nếu không muốn kiểu `Wrapper` có tất cả các phương thức của kiểu bên trong — ví dụ, để hạn chế hành vi của kiểu `Wrapper` — chúng ta chỉ cần triển khai thủ công những phương thức mà chúng ta muốn.
 
-This newtype pattern is also useful even when traits are not involved. Let’s
-switch focus and look at some advanced ways to interact with Rust’s type system.
+Pattern newtype này cũng hữu ích ngay cả khi không có trait liên quan. Bây giờ hãy chuyển sang và xem một số cách nâng cao để tương tác với hệ thống kiểu của Rust.
 
 [newtype]: ch19-03-advanced-traits.html#using-the-newtype-pattern-to-implement-external-traits-on-external-types
 [implementing-a-trait-on-a-type]:

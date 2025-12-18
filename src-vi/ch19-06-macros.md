@@ -1,79 +1,38 @@
 ## Macros
 
-We’ve used macros like `println!` throughout this book, but we haven’t fully
-explored what a macro is and how it works. The term *macro* refers to a family
-of features in Rust: *declarative* macros with `macro_rules!` and three kinds
-of *procedural* macros:
+Chúng ta đã sử dụng các macro như `println!` trong suốt cuốn sách này, nhưng chúng ta chưa khám phá đầy đủ macro là gì và cách chúng hoạt động. Thuật ngữ *macro* đề cập đến một tập hợp các tính năng trong Rust: *macro khai báo* với `macro_rules!` và ba loại *macro thủ tục*:
 
-* Custom `#[derive]` macros that specify code added with the `derive` attribute
-  used on structs and enums
-* Attribute-like macros that define custom attributes usable on any item
-* Function-like macros that look like function calls but operate on the tokens
-  specified as their argument
+* Macro `#[derive]` tùy chỉnh, xác định mã được thêm với thuộc tính `derive` sử dụng trên struct và enum
+* Macro kiểu thuộc tính, định nghĩa các thuộc tính tùy chỉnh có thể sử dụng trên bất kỳ item nào
+* Macro kiểu hàm, trông giống như các lời gọi hàm nhưng hoạt động trên các token được chỉ định làm đối số
 
-We’ll talk about each of these in turn, but first, let’s look at why we even
-need macros when we already have functions.
+Chúng ta sẽ lần lượt nói về từng loại, nhưng trước tiên, hãy xem lý do tại sao chúng ta cần macro khi đã có hàm.
 
-### The Difference Between Macros and Functions
+### Sự khác biệt giữa Macros và Functions
 
-Fundamentally, macros are a way of writing code that writes other code, which
-is known as *metaprogramming*. In Appendix C, we discuss the `derive`
-attribute, which generates an implementation of various traits for you. We’ve
-also used the `println!` and `vec!` macros throughout the book. All of these
-macros *expand* to produce more code than the code you’ve written manually.
+Về cơ bản, macros là cách viết mã mà tự nó viết ra mã khác, điều này được gọi là *metaprogramming*. Trong Phụ lục C, chúng ta thảo luận về thuộc tính `derive`, tạo ra việc triển khai các trait khác nhau cho bạn. Chúng ta cũng đã sử dụng các macro `println!` và `vec!` trong suốt cuốn sách. Tất cả các macro này *mở rộng* để tạo ra nhiều mã hơn so với mã bạn viết thủ công.
 
-Metaprogramming is useful for reducing the amount of code you have to write and
-maintain, which is also one of the roles of functions. However, macros have
-some additional powers that functions don’t.
+Metaprogramming hữu ích để giảm lượng mã bạn phải viết và duy trì, điều này cũng là một trong những vai trò của hàm. Tuy nhiên, macros có một số khả năng bổ sung mà hàm không có.
 
-A function signature must declare the number and type of parameters the
-function has. Macros, on the other hand, can take a variable number of
-parameters: we can call `println!("hello")` with one argument or
-`println!("hello {}", name)` with two arguments. Also, macros are expanded
-before the compiler interprets the meaning of the code, so a macro can, for
-example, implement a trait on a given type. A function can’t, because it gets
-called at runtime and a trait needs to be implemented at compile time.
+Một chữ ký hàm phải khai báo số lượng và kiểu của các tham số mà hàm có. Ngược lại, macros có thể nhận một số lượng biến đổi của các tham số: chúng ta có thể gọi `println!("hello")` với một đối số hoặc `println!("hello {}", name)` với hai đối số. Ngoài ra, macros được mở rộng trước khi trình biên dịch giải thích ý nghĩa của mã, vì vậy một macro có thể, ví dụ, triển khai một trait trên một kiểu nhất định. Một hàm không thể làm được điều đó, vì nó được gọi tại runtime và một trait cần được triển khai tại compile time.
 
-The downside to implementing a macro instead of a function is that macro
-definitions are more complex than function definitions because you’re writing
-Rust code that writes Rust code. Due to this indirection, macro definitions are
-generally more difficult to read, understand, and maintain than function
-definitions.
+Nhược điểm của việc triển khai macro thay vì hàm là các định nghĩa macro phức tạp hơn định nghĩa hàm vì bạn đang viết mã Rust mà tự nó viết ra mã Rust khác. Do sự gián tiếp này, các định nghĩa macro thường khó đọc, hiểu và duy trì hơn so với định nghĩa hàm.
 
-Another important difference between macros and functions is that you must
-define macros or bring them into scope *before* you call them in a file, as
-opposed to functions you can define anywhere and call anywhere.
+Một khác biệt quan trọng khác giữa macros và hàm là bạn phải định nghĩa macro hoặc đưa chúng vào phạm vi *trước* khi gọi chúng trong một file, khác với các hàm mà bạn có thể định nghĩa ở bất cứ đâu và gọi ở bất cứ đâu.
 
-### Declarative Macros with `macro_rules!` for General Metaprogramming
+### Macros Khai Báo với `macro_rules!` cho Metaprogramming Chung
 
-The most widely used form of macros in Rust is the *declarative macro*. These
-are also sometimes referred to as “macros by example,” “`macro_rules!` macros,”
-or just plain “macros.” At their core, declarative macros allow you to write
-something similar to a Rust `match` expression. As discussed in Chapter 6,
-`match` expressions are control structures that take an expression, compare the
-resulting value of the expression to patterns, and then run the code associated
-with the matching pattern. Macros also compare a value to patterns that are
-associated with particular code: in this situation, the value is the literal
-Rust source code passed to the macro; the patterns are compared with the
-structure of that source code; and the code associated with each pattern, when
-matched, replaces the code passed to the macro. This all happens during
-compilation.
+Hình thức macro được sử dụng rộng rãi nhất trong Rust là *macro khai báo*. Chúng đôi khi còn được gọi là “macros theo ví dụ”, “`macro_rules!` macros,” hoặc đơn giản là “macros.” Về bản chất, macro khai báo cho phép bạn viết một cái gì đó tương tự như biểu thức `match` trong Rust. Như đã thảo luận trong Chương 6, biểu thức `match` là các cấu trúc điều khiển nhận một biểu thức, so sánh giá trị kết quả của biểu thức với các pattern, và sau đó chạy mã liên quan đến pattern khớp. Macro cũng so sánh một giá trị với các pattern được liên kết với mã cụ thể: trong trường hợp này, giá trị là mã nguồn Rust literal được truyền vào macro; các pattern được so sánh với cấu trúc của mã nguồn đó; và mã liên kết với mỗi pattern, khi khớp, sẽ thay thế mã được truyền vào macro. Tất cả điều này xảy ra trong quá trình biên dịch.
 
-To define a macro, you use the `macro_rules!` construct. Let’s explore how to
-use `macro_rules!` by looking at how the `vec!` macro is defined. Chapter 8
-covered how we can use the `vec!` macro to create a new vector with particular
-values. For example, the following macro creates a new vector containing three
-integers:
+Để định nghĩa một macro, bạn sử dụng cấu trúc `macro_rules!`. Hãy cùng khám phá cách sử dụng `macro_rules!` bằng cách xem cách macro `vec!` được định nghĩa. Chương 8 đã đề cập cách chúng ta có thể sử dụng macro `vec!` để tạo một vector mới với các giá trị cụ thể. Ví dụ, macro sau tạo một vector mới chứa ba số nguyên:
 
 ```rust
 let v: Vec<u32> = vec![1, 2, 3];
 ```
 
-We could also use the `vec!` macro to make a vector of two integers or a vector
-of five string slices. We wouldn’t be able to use a function to do the same
-because we wouldn’t know the number or type of values up front.
+Chúng ta cũng có thể sử dụng macro `vec!` để tạo một vector gồm hai số nguyên hoặc một vector gồm năm string slice. Chúng ta sẽ không thể sử dụng hàm để làm điều tương tự vì không biết trước số lượng hoặc kiểu của các giá trị.
 
-Listing 19-28 shows a slightly simplified definition of the `vec!` macro.
+Listing 19-28 cho thấy một định nghĩa hơi đơn giản hóa của macro `vec!`.
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -81,56 +40,25 @@ Listing 19-28 shows a slightly simplified definition of the `vec!` macro.
 {{#rustdoc_include ../listings/ch19-advanced-features/listing-19-28/src/lib.rs}}
 ```
 
-<span class="caption">Listing 19-28: A simplified version of the `vec!` macro
-definition</span>
+<span class="caption">Listing 19-28: Phiên bản đơn giản hóa của định nghĩa macro `vec!`</span>
 
-> Note: The actual definition of the `vec!` macro in the standard library
-> includes code to preallocate the correct amount of memory up front. That code
-> is an optimization that we don’t include here to make the example simpler.
+> Lưu ý: Định nghĩa thực tế của macro `vec!` trong thư viện chuẩn bao gồm mã để cấp phát trước lượng bộ nhớ chính xác. Mã đó là một tối ưu hóa mà chúng ta không bao gồm ở đây để làm ví dụ đơn giản hơn.
 
-The `#[macro_export]` annotation indicates that this macro should be made
-available whenever the crate in which the macro is defined is brought into
-scope. Without this annotation, the macro can’t be brought into scope.
+Chú thích `#[macro_export]` chỉ ra rằng macro này nên có sẵn bất cứ khi nào crate chứa macro được đưa vào phạm vi. Nếu không có chú thích này, macro sẽ không thể được đưa vào phạm vi.
 
-We then start the macro definition with `macro_rules!` and the name of the
-macro we’re defining *without* the exclamation mark. The name, in this case
-`vec`, is followed by curly brackets denoting the body of the macro definition.
+Chúng ta bắt đầu định nghĩa macro với `macro_rules!` và tên của macro mà chúng ta đang định nghĩa *không có* dấu chấm than. Tên, trong trường hợp này là `vec`, được theo sau bởi dấu ngoặc nhọn xác định thân của định nghĩa macro.
 
-The structure in the `vec!` body is similar to the structure of a `match`
-expression. Here we have one arm with the pattern `( $( $x:expr ),* )`,
-followed by `=>` and the block of code associated with this pattern. If the
-pattern matches, the associated block of code will be emitted. Given that this
-is the only pattern in this macro, there is only one valid way to match; any
-other pattern will result in an error. More complex macros will have more than
-one arm.
+Cấu trúc trong thân `vec!` tương tự cấu trúc của một biểu thức `match`. Ở đây chúng ta có một nhánh với pattern `( $( $x:expr ),* )`, theo sau bởi `=>` và khối mã liên kết với pattern này. Nếu pattern khớp, khối mã liên kết sẽ được tạo ra. Vì đây là pattern duy nhất trong macro này, chỉ có một cách hợp lệ để khớp; bất kỳ pattern nào khác sẽ dẫn đến lỗi. Các macro phức tạp hơn sẽ có nhiều nhánh hơn.
 
-Valid pattern syntax in macro definitions is different than the pattern syntax
-covered in Chapter 18 because macro patterns are matched against Rust code
-structure rather than values. Let’s walk through what the pattern pieces in
-Listing 19-28 mean; for the full macro pattern syntax, see the [Rust
-Reference][ref].
+Cú pháp pattern hợp lệ trong định nghĩa macro khác với cú pháp pattern được trình bày trong Chương 18 vì các macro pattern được khớp với cấu trúc mã Rust thay vì giá trị. Hãy cùng phân tích các thành phần pattern trong Listing 19-28; để xem toàn bộ cú pháp pattern của macro, tham khảo [Rust Reference][ref].
 
-First, we use a set of parentheses to encompass the whole pattern. We use a
-dollar sign (`$`) to declare a variable in the macro system that will contain
-the Rust code matching the pattern. The dollar sign makes it clear this is a
-macro variable as opposed to a regular Rust variable. Next comes a set of
-parentheses that captures values that match the pattern within the parentheses
-for use in the replacement code. Within `$()` is `$x:expr`, which matches any
-Rust expression and gives the expression the name `$x`.
+Đầu tiên, chúng ta sử dụng một cặp dấu ngoặc để bao quanh toàn bộ pattern. Chúng ta sử dụng dấu đô la (`$`) để khai báo một biến trong hệ thống macro sẽ chứa mã Rust khớp với pattern. Dấu đô la làm rõ rằng đây là một biến macro, khác với biến Rust thông thường. Tiếp theo là một cặp dấu ngoặc để bắt các giá trị khớp với pattern bên trong dấu ngoặc để sử dụng trong mã thay thế. Bên trong `$()` là `$x:expr`, khớp với bất kỳ biểu thức Rust nào và gán tên `$x` cho biểu thức đó.
 
-The comma following `$()` indicates that a literal comma separator character
-could optionally appear after the code that matches the code in `$()`. The `*`
-specifies that the pattern matches zero or more of whatever precedes the `*`.
+Dấu phẩy theo sau `$()` chỉ ra rằng một ký tự dấu phẩy thực tế có thể xuất hiện tùy chọn sau mã khớp với `$()`. Dấu `*` chỉ ra rằng pattern khớp với không hoặc nhiều lần bất cứ thứ gì đứng trước `*`.
 
-When we call this macro with `vec![1, 2, 3];`, the `$x` pattern matches three
-times with the three expressions `1`, `2`, and `3`.
+Khi chúng ta gọi macro này với `vec![1, 2, 3];`, pattern `$x` khớp ba lần với ba biểu thức `1`, `2`, và `3`.
 
-Now let’s look at the pattern in the body of the code associated with this arm:
-`temp_vec.push()` within `$()*` is generated for each part that matches `$()`
-in the pattern zero or more times depending on how many times the pattern
-matches. The `$x` is replaced with each expression matched. When we call this
-macro with `vec![1, 2, 3];`, the code generated that replaces this macro call
-will be the following:
+Bây giờ hãy xem pattern trong thân mã liên kết với nhánh này: `temp_vec.push()` trong `$()*` được sinh ra cho mỗi phần khớp với `$()` trong pattern không hoặc nhiều lần tùy thuộc vào số lần pattern khớp. `$x` được thay thế bằng mỗi biểu thức khớp. Khi chúng ta gọi macro này với `vec![1, 2, 3];`, mã được sinh ra thay thế cho lời gọi macro này sẽ là:
 
 ```rust,ignore
 {
@@ -142,27 +70,15 @@ will be the following:
 }
 ```
 
-We’ve defined a macro that can take any number of arguments of any type and can
-generate code to create a vector containing the specified elements.
+Chúng ta đã định nghĩa một macro có thể nhận bất kỳ số lượng đối số nào với bất kỳ kiểu nào và có thể sinh mã để tạo một vector chứa các phần tử được chỉ định.
 
-To learn more about how to write macros, consult the online documentation or
-other resources, such as [“The Little Book of Rust Macros”][tlborm] started by
-Daniel Keep and continued by Lukas Wirth.
+Để tìm hiểu thêm về cách viết macro, tham khảo tài liệu trực tuyến hoặc các nguồn khác, chẳng hạn như [“The Little Book of Rust Macros”][tlborm] do Daniel Keep khởi xướng và tiếp tục bởi Lukas Wirth.
 
-### Procedural Macros for Generating Code from Attributes
+### Macros Thủ Tục để Sinh Mã từ Thuộc Tính
 
-The second form of macros is the *procedural macro*, which acts more like a
-function (and is a type of procedure). Procedural macros accept some code as an
-input, operate on that code, and produce some code as an output rather than
-matching against patterns and replacing the code with other code as declarative
-macros do. The three kinds of procedural macros are custom derive,
-attribute-like, and function-like, and all work in a similar fashion.
+Hình thức thứ hai của macro là *macro thủ tục*, hoạt động giống như một hàm (và là một loại thủ tục). Macros thủ tục nhận một số mã làm đầu vào, thao tác trên mã đó, và tạo ra một số mã làm đầu ra thay vì so khớp với các pattern và thay thế mã như các macro khai báo. Ba loại macros thủ tục là custom derive, attribute-like, và function-like, và tất cả hoạt động theo cách tương tự.
 
-When creating procedural macros, the definitions must reside in their own crate
-with a special crate type. This is for complex technical reasons that we hope
-to eliminate in the future. In Listing 19-29, we show how to define a
-procedural macro, where `some_attribute` is a placeholder for using a specific
-macro variety.
+Khi tạo macros thủ tục, định nghĩa phải nằm trong một crate riêng với loại crate đặc biệt. Điều này do các lý do kỹ thuật phức tạp mà chúng ta hy vọng sẽ loại bỏ trong tương lai. Trong Listing 19-29, chúng ta minh họa cách định nghĩa một macro thủ tục, trong đó `some_attribute` là một chỗ giữ chỗ cho việc sử dụng một loại macro cụ thể.
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -174,33 +90,15 @@ pub fn some_name(input: TokenStream) -> TokenStream {
 }
 ```
 
-<span class="caption">Listing 19-29: An example of defining a procedural
-macro</span>
+<span class="caption">Listing 19-29: Ví dụ về việc định nghĩa một procedural macro</span>
 
-The function that defines a procedural macro takes a `TokenStream` as an input
-and produces a `TokenStream` as an output. The `TokenStream` type is defined by
-the `proc_macro` crate that is included with Rust and represents a sequence of
-tokens. This is the core of the macro: the source code that the macro is
-operating on makes up the input `TokenStream`, and the code the macro produces
-is the output `TokenStream`. The function also has an attribute attached to it
-that specifies which kind of procedural macro we’re creating. We can have
-multiple kinds of procedural macros in the same crate.
+Hàm định nghĩa một procedural macro nhận một `TokenStream` làm đầu vào và tạo ra một `TokenStream` làm đầu ra. Kiểu `TokenStream` được định nghĩa bởi crate `proc_macro` đi kèm với Rust và đại diện cho một chuỗi các token. Đây là phần cốt lõi của macro: mã nguồn mà macro thao tác tạo thành `TokenStream` đầu vào, và mã mà macro sinh ra là `TokenStream` đầu ra. Hàm cũng có một thuộc tính đi kèm chỉ ra loại procedural macro mà chúng ta đang tạo. Chúng ta có thể có nhiều loại procedural macro trong cùng một crate.
 
-Let’s look at the different kinds of procedural macros. We’ll start with a
-custom derive macro and then explain the small dissimilarities that make the
-other forms different.
+Hãy xem các loại procedural macro khác nhau. Chúng ta sẽ bắt đầu với một custom derive macro và sau đó giải thích những khác biệt nhỏ khiến các dạng khác khác nhau.
 
-### How to Write a Custom `derive` Macro
+### Cách Viết Custom `derive` Macro
 
-Let’s create a crate named `hello_macro` that defines a trait named
-`HelloMacro` with one associated function named `hello_macro`. Rather than
-making our users implement the `HelloMacro` trait for each of their types,
-we’ll provide a procedural macro so users can annotate their type with
-`#[derive(HelloMacro)]` to get a default implementation of the `hello_macro`
-function. The default implementation will print `Hello, Macro! My name is
-TypeName!` where `TypeName` is the name of the type on which this trait has
-been defined. In other words, we’ll write a crate that enables another
-programmer to write code like Listing 19-30 using our crate.
+Hãy tạo một crate có tên `hello_macro` định nghĩa một trait có tên `HelloMacro` với một hàm liên kết là `hello_macro`. Thay vì yêu cầu người dùng triển khai trait `HelloMacro` cho từng kiểu của họ, chúng ta sẽ cung cấp một procedural macro để người dùng có thể chú thích kiểu của họ với `#[derive(HelloMacro)]` để nhận triển khai mặc định của hàm `hello_macro`. Triển khai mặc định sẽ in ra `Hello, Macro! My name is TypeName!`, trong đó `TypeName` là tên của kiểu mà trait này được định nghĩa. Nói cách khác, chúng ta sẽ viết một crate cho phép lập trình viên khác viết mã như Listing 19-30 sử dụng crate của chúng ta.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -208,17 +106,15 @@ programmer to write code like Listing 19-30 using our crate.
 {{#rustdoc_include ../listings/ch19-advanced-features/listing-19-30/src/main.rs}}
 ```
 
-<span class="caption">Listing 19-30: The code a user of our crate will be able
-to write when using our procedural macro</span>
+<span class="caption">Listing 19-30: Mã mà người dùng crate của chúng ta có thể viết khi sử dụng procedural macro</span>
 
-This code will print `Hello, Macro! My name is Pancakes!` when we’re done. The
-first step is to make a new library crate, like this:
+Đoạn mã này sẽ in ra `Hello, Macro! My name is Pancakes!` khi hoàn tất. Bước đầu tiên là tạo một crate thư viện mới, như sau:
 
 ```console
 $ cargo new hello_macro --lib
 ```
 
-Next, we’ll define the `HelloMacro` trait and its associated function:
+Tiếp theo, chúng ta sẽ định nghĩa trait `HelloMacro` và hàm liên kết của nó:
 
 <span class="filename">Filename: src/lib.rs</span>
 
@@ -226,48 +122,25 @@ Next, we’ll define the `HelloMacro` trait and its associated function:
 {{#rustdoc_include ../listings/ch19-advanced-features/no-listing-20-impl-hellomacro-for-pancakes/hello_macro/src/lib.rs}}
 ```
 
-We have a trait and its function. At this point, our crate user could implement
-the trait to achieve the desired functionality, like so:
+Chúng ta đã có một trait và hàm của nó. Tại thời điểm này, người dùng crate của chúng ta có thể triển khai trait để đạt được chức năng mong muốn, như sau:
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch19-advanced-features/no-listing-20-impl-hellomacro-for-pancakes/pancakes/src/main.rs}}
 ```
 
-However, they would need to write the implementation block for each type they
-wanted to use with `hello_macro`; we want to spare them from having to do this
-work.
+Tuy nhiên, họ sẽ phải viết khối triển khai cho từng kiểu mà họ muốn sử dụng với `hello_macro`; chúng ta muốn giúp họ khỏi phải làm việc này.
 
-Additionally, we can’t yet provide the `hello_macro` function with default
-implementation that will print the name of the type the trait is implemented
-on: Rust doesn’t have reflection capabilities, so it can’t look up the type’s
-name at runtime. We need a macro to generate code at compile time.
+Ngoài ra, chúng ta chưa thể cung cấp hàm `hello_macro` với triển khai mặc định in ra tên của kiểu mà trait được triển khai trên đó: Rust không có khả năng reflection, vì vậy không thể tra cứu tên kiểu tại runtime. Chúng ta cần một macro để sinh mã tại thời gian biên dịch.
 
-The next step is to define the procedural macro. At the time of this writing,
-procedural macros need to be in their own crate. Eventually, this restriction
-might be lifted. The convention for structuring crates and macro crates is as
-follows: for a crate named `foo`, a custom derive procedural macro crate is
-called `foo_derive`. Let’s start a new crate called `hello_macro_derive` inside
-our `hello_macro` project:
+Bước tiếp theo là định nghĩa procedural macro. Tại thời điểm viết, các procedural macro cần nằm trong một crate riêng. Trong tương lai, hạn chế này có thể được loại bỏ. Quy ước cấu trúc crate và crate macro như sau: đối với một crate có tên `foo`, crate procedural macro custom derive sẽ được gọi là `foo_derive`. Hãy bắt đầu một crate mới có tên `hello_macro_derive` bên trong dự án `hello_macro` của chúng ta:
 
 ```console
 $ cargo new hello_macro_derive --lib
 ```
 
-Our two crates are tightly related, so we create the procedural macro crate
-within the directory of our `hello_macro` crate. If we change the trait
-definition in `hello_macro`, we’ll have to change the implementation of the
-procedural macro in `hello_macro_derive` as well. The two crates will need to
-be published separately, and programmers using these crates will need to add
-both as dependencies and bring them both into scope. We could instead have the
-`hello_macro` crate use `hello_macro_derive` as a dependency and re-export the
-procedural macro code. However, the way we’ve structured the project makes it
-possible for programmers to use `hello_macro` even if they don’t want the
-`derive` functionality.
+Hai crate của chúng ta có mối quan hệ chặt chẽ, vì vậy chúng ta tạo crate procedural macro bên trong thư mục của crate `hello_macro`. Nếu chúng ta thay đổi định nghĩa trait trong `hello_macro`, chúng ta cũng sẽ phải thay đổi triển khai của procedural macro trong `hello_macro_derive`. Hai crate sẽ cần được phát hành riêng, và lập trình viên sử dụng các crate này sẽ cần thêm cả hai làm dependencies và đưa cả hai vào phạm vi. Chúng ta có thể để crate `hello_macro` sử dụng `hello_macro_derive` làm dependency và re-export mã procedural macro. Tuy nhiên, cách chúng ta cấu trúc dự án cho phép lập trình viên sử dụng `hello_macro` ngay cả khi họ không cần chức năng `derive`.
 
-We need to declare the `hello_macro_derive` crate as a procedural macro crate.
-We’ll also need functionality from the `syn` and `quote` crates, as you’ll see
-in a moment, so we need to add them as dependencies. Add the following to the
-*Cargo.toml* file for `hello_macro_derive`:
+Chúng ta cần khai báo crate `hello_macro_derive` là một procedural macro crate. Chúng ta cũng sẽ cần chức năng từ các crate `syn` và `quote`, như bạn sẽ thấy ngay sau đây, vì vậy cần thêm chúng làm dependencies. Thêm các dòng sau vào file *Cargo.toml* của `hello_macro_derive`:
 
 <span class="filename">Filename: hello_macro_derive/Cargo.toml</span>
 
@@ -275,9 +148,7 @@ in a moment, so we need to add them as dependencies. Add the following to the
 {{#include ../listings/ch19-advanced-features/listing-19-31/hello_macro/hello_macro_derive/Cargo.toml:6:12}}
 ```
 
-To start defining the procedural macro, place the code in Listing 19-31 into
-your *src/lib.rs* file for the `hello_macro_derive` crate. Note that this code
-won’t compile until we add a definition for the `impl_hello_macro` function.
+Để bắt đầu định nghĩa procedural macro, đặt mã trong Listing 19-31 vào file *src/lib.rs* của crate `hello_macro_derive`. Lưu ý rằng mã này sẽ chưa biên dịch cho đến khi chúng ta thêm định nghĩa cho hàm `impl_hello_macro`.
 
 <span class="filename">Filename: hello_macro_derive/src/lib.rs</span>
 
@@ -285,41 +156,17 @@ won’t compile until we add a definition for the `impl_hello_macro` function.
 {{#rustdoc_include ../listings/ch19-advanced-features/listing-19-31/hello_macro/hello_macro_derive/src/lib.rs}}
 ```
 
-<span class="caption">Listing 19-31: Code that most procedural macro crates
-will require in order to process Rust code</span>
+<span class="caption">Listing 19-31: Mã mà hầu hết các crate procedural macro sẽ cần để xử lý mã Rust</span>
 
-Notice that we’ve split the code into the `hello_macro_derive` function, which
-is responsible for parsing the `TokenStream`, and the `impl_hello_macro`
-function, which is responsible for transforming the syntax tree: this makes
-writing a procedural macro more convenient. The code in the outer function
-(`hello_macro_derive` in this case) will be the same for almost every
-procedural macro crate you see or create. The code you specify in the body of
-the inner function (`impl_hello_macro` in this case) will be different
-depending on your procedural macro’s purpose.
+Lưu ý rằng chúng ta đã tách mã thành hàm `hello_macro_derive`, chịu trách nhiệm phân tích `TokenStream`, và hàm `impl_hello_macro`, chịu trách nhiệm biến đổi cây cú pháp: điều này giúp việc viết procedural macro thuận tiện hơn. Mã trong hàm ngoài (`hello_macro_derive` trong trường hợp này) sẽ giống nhau cho hầu hết mọi crate procedural macro mà bạn thấy hoặc tạo. Mã bạn chỉ định trong thân của hàm bên trong (`impl_hello_macro` trong trường hợp này) sẽ khác nhau tùy thuộc vào mục đích của procedural macro của bạn.
 
-We’ve introduced three new crates: `proc_macro`, [`syn`], and [`quote`]. The
-`proc_macro` crate comes with Rust, so we didn’t need to add that to the
-dependencies in *Cargo.toml*. The `proc_macro` crate is the compiler’s API that
-allows us to read and manipulate Rust code from our code.
+Chúng ta đã giới thiệu ba crate mới: `proc_macro`, [`syn`] và [`quote`]. Crate `proc_macro` đi kèm với Rust, vì vậy chúng ta không cần thêm nó vào dependencies trong *Cargo.toml*. Crate `proc_macro` là API của compiler cho phép chúng ta đọc và thao tác mã Rust từ mã của chính chúng ta.
 
-The `syn` crate parses Rust code from a string into a data structure that we
-can perform operations on. The `quote` crate turns `syn` data structures back
-into Rust code. These crates make it much simpler to parse any sort of Rust
-code we might want to handle: writing a full parser for Rust code is no simple
-task.
+Crate `syn` phân tích mã Rust từ một chuỗi thành một cấu trúc dữ liệu mà chúng ta có thể thao tác. Crate `quote` biến các cấu trúc dữ liệu của `syn` trở lại thành mã Rust. Các crate này làm cho việc phân tích bất kỳ loại mã Rust nào mà chúng ta muốn xử lý trở nên đơn giản hơn nhiều: viết một parser đầy đủ cho mã Rust không phải là việc đơn giản.
 
-The `hello_macro_derive` function will be called when a user of our library
-specifies `#[derive(HelloMacro)]` on a type. This is possible because we’ve
-annotated the `hello_macro_derive` function here with `proc_macro_derive` and
-specified the name `HelloMacro`, which matches our trait name; this is the
-convention most procedural macros follow.
+Hàm `hello_macro_derive` sẽ được gọi khi người dùng thư viện của chúng ta chỉ định `#[derive(HelloMacro)]` trên một kiểu. Điều này khả thi vì chúng ta đã chú thích hàm `hello_macro_derive` với `proc_macro_derive` và chỉ định tên `HelloMacro`, khớp với tên trait của chúng ta; đây là quy ước mà hầu hết procedural macro tuân theo.
 
-The `hello_macro_derive` function first converts the `input` from a
-`TokenStream` to a data structure that we can then interpret and perform
-operations on. This is where `syn` comes into play. The `parse` function in
-`syn` takes a `TokenStream` and returns a `DeriveInput` struct representing the
-parsed Rust code. Listing 19-32 shows the relevant parts of the `DeriveInput`
-struct we get from parsing the `struct Pancakes;` string:
+Hàm `hello_macro_derive` trước tiên chuyển `input` từ `TokenStream` thành một cấu trúc dữ liệu mà chúng ta có thể diễn giải và thao tác. Đây là nơi crate `syn` phát huy tác dụng. Hàm `parse` trong `syn` nhận một `TokenStream` và trả về một struct `DeriveInput` đại diện cho mã Rust đã được phân tích. Listing 19-32 hiển thị các phần liên quan của struct `DeriveInput` mà chúng ta nhận được từ việc phân tích chuỗi `struct Pancakes;`:
 
 ```rust,ignore
 DeriveInput {
@@ -341,32 +188,15 @@ DeriveInput {
 }
 ```
 
-<span class="caption">Listing 19-32: The `DeriveInput` instance we get when
-parsing the code that has the macro’s attribute in Listing 19-30</span>
+<span class="caption">Listing 19-32: Instance `DeriveInput` chúng ta nhận được khi phân tích mã có thuộc tính macro trong Listing 19-30</span>
 
-The fields of this struct show that the Rust code we’ve parsed is a unit struct
-with the `ident` (identifier, meaning the name) of `Pancakes`. There are more
-fields on this struct for describing all sorts of Rust code; check the [`syn`
-documentation for `DeriveInput`][syn-docs] for more information.
+Các trường của struct này cho thấy mã Rust mà chúng ta đã phân tích là một unit struct với `ident` (identifier, nghĩa là tên) là `Pancakes`. Có nhiều trường khác trong struct này để mô tả đủ loại mã Rust; xem tài liệu [`syn` về `DeriveInput`][syn-docs] để biết thêm thông tin.
 
-Soon we’ll define the `impl_hello_macro` function, which is where we’ll build
-the new Rust code we want to include. But before we do, note that the output
-for our derive macro is also a `TokenStream`. The returned `TokenStream` is
-added to the code that our crate users write, so when they compile their crate,
-they’ll get the extra functionality that we provide in the modified
-`TokenStream`.
+Chúng ta sắp định nghĩa hàm `impl_hello_macro`, nơi chúng ta sẽ xây dựng mã Rust mới mà muốn thêm vào. Nhưng trước khi làm điều đó, lưu ý rằng đầu ra của macro derive của chúng ta cũng là một `TokenStream`. `TokenStream` trả về được thêm vào mã mà người dùng crate của chúng ta viết, vì vậy khi họ biên dịch crate của họ, họ sẽ nhận được chức năng bổ sung mà chúng ta cung cấp trong `TokenStream` đã được sửa đổi.
 
-You might have noticed that we’re calling `unwrap` to cause the
-`hello_macro_derive` function to panic if the call to the `syn::parse` function
-fails here. It’s necessary for our procedural macro to panic on errors because
-`proc_macro_derive` functions must return `TokenStream` rather than `Result` to
-conform to the procedural macro API. We’ve simplified this example by using
-`unwrap`; in production code, you should provide more specific error messages
-about what went wrong by using `panic!` or `expect`.
+Bạn có thể nhận thấy chúng ta đang gọi `unwrap` để làm cho hàm `hello_macro_derive` panic nếu lời gọi đến hàm `syn::parse` thất bại ở đây. Điều này cần thiết vì procedural macro của chúng ta phải panic khi có lỗi vì các hàm `proc_macro_derive` phải trả về `TokenStream` thay vì `Result` để tuân theo API procedural macro. Chúng ta đã đơn giản hóa ví dụ này bằng cách sử dụng `unwrap`; trong mã sản xuất, bạn nên cung cấp thông báo lỗi cụ thể hơn về những gì đã xảy ra bằng cách sử dụng `panic!` hoặc `expect`.
 
-Now that we have the code to turn the annotated Rust code from a `TokenStream`
-into a `DeriveInput` instance, let’s generate the code that implements the
-`HelloMacro` trait on the annotated type, as shown in Listing 19-33.
+Bây giờ khi chúng ta có mã để chuyển đổi mã Rust được chú thích từ `TokenStream` thành một instance `DeriveInput`, hãy sinh mã thực thi trait `HelloMacro` trên kiểu được chú thích, như được trình bày trong Listing 19-33.
 
 <span class="filename">Filename: hello_macro_derive/src/lib.rs</span>
 
@@ -374,135 +204,70 @@ into a `DeriveInput` instance, let’s generate the code that implements the
 {{#rustdoc_include ../listings/ch19-advanced-features/listing-19-33/hello_macro/hello_macro_derive/src/lib.rs:here}}
 ```
 
-<span class="caption">Listing 19-33: Implementing the `HelloMacro` trait using
-the parsed Rust code</span>
+<span class="caption">Listing 19-33: Triển khai trait `HelloMacro` sử dụng mã Rust đã được phân tích</span>
 
-We get an `Ident` struct instance containing the name (identifier) of the
-annotated type using `ast.ident`. The struct in Listing 19-32 shows that when
-we run the `impl_hello_macro` function on the code in Listing 19-30, the
-`ident` we get will have the `ident` field with a value of `"Pancakes"`. Thus,
-the `name` variable in Listing 19-33 will contain an `Ident` struct instance
-that, when printed, will be the string `"Pancakes"`, the name of the struct in
-Listing 19-30.
+Chúng ta nhận được một instance struct `Ident` chứa tên (identifier) của kiểu được chú thích bằng cách sử dụng `ast.ident`. Struct trong Listing 19-32 cho thấy khi chạy hàm `impl_hello_macro` trên mã trong Listing 19-30, `ident` nhận được sẽ có trường `ident` với giá trị `"Pancakes"`. Do đó, biến `name` trong Listing 19-33 sẽ chứa một instance struct `Ident` mà khi in ra sẽ là chuỗi `"Pancakes"`, tên của struct trong Listing 19-30.
 
-The `quote!` macro lets us define the Rust code that we want to return. The
-compiler expects something different to the direct result of the `quote!`
-macro’s execution, so we need to convert it to a `TokenStream`. We do this by
-calling the `into` method, which consumes this intermediate representation and
-returns a value of the required `TokenStream` type.
+Macro `quote!` cho phép chúng ta định nghĩa mã Rust mà chúng ta muốn trả về. Compiler mong đợi thứ gì đó khác so với kết quả trực tiếp của việc thực thi macro `quote!`, vì vậy chúng ta cần chuyển đổi nó thành `TokenStream`. Chúng ta làm điều này bằng cách gọi phương thức `into`, phương thức này tiêu thụ biểu diễn trung gian và trả về giá trị kiểu `TokenStream` yêu cầu.
 
-The `quote!` macro also provides some very cool templating mechanics: we can
-enter `#name`, and `quote!` will replace it with the value in the variable
-`name`. You can even do some repetition similar to the way regular macros work.
-Check out [the `quote` crate’s docs][quote-docs] for a thorough introduction.
+Macro `quote!` cũng cung cấp cơ chế templating rất tiện lợi: chúng ta có thể viết `#name`, và `quote!` sẽ thay thế bằng giá trị trong biến `name`. Bạn thậm chí có thể thực hiện một số lặp lại tương tự cách hoạt động của các macro thông thường. Xem [tài liệu crate `quote`][quote-docs] để có giới thiệu chi tiết.
 
-We want our procedural macro to generate an implementation of our `HelloMacro`
-trait for the type the user annotated, which we can get by using `#name`. The
-trait implementation has the one function `hello_macro`, whose body contains the
-functionality we want to provide: printing `Hello, Macro! My name is` and then
-the name of the annotated type.
+Chúng ta muốn procedural macro sinh ra triển khai trait `HelloMacro` cho kiểu mà người dùng đã chú thích, điều này có thể lấy bằng cách sử dụng `#name`. Triển khai trait có một hàm là `hello_macro`, thân hàm chứa chức năng mà chúng ta muốn cung cấp: in ra `Hello, Macro! My name is` và sau đó là tên của kiểu được chú thích.
 
-The `stringify!` macro used here is built into Rust. It takes a Rust
-expression, such as `1 + 2`, and at compile time turns the expression into a
-string literal, such as `"1 + 2"`. This is different than `format!` or
-`println!`, macros which evaluate the expression and then turn the result into
-a `String`. There is a possibility that the `#name` input might be an
-expression to print literally, so we use `stringify!`. Using `stringify!` also
-saves an allocation by converting `#name` to a string literal at compile time.
+Macro `stringify!` được sử dụng ở đây là built-in trong Rust. Nó nhận một biểu thức Rust, chẳng hạn như `1 + 2`, và tại thời gian biên dịch chuyển biểu thức đó thành một literal string, ví dụ `"1 + 2"`. Điều này khác với `format!` hoặc `println!`, các macro này sẽ đánh giá biểu thức rồi chuyển kết quả thành một `String`. Có khả năng input `#name` là một biểu thức cần in ra nguyên văn, vì vậy chúng ta dùng `stringify!`. Sử dụng `stringify!` cũng tiết kiệm một phép cấp phát bằng cách chuyển `#name` thành literal string tại thời gian biên dịch.
 
-At this point, `cargo build` should complete successfully in both `hello_macro`
-and `hello_macro_derive`. Let’s hook up these crates to the code in Listing
-19-30 to see the procedural macro in action! Create a new binary project in
-your *projects* directory using `cargo new pancakes`. We need to add
-`hello_macro` and `hello_macro_derive` as dependencies in the `pancakes`
-crate’s *Cargo.toml*. If you’re publishing your versions of `hello_macro` and
-`hello_macro_derive` to [crates.io](https://crates.io/), they would be regular
-dependencies; if not, you can specify them as `path` dependencies as follows:
+Ở thời điểm này, `cargo build` nên hoàn tất thành công cả trong `hello_macro` và `hello_macro_derive`. Hãy kết nối các crate này với mã trong Listing 19-30 để xem procedural macro hoạt động! Tạo một dự án nhị phân mới trong thư mục *projects* bằng lệnh `cargo new pancakes`. Chúng ta cần thêm `hello_macro` và `hello_macro_derive` làm dependencies trong *Cargo.toml* của crate `pancakes`. Nếu bạn xuất bản các phiên bản của `hello_macro` và `hello_macro_derive` lên [crates.io](https://crates.io/), chúng sẽ là dependencies thông thường; nếu không, bạn có thể chỉ định chúng là dependencies theo `path` như sau:
 
 ```toml
 {{#include ../listings/ch19-advanced-features/no-listing-21-pancakes/pancakes/Cargo.toml:7:9}}
 ```
 
-Put the code in Listing 19-30 into *src/main.rs*, and run `cargo run`: it
-should print `Hello, Macro! My name is Pancakes!` The implementation of the
-`HelloMacro` trait from the procedural macro was included without the
-`pancakes` crate needing to implement it; the `#[derive(HelloMacro)]` added the
-trait implementation.
+Đặt mã trong Listing 19-30 vào *src/main.rs*, và chạy `cargo run`: nó sẽ in ra `Hello, Macro! My name is Pancakes!`. Triển khai trait `HelloMacro` từ procedural macro đã được thêm vào mà crate `pancakes` không cần tự triển khai; `#[derive(HelloMacro)]` đã thêm triển khai trait này.
 
-Next, let’s explore how the other kinds of procedural macros differ from custom
-derive macros.
+Tiếp theo, hãy khám phá cách các loại procedural macro khác khác với custom derive macros.
 
-### Attribute-like macros
+### Macros kiểu Attribute
 
-Attribute-like macros are similar to custom derive macros, but instead of
-generating code for the `derive` attribute, they allow you to create new
-attributes. They’re also more flexible: `derive` only works for structs and
-enums; attributes can be applied to other items as well, such as functions.
-Here’s an example of using an attribute-like macro: say you have an attribute
-named `route` that annotates functions when using a web application framework:
+Macros kiểu attribute tương tự như custom derive macros, nhưng thay vì sinh mã cho thuộc tính `derive`, chúng cho phép bạn tạo các thuộc tính mới. Chúng cũng linh hoạt hơn: `derive` chỉ hoạt động cho structs và enums; các attribute có thể áp dụng cho các item khác, chẳng hạn như các hàm. Dưới đây là ví dụ sử dụng macro kiểu attribute: giả sử bạn có một attribute tên `route` để chú thích các hàm khi sử dụng một framework ứng dụng web:
 
 ```rust,ignore
 #[route(GET, "/")]
 fn index() {
 ```
 
-This `#[route]` attribute would be defined by the framework as a procedural
-macro. The signature of the macro definition function would look like this:
+Attribute `#[route]` này sẽ được framework định nghĩa như một procedural macro. Chữ ký của hàm định nghĩa macro sẽ trông như sau:
 
 ```rust,ignore
 #[proc_macro_attribute]
 pub fn route(attr: TokenStream, item: TokenStream) -> TokenStream {
 ```
 
-Here, we have two parameters of type `TokenStream`. The first is for the
-contents of the attribute: the `GET, "/"` part. The second is the body of the
-item the attribute is attached to: in this case, `fn index() {}` and the rest
-of the function’s body.
+Ở đây, chúng ta có hai tham số kiểu `TokenStream`. Tham số đầu tiên dành cho nội dung của attribute: phần `GET, "/"`. Tham số thứ hai là thân của item mà attribute được gắn vào: trong trường hợp này là `fn index() {}` và phần còn lại của thân hàm.
 
-Other than that, attribute-like macros work the same way as custom derive
-macros: you create a crate with the `proc-macro` crate type and implement a
-function that generates the code you want!
+Ngoài ra, macros kiểu attribute hoạt động giống hệt như custom derive macros: bạn tạo một crate với loại crate `proc-macro` và triển khai một hàm sinh ra mã bạn muốn!
 
-### Function-like macros
+### Macros kiểu Function
 
-Function-like macros define macros that look like function calls. Similarly to
-`macro_rules!` macros, they’re more flexible than functions; for example, they
-can take an unknown number of arguments. However, `macro_rules!` macros can be
-defined only using the match-like syntax we discussed in the section
-[“Declarative Macros with `macro_rules!` for General
-Metaprogramming”][decl]<!-- ignore --> earlier. Function-like macros take a
-`TokenStream` parameter and their definition manipulates that `TokenStream`
-using Rust code as the other two types of procedural macros do. An example of a
-function-like macro is an `sql!` macro that might be called like so:
+Macros kiểu function định nghĩa các macro trông giống như lời gọi hàm. Tương tự như các macro `macro_rules!`, chúng linh hoạt hơn các hàm thông thường; ví dụ, chúng có thể nhận số lượng đối số không xác định. Tuy nhiên, các macro `macro_rules!` chỉ có thể được định nghĩa bằng cú pháp giống match mà chúng ta đã thảo luận trong phần [“Declarative Macros with `macro_rules!` for General Metaprogramming”][decl]<!-- ignore --> trước đó. Các macro kiểu function nhận một tham số `TokenStream` và định nghĩa của chúng thao tác với `TokenStream` đó bằng mã Rust giống như hai loại procedural macro khác. Một ví dụ về macro kiểu function là macro `sql!` có thể được gọi như sau:
 
 ```rust,ignore
 let sql = sql!(SELECT * FROM posts WHERE id=1);
 ```
 
-This macro would parse the SQL statement inside it and check that it’s
-syntactically correct, which is much more complex processing than a
-`macro_rules!` macro can do. The `sql!` macro would be defined like this:
+Macro này sẽ phân tích câu lệnh SQL bên trong nó và kiểm tra xem cú pháp có đúng hay không, điều này phức tạp hơn nhiều so với những gì một macro `macro_rules!` có thể làm. Macro `sql!` sẽ được định nghĩa như sau:
 
 ```rust,ignore
 #[proc_macro]
 pub fn sql(input: TokenStream) -> TokenStream {
 ```
 
-This definition is similar to the custom derive macro’s signature: we receive
-the tokens that are inside the parentheses and return the code we wanted to
-generate.
+Định nghĩa này tương tự như chữ ký của macro custom derive: chúng ta nhận các token bên trong dấu ngoặc và trả về mã mà chúng ta muốn sinh ra.
 
-## Summary
+## Tóm tắt
 
-Whew! Now you have some Rust features in your toolbox that you likely won’t use
-often, but you’ll know they’re available in very particular circumstances.
-We’ve introduced several complex topics so that when you encounter them in
-error message suggestions or in other peoples’ code, you’ll be able to
-recognize these concepts and syntax. Use this chapter as a reference to guide
-you to solutions.
+Hú! Bây giờ bạn đã có một số tính năng Rust trong hộp công cụ của mình mà có thể bạn sẽ không dùng thường xuyên, nhưng bạn sẽ biết chúng khả dụng trong những tình huống rất cụ thể. Chúng ta đã giới thiệu một số chủ đề phức tạp để khi gặp chúng trong gợi ý lỗi hoặc trong mã của người khác, bạn sẽ nhận biết được các khái niệm và cú pháp này. Sử dụng chương này như một tài liệu tham khảo để hướng dẫn bạn đến các giải pháp.
 
-Next, we’ll put everything we’ve discussed throughout the book into practice
-and do one more project!
+Tiếp theo, chúng ta sẽ đưa tất cả những gì đã thảo luận trong suốt cuốn sách vào thực hành và làm thêm một dự án nữa!
 
 [ref]: ../reference/macros-by-example.html
 [tlborm]: https://veykril.github.io/tlborm/

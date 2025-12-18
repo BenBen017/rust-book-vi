@@ -1,29 +1,31 @@
 # Patterns and Matching
 
-*Patterns* are a special syntax in Rust for matching against the structure of
-types, both complex and simple. Using patterns in conjunction with `match`
-expressions and other constructs gives you more control over a program’s
-control flow. A pattern consists of some combination of the following:
+*Patterns* là một cú pháp đặc biệt trong Rust dùng để so khớp với cấu trúc
+của các kiểu dữ liệu, cả phức tạp lẫn đơn giản. Sử dụng patterns kết hợp với
+các biểu thức `match` và các cấu trúc khác sẽ cho bạn nhiều quyền kiểm soát
+hơn đối với luồng điều khiển của chương trình. Một pattern bao gồm sự
+kết hợp của một số thành phần sau:
 
-* Literals
-* Destructured arrays, enums, structs, or tuples
-* Variables
-* Wildcards
+* Literals (hằng số)
+* Các mảng, enum, struct, hoặc tuple được destructure
+* Biến
+* Wildcards (`_`)
 * Placeholders
 
-Some example patterns include `x`, `(a, 3)`, and `Some(Color::Red)`. In the
-contexts in which patterns are valid, these components describe the shape of
-data. Our program then matches values against the patterns to determine whether
-it has the correct shape of data to continue running a particular piece of code.
+Một số ví dụ về pattern gồm `x`, `(a, 3)`, và `Some(Color::Red)`. Trong
+các ngữ cảnh mà pattern hợp lệ, các thành phần này mô tả “hình dạng” của
+dữ liệu. Chương trình sau đó sẽ so khớp các giá trị với pattern để xác định
+xem giá trị có đúng “hình dạng” dữ liệu để chạy đoạn code tương ứng hay không.
 
-To use a pattern, we compare it to some value. If the pattern matches the
-value, we use the value parts in our code. Recall the `match` expressions in
-Chapter 6 that used patterns, such as the coin-sorting machine example. If the
-value fits the shape of the pattern, we can use the named pieces. If it
-doesn’t, the code associated with the pattern won’t run.
+Để sử dụng một pattern, chúng ta so sánh nó với một giá trị. Nếu pattern
+khớp với giá trị, chúng ta có thể sử dụng các phần của giá trị đó trong code.
+Hãy nhớ lại các biểu thức `match` trong Chương 6 mà đã sử dụng patterns,
+chẳng hạn như ví dụ máy phân loại đồng xu. Nếu giá trị phù hợp với hình dạng
+của pattern, chúng ta có thể dùng các phần được đặt tên. Nếu không, đoạn
+code liên quan đến pattern đó sẽ không chạy.
 
-This chapter is a reference on all things related to patterns. We’ll cover the
-valid places to use patterns, the difference between refutable and irrefutable
-patterns, and the different kinds of pattern syntax that you might see. By the
-end of the chapter, you’ll know how to use patterns to express many concepts in
-a clear way.
+Chương này là một tài liệu tham khảo về tất cả các vấn đề liên quan đến
+patterns. Chúng ta sẽ đề cập đến các vị trí hợp lệ để sử dụng patterns,
+sự khác nhau giữa refutable và irrefutable patterns, cũng như các loại cú
+pháp pattern mà bạn có thể gặp. Kết thúc chương này, bạn sẽ biết cách sử
+dụng patterns để biểu diễn nhiều khái niệm một cách rõ ràng.

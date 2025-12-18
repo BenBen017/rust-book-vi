@@ -1,28 +1,14 @@
-## Building a Single-Threaded Web Server
+## Xây dựng Web Server Đơn Luồng
 
-We’ll start by getting a single-threaded web server working. Before we begin,
-let’s look at a quick overview of the protocols involved in building web
-servers. The details of these protocols are beyond the scope of this book, but
-a brief overview will give you the information you need.
+Chúng ta sẽ bắt đầu bằng việc tạo một web server đơn luồng hoạt động. Trước khi bắt đầu, hãy xem qua tổng quan nhanh về các giao thức liên quan đến việc xây dựng web server. Chi tiết về các giao thức này vượt ngoài phạm vi của cuốn sách, nhưng một cái nhìn tổng quan sẽ cung cấp thông tin cần thiết.
 
-The two main protocols involved in web servers are *Hypertext Transfer
-Protocol* *(HTTP)* and *Transmission Control Protocol* *(TCP)*. Both protocols
-are *request-response* protocols, meaning a *client* initiates requests and a
-*server* listens to the requests and provides a response to the client. The
-contents of those requests and responses are defined by the protocols.
+Hai giao thức chính liên quan đến web server là *Hypertext Transfer Protocol* *(HTTP)* và *Transmission Control Protocol* *(TCP)*. Cả hai đều là các giao thức *yêu cầu-phản hồi*, nghĩa là *client* khởi tạo yêu cầu và *server* lắng nghe các yêu cầu và trả về phản hồi cho client. Nội dung của các yêu cầu và phản hồi được xác định bởi các giao thức này.
 
-TCP is the lower-level protocol that describes the details of how information
-gets from one server to another but doesn’t specify what that information is.
-HTTP builds on top of TCP by defining the contents of the requests and
-responses. It’s technically possible to use HTTP with other protocols, but in
-the vast majority of cases, HTTP sends its data over TCP. We’ll work with the
-raw bytes of TCP and HTTP requests and responses.
+TCP là giao thức cấp thấp hơn, mô tả chi tiết cách thông tin di chuyển từ server này sang server khác nhưng không xác định thông tin đó là gì. HTTP xây dựng trên TCP bằng cách xác định nội dung của các yêu cầu và phản hồi. Về mặt kỹ thuật, có thể sử dụng HTTP với các giao thức khác, nhưng trong phần lớn các trường hợp, HTTP gửi dữ liệu qua TCP. Chúng ta sẽ làm việc với các byte thô của yêu cầu và phản hồi TCP và HTTP.
 
-### Listening to the TCP Connection
+### Lắng nghe Kết nối TCP
 
-Our web server needs to listen to a TCP connection, so that’s the first part
-we’ll work on. The standard library offers a `std::net` module that lets us do
-this. Let’s make a new project in the usual fashion:
+Web server của chúng ta cần lắng nghe kết nối TCP, đây là phần đầu tiên chúng ta sẽ thực hiện. Thư viện chuẩn cung cấp module `std::net` cho phép chúng ta làm điều này. Hãy tạo một dự án mới theo cách thông thường:
 
 ```console
 $ cargo new hello
@@ -30,9 +16,7 @@ $ cargo new hello
 $ cd hello
 ```
 
-Now enter the code in Listing 20-1 in *src/main.rs* to start. This code will
-listen at the local address `127.0.0.1:7878` for incoming TCP streams. When it
-gets an incoming stream, it will print `Connection established!`.
+Bây giờ, hãy nhập mã trong Listing 20-1 vào *src/main.rs* để bắt đầu. Mã này sẽ lắng nghe tại địa chỉ cục bộ `127.0.0.1:7878` cho các luồng TCP đến. Khi nhận được một luồng đến, nó sẽ in ra `Connection established!`.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -40,59 +24,19 @@ gets an incoming stream, it will print `Connection established!`.
 {{#rustdoc_include ../listings/ch20-web-server/listing-20-01/src/main.rs}}
 ```
 
-<span class="caption">Listing 20-1: Listening for incoming streams and printing
-a message when we receive a stream</span>
+<span class="caption">Listing 20-1: Lắng nghe các luồng đến và in thông báo khi nhận được luồng</span>
 
-Using `TcpListener`, we can listen for TCP connections at the address
-`127.0.0.1:7878`. In the address, the section before the colon is an IP address
-representing your computer (this is the same on every computer and doesn’t
-represent the authors’ computer specifically), and `7878` is the port. We’ve
-chosen this port for two reasons: HTTP isn’t normally accepted on this port so
-our server is unlikely to conflict with any other web server you might have
-running on your machine, and 7878 is *rust* typed on a telephone.
+Sử dụng `TcpListener`, chúng ta có thể lắng nghe các kết nối TCP tại địa chỉ `127.0.0.1:7878`. Trong địa chỉ này, phần trước dấu hai chấm là địa chỉ IP đại diện cho máy tính của bạn (điều này giống nhau trên mọi máy và không đại diện cho máy của tác giả), và `7878` là cổng. Chúng ta chọn cổng này vì hai lý do: HTTP thường không được sử dụng trên cổng này nên server của chúng ta khó bị xung đột với bất kỳ web server nào đang chạy trên máy của bạn, và 7878 gợi nhớ đến từ *rust* khi bấm trên bàn phím số điện thoại.
 
-The `bind` function in this scenario works like the `new` function in that it
-will return a new `TcpListener` instance. The function is called `bind`
-because, in networking, connecting to a port to listen to is known as “binding
-to a port.”
+Hàm `bind` trong trường hợp này hoạt động giống như hàm `new` vì nó trả về một instance `TcpListener` mới. Hàm được gọi là `bind` vì trong mạng, việc kết nối đến một cổng để lắng nghe được gọi là “binding to a port”.
 
-The `bind` function returns a `Result<T, E>`, which indicates that it’s
-possible for binding to fail. For example, connecting to port 80 requires
-administrator privileges (nonadministrators can listen only on ports higher
-than 1023), so if we tried to connect to port 80 without being an
-administrator, binding wouldn’t work. Binding also wouldn’t work, for example,
-if we ran two instances of our program and so had two programs listening to the
-same port. Because we’re writing a basic server just for learning purposes, we
-won’t worry about handling these kinds of errors; instead, we use `unwrap` to
-stop the program if errors happen.
+Hàm `bind` trả về một `Result<T, E>`, điều này cho thấy việc binding có thể thất bại. Ví dụ, kết nối tới cổng 80 yêu cầu quyền quản trị (người dùng thường không có quyền có thể lắng nghe các cổng cao hơn 1023), nên nếu thử kết nối tới cổng 80 mà không có quyền quản trị, binding sẽ thất bại. Binding cũng sẽ không thành công nếu chạy hai instance của chương trình cùng lúc trên cùng một cổng. Vì chúng ta đang viết một server cơ bản cho mục đích học tập, chúng ta sẽ không xử lý những lỗi này; thay vào đó, sử dụng `unwrap` để dừng chương trình nếu có lỗi xảy ra.
 
-The `incoming` method on `TcpListener` returns an iterator that gives us a
-sequence of streams (more specifically, streams of type `TcpStream`). A single
-*stream* represents an open connection between the client and the server. A
-*connection* is the name for the full request and response process in which a
-client connects to the server, the server generates a response, and the server
-closes the connection. As such, we will read from the `TcpStream` to see what
-the client sent and then write our response to the stream to send data back to
-the client. Overall, this `for` loop will process each connection in turn and
-produce a series of streams for us to handle.
+Phương thức `incoming` trên `TcpListener` trả về một iterator cung cấp một chuỗi các luồng (cụ thể là các luồng kiểu `TcpStream`). Một *stream* đại diện cho một kết nối mở giữa client và server. Một *connection* là tên gọi cho toàn bộ quá trình yêu cầu và phản hồi trong đó client kết nối đến server, server sinh ra phản hồi, và server đóng kết nối. Vì vậy, chúng ta sẽ đọc từ `TcpStream` để xem client gửi gì và sau đó ghi phản hồi vào luồng để gửi dữ liệu trở lại client. Nhìn chung, vòng lặp `for` này sẽ xử lý từng kết nối theo thứ tự và tạo ra một chuỗi các luồng để chúng ta xử lý.
 
-For now, our handling of the stream consists of calling `unwrap` to terminate
-our program if the stream has any errors; if there aren’t any errors, the
-program prints a message. We’ll add more functionality for the success case in
-the next listing. The reason we might receive errors from the `incoming` method
-when a client connects to the server is that we’re not actually iterating over
-connections. Instead, we’re iterating over *connection attempts*. The
-connection might not be successful for a number of reasons, many of them
-operating system specific. For example, many operating systems have a limit to
-the number of simultaneous open connections they can support; new connection
-attempts beyond that number will produce an error until some of the open
-connections are closed.
+Hiện tại, cách xử lý luồng của chúng ta chỉ gồm việc gọi `unwrap` để kết thúc chương trình nếu luồng có lỗi; nếu không có lỗi, chương trình sẽ in ra thông báo. Chúng ta sẽ thêm nhiều chức năng hơn cho trường hợp thành công trong listing tiếp theo. Lý do có thể nhận được lỗi từ phương thức `incoming` khi client kết nối đến server là vì chúng ta không thực sự lặp qua các kết nối mà lặp qua *các nỗ lực kết nối*. Kết nối có thể không thành công vì nhiều lý do, nhiều lý do phụ thuộc vào hệ điều hành. Ví dụ, nhiều hệ điều hành giới hạn số lượng kết nối mở đồng thời mà chúng có thể hỗ trợ; các nỗ lực kết nối mới vượt quá số lượng đó sẽ gây lỗi cho đến khi một số kết nối mở được đóng.
 
-Let’s try running this code! Invoke `cargo run` in the terminal and then load
-*127.0.0.1:7878* in a web browser. The browser should show an error message
-like “Connection reset,” because the server isn’t currently sending back any
-data. But when you look at your terminal, you should see several messages that
-were printed when the browser connected to the server!
+Hãy thử chạy đoạn mã này! Thực thi `cargo run` trong terminal và mở *127.0.0.1:7878* trong trình duyệt web. Trình duyệt sẽ hiển thị thông báo lỗi như “Connection reset,” vì server hiện tại chưa gửi dữ liệu trả về. Nhưng khi nhìn vào terminal, bạn sẽ thấy nhiều thông báo được in ra khi trình duyệt kết nối tới server!
 
 ```text
      Running `target/debug/hello`
@@ -101,31 +45,15 @@ Connection established!
 Connection established!
 ```
 
-Sometimes, you’ll see multiple messages printed for one browser request; the
-reason might be that the browser is making a request for the page as well as a
-request for other resources, like the *favicon.ico* icon that appears in the
-browser tab.
+Đôi khi bạn sẽ thấy nhiều thông báo được in ra cho cùng một yêu cầu từ trình duyệt; lý do có thể là trình duyệt đang gửi yêu cầu cho trang chính cũng như cho các tài nguyên khác, chẳng hạn như biểu tượng *favicon.ico* xuất hiện trong tab trình duyệt.
 
-It could also be that the browser is trying to connect to the server multiple
-times because the server isn’t responding with any data. When `stream` goes out
-of scope and is dropped at the end of the loop, the connection is closed as
-part of the `drop` implementation. Browsers sometimes deal with closed
-connections by retrying, because the problem might be temporary. The important
-factor is that we’ve successfully gotten a handle to a TCP connection!
+Cũng có thể trình duyệt đang cố gắng kết nối tới server nhiều lần vì server không phản hồi dữ liệu. Khi `stream` ra khỏi phạm vi và bị drop ở cuối vòng lặp, kết nối sẽ được đóng theo cách `drop` được triển khai. Trình duyệt đôi khi xử lý các kết nối bị đóng bằng cách thử lại, vì vấn đề có thể chỉ là tạm thời. Yếu tố quan trọng là chúng ta đã thành công trong việc lấy được handle tới một kết nối TCP!
 
-Remember to stop the program by pressing <span class="keystroke">ctrl-c</span>
-when you’re done running a particular version of the code. Then restart the
-program by invoking the `cargo run` command after you’ve made each set of code
-changes to make sure you’re running the newest code.
+Hãy nhớ dừng chương trình bằng cách nhấn <span class="keystroke">ctrl-c</span> khi bạn hoàn tất việc chạy một phiên bản code. Sau đó khởi động lại chương trình bằng lệnh `cargo run` sau khi bạn thực hiện các thay đổi để đảm bảo bạn đang chạy phiên bản code mới nhất.
 
-### Reading the Request
+### Đọc Request
 
-Let’s implement the functionality to read the request from the browser! To
-separate the concerns of first getting a connection and then taking some action
-with the connection, we’ll start a new function for processing connections. In
-this new `handle_connection` function, we’ll read data from the TCP stream and
-print it so we can see the data being sent from the browser. Change the code to
-look like Listing 20-2.
+Hãy triển khai chức năng đọc request từ trình duyệt! Để tách biệt việc lấy kết nối và xử lý kết nối, chúng ta sẽ tạo một hàm mới để xử lý kết nối. Trong hàm `handle_connection` mới này, chúng ta sẽ đọc dữ liệu từ TCP stream và in ra để có thể quan sát dữ liệu được gửi từ trình duyệt. Thay đổi code để trông giống như Listing 20-2.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -133,41 +61,19 @@ look like Listing 20-2.
 {{#rustdoc_include ../listings/ch20-web-server/listing-20-02/src/main.rs}}
 ```
 
-<span class="caption">Listing 20-2: Reading from the `TcpStream` and printing
-the data</span>
+<span class="caption">Listing 20-2: Đọc từ `TcpStream` và in dữ liệu ra</span>
 
-We bring `std::io::prelude` and `std::io::BufReader` into scope to get access
-to traits and types that let us read from and write to the stream. In the `for`
-loop in the `main` function, instead of printing a message that says we made a
-connection, we now call the new `handle_connection` function and pass the
-`stream` to it.
+Chúng ta đưa `std::io::prelude` và `std::io::BufReader` vào phạm vi để có quyền truy cập vào các trait và kiểu giúp đọc và ghi từ stream. Trong vòng lặp `for` ở hàm `main`, thay vì in thông báo rằng chúng ta đã nhận được kết nối, giờ chúng ta gọi hàm `handle_connection` mới và truyền `stream` vào.
 
-In the `handle_connection` function, we create a new `BufReader` instance that
-wraps a mutable reference to the `stream`. `BufReader` adds buffering by
-managing calls to the `std::io::Read` trait methods for us.
+Trong hàm `handle_connection`, chúng ta tạo một instance `BufReader` bao quanh tham chiếu mutable tới `stream`. `BufReader` thêm bộ đệm bằng cách quản lý các gọi tới các phương thức của trait `std::io::Read` cho chúng ta.
 
-We create a variable named `http_request` to collect the lines of the request
-the browser sends to our server. We indicate that we want to collect these
-lines in a vector by adding the `Vec<_>` type annotation.
+Chúng ta tạo biến `http_request` để thu thập các dòng của request mà trình duyệt gửi đến server. Chúng ta chỉ định rằng muốn thu thập các dòng này trong một vector bằng cách thêm chú thích kiểu `Vec<_>`.
 
-`BufReader` implements the `std::io::BufRead` trait, which provides the `lines`
-method. The `lines` method returns an iterator of `Result<String,
-std::io::Error>` by splitting the stream of data whenever it sees a newline
-byte. To get each `String`, we map and `unwrap` each `Result`. The `Result`
-might be an error if the data isn’t valid UTF-8 or if there was a problem
-reading from the stream. Again, a production program should handle these errors
-more gracefully, but we’re choosing to stop the program in the error case for
-simplicity.
+`BufReader` triển khai trait `std::io::BufRead`, trait này cung cấp phương thức `lines`. Phương thức `lines` trả về một iterator các giá trị `Result<String, std::io::Error>` bằng cách tách luồng dữ liệu mỗi khi gặp byte newline. Để lấy được từng `String`, chúng ta dùng `map` và `unwrap` mỗi `Result`. `Result` có thể là lỗi nếu dữ liệu không hợp lệ UTF-8 hoặc có vấn đề khi đọc từ stream. Trong chương trình sản xuất nên xử lý lỗi một cách mềm dẻo hơn, nhưng chúng ta chọn dừng chương trình trong trường hợp lỗi để đơn giản.
 
-The browser signals the end of an HTTP request by sending two newline
-characters in a row, so to get one request from the stream, we take lines until
-we get a line that is the empty string. Once we’ve collected the lines into the
-vector, we’re printing them out using pretty debug formatting so we can take a
-look at the instructions the web browser is sending to our server.
+Trình duyệt báo hiệu kết thúc một HTTP request bằng việc gửi hai ký tự newline liên tiếp, vì vậy để lấy một request từ stream, chúng ta lấy các dòng cho tới khi gặp một dòng trống. Khi đã thu thập xong các dòng vào vector, chúng ta in chúng ra sử dụng định dạng debug đẹp để có thể xem các lệnh mà trình duyệt gửi tới server.
 
-Let’s try this code! Start the program and make a request in a web browser
-again. Note that we’ll still get an error page in the browser, but our
-program’s output in the terminal will now look similar to this:
+Hãy thử chạy code này! Khởi động chương trình và thực hiện một request từ trình duyệt lần nữa. Lưu ý rằng trình duyệt vẫn sẽ hiển thị trang lỗi, nhưng đầu ra của chương trình trong terminal sẽ trông giống như sau:
 
 ```console
 $ cargo run
@@ -192,19 +98,13 @@ Request: [
 ]
 ```
 
-Depending on your browser, you might get slightly different output. Now that
-we’re printing the request data, we can see why we get multiple connections
-from one browser request by looking at the path after `GET` in the first line
-of the request. If the repeated connections are all requesting */*, we know the
-browser is trying to fetch */* repeatedly because it’s not getting a response
-from our program.
+Tùy vào trình duyệt, bạn có thể thấy đầu ra hơi khác nhau. Giờ khi chúng ta đã in dữ liệu request ra, chúng ta có thể thấy lý do vì sao một request từ trình duyệt lại tạo ra nhiều kết nối bằng cách nhìn vào đường dẫn sau `GET` trong dòng đầu tiên của request. Nếu các kết nối lặp lại đều yêu cầu `/*`, chúng ta biết trình duyệt đang cố gắng lấy `/*` nhiều lần vì chưa nhận được phản hồi từ chương trình của chúng ta.
 
-Let’s break down this request data to understand what the browser is asking of
-our program.
+Hãy phân tích dữ liệu request này để hiểu trình duyệt đang yêu cầu gì từ chương trình của chúng ta.
 
-### A Closer Look at an HTTP Request
+### Xem kỹ một HTTP Request
 
-HTTP is a text-based protocol, and a request takes this format:
+HTTP là một giao thức dựa trên văn bản, và một request có định dạng như sau:
 
 ```text
 Method Request-URI HTTP-Version CRLF
@@ -212,41 +112,23 @@ headers CRLF
 message-body
 ```
 
-The first line is the *request line* that holds information about what the
-client is requesting. The first part of the request line indicates the *method*
-being used, such as `GET` or `POST`, which describes how the client is making
-this request. Our client used a `GET` request, which means it is asking for
-information.
+Dòng đầu tiên là *request line* chứa thông tin về yêu cầu mà client gửi tới. Phần đầu của request line chỉ ra *method* đang được sử dụng, chẳng hạn như `GET` hoặc `POST`, mô tả cách client thực hiện request này. Client của chúng ta sử dụng request `GET`, có nghĩa là nó đang yêu cầu lấy thông tin.
 
-The next part of the request line is */*, which indicates the *Uniform Resource
-Identifier* *(URI)* the client is requesting: a URI is almost, but not quite,
-the same as a *Uniform Resource Locator* *(URL)*. The difference between URIs
-and URLs isn’t important for our purposes in this chapter, but the HTTP spec
-uses the term URI, so we can just mentally substitute URL for URI here.
+Phần tiếp theo của request line là `/*`, chỉ ra *Uniform Resource Identifier* *(URI)* mà client đang yêu cầu: URI gần giống, nhưng không hoàn toàn giống, với *Uniform Resource Locator* *(URL)*. Sự khác biệt giữa URI và URL không quan trọng trong chương này, nhưng chuẩn HTTP dùng thuật ngữ URI, nên ta có thể tạm thay thế URL bằng URI trong suy nghĩ.
 
-The last part is the HTTP version the client uses, and then the request line
-ends in a *CRLF sequence*. (CRLF stands for *carriage return* and *line feed*,
-which are terms from the typewriter days!) The CRLF sequence can also be
-written as `\r\n`, where `\r` is a carriage return and `\n` is a line feed. The
-CRLF sequence separates the request line from the rest of the request data.
-Note that when the CRLF is printed, we see a new line start rather than `\r\n`.
+Phần cuối cùng là phiên bản HTTP mà client đang sử dụng, và sau đó request line kết thúc bằng *CRLF sequence*. (CRLF là viết tắt của *carriage return* và *line feed*, các thuật ngữ từ thời máy đánh chữ!) Chuỗi CRLF cũng có thể viết là `\r\n`, trong đó `\r` là carriage return và `\n` là line feed. CRLF phân tách request line với phần dữ liệu request còn lại. Khi in ra, CRLF hiển thị như xuống dòng thay vì `\r\n`.
 
-Looking at the request line data we received from running our program so far,
-we see that `GET` is the method, */* is the request URI, and `HTTP/1.1` is the
-version.
+Nhìn vào request line từ kết quả chương trình, ta thấy `GET` là method, `/*` là request URI, và `HTTP/1.1` là version.
 
-After the request line, the remaining lines starting from `Host:` onward are
-headers. `GET` requests have no body.
+Sau request line, các dòng còn lại bắt đầu từ `Host:` trở đi là các header. Các request `GET` không có body.
 
-Try making a request from a different browser or asking for a different
-address, such as *127.0.0.1:7878/test*, to see how the request data changes.
+Hãy thử gửi request từ một trình duyệt khác hoặc yêu cầu một địa chỉ khác, ví dụ *127.0.0.1:7878/test*, để thấy dữ liệu request thay đổi như thế nào.
 
-Now that we know what the browser is asking for, let’s send back some data!
+Giờ khi đã biết trình duyệt đang yêu cầu gì, hãy gửi dữ liệu phản hồi lại!
 
-### Writing a Response
+### Viết Response
 
-We’re going to implement sending data in response to a client request.
-Responses have the following format:
+Chúng ta sẽ triển khai việc gửi dữ liệu phản hồi cho client. Response có định dạng như sau:
 
 ```text
 HTTP-Version Status-Code Reason-Phrase CRLF

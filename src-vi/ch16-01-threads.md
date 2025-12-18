@@ -1,43 +1,24 @@
-## Using Threads to Run Code Simultaneously
+## Sử Dụng Luồng để Chạy Mã Đồng Thời
 
-In most current operating systems, an executed program’s code is run in a
-*process*, and the operating system will manage multiple processes at once.
-Within a program, you can also have independent parts that run simultaneously.
-The features that run these independent parts are called *threads*. For
-example, a web server could have multiple threads so that it could respond to
-more than one request at the same time.
+Trong hầu hết các hệ điều hành hiện nay, mã của một chương trình khi thực thi được chạy trong một *process*, và hệ điều hành sẽ quản lý nhiều process cùng lúc. Trong một chương trình, bạn cũng có thể có các phần độc lập chạy đồng thời. Các tính năng chạy các phần độc lập này được gọi là *threads* (luồng). Ví dụ, một web server có thể có nhiều luồng để có thể phản hồi nhiều yêu cầu cùng một lúc.
 
-Splitting the computation in your program into multiple threads to run multiple
-tasks at the same time can improve performance, but it also adds complexity.
-Because threads can run simultaneously, there’s no inherent guarantee about the
-order in which parts of your code on different threads will run. This can lead
-to problems, such as:
+Chia việc tính toán trong chương trình của bạn thành nhiều luồng để chạy nhiều tác vụ cùng một lúc có thể cải thiện hiệu suất, nhưng cũng làm tăng độ phức tạp. Vì các luồng có thể chạy đồng thời, không có đảm bảo nào về thứ tự mà các phần mã trên các luồng khác nhau sẽ chạy. Điều này có thể dẫn đến các vấn đề như:
 
-* Race conditions, where threads are accessing data or resources in an
-  inconsistent order
-* Deadlocks, where two threads are waiting for each other, preventing both
-  threads from continuing
-* Bugs that happen only in certain situations and are hard to reproduce and fix
-  reliably
+* Race conditions, nơi các luồng truy cập dữ liệu hoặc tài nguyên theo thứ tự không nhất quán
+* Deadlocks, nơi hai luồng chờ lẫn nhau, khiến cả hai luồng không thể tiếp tục
+* Lỗi chỉ xảy ra trong một số tình huống nhất định và khó tái tạo cũng như sửa chữa một cách đáng tin cậy
 
-Rust attempts to mitigate the negative effects of using threads, but
-programming in a multithreaded context still takes careful thought and requires
-a code structure that is different from that in programs running in a single
-thread.
+Rust cố gắng giảm thiểu các tác động tiêu cực khi sử dụng luồng, nhưng lập trình trong bối cảnh đa luồng vẫn đòi hỏi suy nghĩ cẩn thận và yêu cầu cấu trúc mã khác với các chương trình chạy trong một luồng đơn.
 
-Programming languages implement threads in a few different ways, and many
-operating systems provide an API the language can call for creating new
-threads. The Rust standard library uses a *1:1* model of thread implementation,
-whereby a program uses one operating system thread per one language thread.
-There are crates that implement other models of threading that make different
-tradeoffs to the 1:1 model.
+Các ngôn ngữ lập trình triển khai luồng theo một vài cách khác nhau, và nhiều hệ điều hành cung cấp một API mà ngôn ngữ có thể gọi để tạo luồng mới. Thư viện chuẩn của Rust sử dụng mô hình *1:1* trong việc triển khai luồng, theo đó một chương trình sử dụng một luồng hệ điều hành cho mỗi luồng trong ngôn ngữ. Có các crate triển khai các mô hình luồng khác, đưa ra các đánh đổi khác so với mô hình 1:1.
 
-### Creating a New Thread with `spawn`
+### Tạo Luồng Mới với `spawn`
 
-To create a new thread, we call the `thread::spawn` function and pass it a
-closure (we talked about closures in Chapter 13) containing the code we want to
-run in the new thread. The example in Listing 16-1 prints some text from a main
-thread and other text from a new thread:
+Để tạo một luồng mới, chúng ta gọi hàm `thread::spawn` 
+và truyền vào một closure (chúng ta đã nói về closures trong Chương 13) 
+chứa mã mà chúng ta muốn chạy trong luồng mới. 
+Ví dụ trong Listing 16-1 in ra một số văn bản từ luồng chính và văn bản khác từ một luồng mới:
+
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -45,17 +26,11 @@ thread and other text from a new thread:
 {{#rustdoc_include ../listings/ch16-fearless-concurrency/listing-16-01/src/main.rs}}
 ```
 
-<span class="caption">Listing 16-1: Creating a new thread to print one thing
-while the main thread prints something else</span>
+<span class="caption">Listing 16-1: Tạo một luồng mới để in một thứ trong khi luồng chính in thứ khác</span>
 
-Note that when the main thread of a Rust program completes, all spawned threads
-are shut down, whether or not they have finished running. The output from this
-program might be a little different every time, but it will look similar to the
-following:
+Lưu ý rằng khi luồng chính của một chương trình Rust hoàn tất, tất cả các luồng được sinh ra sẽ bị đóng, bất kể chúng đã chạy xong hay chưa. Đầu ra từ chương trình này có thể hơi khác nhau mỗi lần chạy, nhưng sẽ trông tương tự như sau:
 
-<!-- Not extracting output because changes to this output aren't significant;
-the changes are likely to be due to the threads running differently rather than
-changes in the compiler -->
+<!-- Không trích xuất đầu ra vì các thay đổi trong đầu ra này không quan trọng; các thay đổi có khả năng do các luồng chạy khác nhau chứ không phải do thay đổi trong trình biên dịch -->
 
 ```text
 hi number 1 from the main thread!
@@ -69,31 +44,15 @@ hi number 4 from the spawned thread!
 hi number 5 from the spawned thread!
 ```
 
-The calls to `thread::sleep` force a thread to stop its execution for a short
-duration, allowing a different thread to run. The threads will probably take
-turns, but that isn’t guaranteed: it depends on how your operating system
-schedules the threads. In this run, the main thread printed first, even though
-the print statement from the spawned thread appears first in the code. And even
-though we told the spawned thread to print until `i` is 9, it only got to 5
-before the main thread shut down.
+Các lần gọi `thread::sleep` buộc một luồng phải tạm dừng thực thi trong một khoảng thời gian ngắn, cho phép luồng khác chạy. Các luồng có thể sẽ chạy lần lượt, nhưng điều đó không được đảm bảo: nó phụ thuộc vào cách hệ điều hành của bạn lập lịch các luồng. Trong lần chạy này, luồng chính in ra trước, mặc dù câu lệnh in từ luồng được sinh ra xuất hiện trước trong mã. Và mặc dù chúng ta bảo luồng được sinh ra in cho đến khi `i` là 9, nó chỉ in được đến 5 trước khi luồng chính kết thúc.
 
-If you run this code and only see output from the main thread, or don’t see any
-overlap, try increasing the numbers in the ranges to create more opportunities
-for the operating system to switch between the threads.
+Nếu bạn chạy mã này và chỉ thấy đầu ra từ luồng chính, hoặc không thấy sự chồng lấn nào, hãy thử tăng các con số trong các phạm vi để tạo thêm cơ hội cho hệ điều hành chuyển đổi giữa các luồng.
 
-### Waiting for All Threads to Finish Using `join` Handles
+### Chờ tất cả các luồng hoàn thành bằng cách sử dụng `Join` Handles
 
-The code in Listing 16-1 not only stops the spawned thread prematurely most of
-the time due to the main thread ending, but because there is no guarantee on
-the order in which threads run, we also can’t guarantee that the spawned thread
-will get to run at all!
+Mã trong Listing 16-1 không chỉ dừng luồng được sinh ra sớm hơn hầu hết thời gian do luồng chính kết thúc, mà vì không có đảm bảo về thứ tự các luồng chạy, chúng ta cũng không thể đảm bảo rằng luồng được sinh ra sẽ chạy được chút nào!
 
-We can fix the problem of the spawned thread not running or ending prematurely
-by saving the return value of `thread::spawn` in a variable. The return type of
-`thread::spawn` is `JoinHandle`. A `JoinHandle` is an owned value that, when we
-call the `join` method on it, will wait for its thread to finish. Listing 16-2
-shows how to use the `JoinHandle` of the thread we created in Listing 16-1 and
-call `join` to make sure the spawned thread finishes before `main` exits:
+Chúng ta có thể giải quyết vấn đề luồng được sinh ra không chạy hoặc kết thúc sớm bằng cách lưu giá trị trả về của `thread::spawn` vào một biến. Kiểu trả về của `thread::spawn` là `JoinHandle`. Một `JoinHandle` là một giá trị sở hữu mà khi chúng ta gọi phương thức `join` trên nó, sẽ chờ cho luồng của nó hoàn thành. Listing 16-2 minh họa cách sử dụng `JoinHandle` của luồng chúng ta tạo trong Listing 16-1 và gọi `join` để đảm bảo luồng được sinh ra kết thúc trước khi `main` thoát:
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -101,18 +60,13 @@ call `join` to make sure the spawned thread finishes before `main` exits:
 {{#rustdoc_include ../listings/ch16-fearless-concurrency/listing-16-02/src/main.rs}}
 ```
 
-<span class="caption">Listing 16-2: Saving a `JoinHandle` from `thread::spawn`
-to guarantee the thread is run to completion</span>
+<span class="caption">Listing 16-2: Lưu `JoinHandle` từ `thread::spawn`
+để đảm bảo luồng được chạy đến khi hoàn thành</span>
 
-Calling `join` on the handle blocks the thread currently running until the
-thread represented by the handle terminates. *Blocking* a thread means that
-thread is prevented from performing work or exiting. Because we’ve put the call
-to `join` after the main thread’s `for` loop, running Listing 16-2 should
-produce output similar to this:
+Gọi `join` trên handle sẽ chặn luồng đang chạy cho đến khi luồng được handle đại diện kết thúc. *Chặn* một luồng có nghĩa là luồng đó bị ngăn không thực hiện công việc hoặc thoát. Vì chúng ta đặt lời gọi `join` sau vòng lặp `for` của luồng chính, chạy Listing 16-2 sẽ tạo ra đầu ra tương tự như sau:
 
-<!-- Not extracting output because changes to this output aren't significant;
-the changes are likely to be due to the threads running differently rather than
-changes in the compiler -->
+<!-- Không trích xuất đầu ra vì các thay đổi đối với đầu ra này không quan trọng;
+các thay đổi có khả năng do các luồng chạy khác nhau thay vì do thay đổi trong trình biên dịch -->
 
 ```text
 hi number 1 from the main thread!
@@ -130,11 +84,9 @@ hi number 8 from the spawned thread!
 hi number 9 from the spawned thread!
 ```
 
-The two threads continue alternating, but the main thread waits because of the
-call to `handle.join()` and does not end until the spawned thread is finished.
+Hai luồng tiếp tục xen kẽ, nhưng luồng chính sẽ chờ vì lời gọi `handle.join()` và không kết thúc cho đến khi luồng được spawn hoàn tất.
 
-But let’s see what happens when we instead move `handle.join()` before the
-`for` loop in `main`, like this:
+Nhưng hãy xem điều gì xảy ra nếu chúng ta chuyển `handle.join()` lên trước vòng lặp `for` trong `main`, như sau:
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -142,12 +94,10 @@ But let’s see what happens when we instead move `handle.join()` before the
 {{#rustdoc_include ../listings/ch16-fearless-concurrency/no-listing-01-join-too-early/src/main.rs}}
 ```
 
-The main thread will wait for the spawned thread to finish and then run its
-`for` loop, so the output won’t be interleaved anymore, as shown here:
+Luồng chính sẽ chờ cho luồng được spawn hoàn tất, sau đó mới chạy vòng lặp `for` của nó, vì vậy kết quả sẽ không còn xen kẽ nữa, như minh họa dưới đây:
 
-<!-- Not extracting output because changes to this output aren't significant;
-the changes are likely to be due to the threads running differently rather than
-changes in the compiler -->
+<!-- Không trích xuất output vì các thay đổi của output này không quan trọng;
+các thay đổi có thể do các luồng chạy khác nhau hơn là do thay đổi trong compiler -->
 
 ```text
 hi number 1 from the spawned thread!
@@ -165,24 +115,13 @@ hi number 3 from the main thread!
 hi number 4 from the main thread!
 ```
 
-Small details, such as where `join` is called, can affect whether or not your
-threads run at the same time.
+Những chi tiết nhỏ, chẳng hạn như nơi gọi `join`, có thể ảnh hưởng đến việc các luồng của bạn có chạy cùng lúc hay không.
 
-### Using `move` Closures with Threads
+### Sử dụng Closure với `move` trong Threads
 
-We'll often use the `move` keyword with closures passed to `thread::spawn`
-because the closure will then take ownership of the values it uses from the
-environment, thus transferring ownership of those values from one thread to
-another. In the [“Capturing References or Moving Ownership”][capture]<!-- ignore
---> section of Chapter 13, we discussed `move` in the context of closures. Now,
-we’ll concentrate more on the interaction between `move` and `thread::spawn`.
+Chúng ta thường sử dụng từ khóa `move` với các closure được truyền vào `thread::spawn` vì khi đó closure sẽ nhận quyền sở hữu các giá trị mà nó sử dụng từ môi trường, do đó chuyển quyền sở hữu các giá trị đó từ một luồng sang luồng khác. Trong phần [“Capturing References or Moving Ownership”][capture]<!-- ignore --> của Chương 13, chúng ta đã thảo luận về `move` trong bối cảnh của closures. Bây giờ, chúng ta sẽ tập trung hơn vào sự tương tác giữa `move` và `thread::spawn`.
 
-Notice in Listing 16-1 that the closure we pass to `thread::spawn` takes no
-arguments: we’re not using any data from the main thread in the spawned
-thread’s code. To use data from the main thread in the spawned thread, the
-spawned thread’s closure must capture the values it needs. Listing 16-3 shows
-an attempt to create a vector in the main thread and use it in the spawned
-thread. However, this won’t yet work, as you’ll see in a moment.
+Chú ý trong Listing 16-1 rằng closure mà chúng ta truyền vào `thread::spawn` không nhận tham số nào: chúng ta không sử dụng bất kỳ dữ liệu nào từ luồng chính trong code của luồng được spawn. Để sử dụng dữ liệu từ luồng chính trong luồng được spawn, closure của luồng được spawn phải capture các giá trị mà nó cần. Listing 16-3 cho thấy một cố gắng tạo một vector trong luồng chính và sử dụng nó trong luồng được spawn. Tuy nhiên, điều này chưa hoạt động, như bạn sẽ thấy ngay sau đây.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -190,25 +129,17 @@ thread. However, this won’t yet work, as you’ll see in a moment.
 {{#rustdoc_include ../listings/ch16-fearless-concurrency/listing-16-03/src/main.rs}}
 ```
 
-<span class="caption">Listing 16-3: Attempting to use a vector created by the
-main thread in another thread</span>
+<span class="caption">Listing 16-3: Cố gắng sử dụng một vector được tạo bởi luồng chính trong một luồng khác</span>
 
-The closure uses `v`, so it will capture `v` and make it part of the closure’s
-environment. Because `thread::spawn` runs this closure in a new thread, we
-should be able to access `v` inside that new thread. But when we compile this
-example, we get the following error:
+Closure sử dụng `v`, do đó nó sẽ capture `v` và làm nó trở thành một phần của môi trường của closure. Vì `thread::spawn` chạy closure này trong một luồng mới, chúng ta sẽ mong muốn có thể truy cập `v` bên trong luồng mới đó. Nhưng khi biên dịch ví dụ này, chúng ta nhận được lỗi sau:
 
 ```console
 {{#include ../listings/ch16-fearless-concurrency/listing-16-03/output.txt}}
 ```
 
-Rust *infers* how to capture `v`, and because `println!` only needs a reference
-to `v`, the closure tries to borrow `v`. However, there’s a problem: Rust can’t
-tell how long the spawned thread will run, so it doesn’t know if the reference
-to `v` will always be valid.
+Rust *suy diễn* cách capture `v`, và vì `println!` chỉ cần một tham chiếu đến `v`, closure cố gắng mượn `v`. Tuy nhiên, có một vấn đề: Rust không thể biết luồng được spawn sẽ chạy trong bao lâu, nên nó không biết liệu tham chiếu đến `v` có luôn hợp lệ hay không.
 
-Listing 16-4 provides a scenario that’s more likely to have a reference to `v`
-that won’t be valid:
+Listing 16-4 đưa ra một kịch bản có khả năng cao hơn là tham chiếu đến `v` sẽ không hợp lệ:
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -216,18 +147,11 @@ that won’t be valid:
 {{#rustdoc_include ../listings/ch16-fearless-concurrency/listing-16-04/src/main.rs}}
 ```
 
-<span class="caption">Listing 16-4: A thread with a closure that attempts to
-capture a reference to `v` from a main thread that drops `v`</span>
+<span class="caption">Listing 16-4: Một luồng với closure cố gắng capture tham chiếu đến `v` từ luồng chính, nơi `v` đã bị drop</span>
 
-If Rust allowed us to run this code, there’s a possibility the spawned thread
-would be immediately put in the background without running at all. The spawned
-thread has a reference to `v` inside, but the main thread immediately drops
-`v`, using the `drop` function we discussed in Chapter 15. Then, when the
-spawned thread starts to execute, `v` is no longer valid, so a reference to it
-is also invalid. Oh no!
+Nếu Rust cho phép chúng ta chạy đoạn mã này, có khả năng luồng được spawn sẽ ngay lập tức bị đặt vào nền mà không chạy gì cả. Luồng được spawn có một tham chiếu đến `v` bên trong, nhưng luồng chính ngay lập tức drop `v`, sử dụng hàm `drop` mà chúng ta đã thảo luận trong Chương 15. Sau đó, khi luồng được spawn bắt đầu thực thi, `v` không còn hợp lệ nữa, nên tham chiếu đến nó cũng không hợp lệ. Ôi không!
 
-To fix the compiler error in Listing 16-3, we can use the error message’s
-advice:
+Để sửa lỗi compiler trong Listing 16-3, chúng ta có thể dùng lời khuyên từ thông báo lỗi:
 
 <!-- manual-regeneration
 after automatic regeneration, look at listings/ch16-fearless-concurrency/listing-16-03/output.txt and copy the relevant part
@@ -240,10 +164,7 @@ help: to force the closure to take ownership of `v` (and any other referenced va
   |                                ++++
 ```
 
-By adding the `move` keyword before the closure, we force the closure to take
-ownership of the values it’s using rather than allowing Rust to infer that it
-should borrow the values. The modification to Listing 16-3 shown in Listing
-16-5 will compile and run as we intend:
+Bằng cách thêm từ khóa `move` trước closure, chúng ta buộc closure nhận quyền sở hữu của các giá trị mà nó sử dụng thay vì để Rust suy đoán rằng nó nên mượn các giá trị đó. Sự chỉnh sửa đối với Listing 16-3 được thể hiện trong Listing 16-5 sẽ biên dịch và chạy như chúng ta mong muốn:
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -251,31 +172,20 @@ should borrow the values. The modification to Listing 16-3 shown in Listing
 {{#rustdoc_include ../listings/ch16-fearless-concurrency/listing-16-05/src/main.rs}}
 ```
 
-<span class="caption">Listing 16-5: Using the `move` keyword to force a closure
-to take ownership of the values it uses</span>
+Chúng ta có thể bị cám dỗ để thử làm điều tương tự để sửa mã trong Listing 16-4, 
+nơi luồng chính gọi `drop`, bằng cách sử dụng một closure `move`. 
+Tuy nhiên, cách sửa này sẽ không hoạt động vì những gì Listing 16-4 
+đang cố gắng làm bị cấm vì một lý do khác. Nếu chúng ta thêm `move` vào closure, 
+chúng ta sẽ chuyển `v` vào môi trường của closure, và sẽ không thể gọi `drop` 
+trên nó trong luồng chính nữa. Thay vào đó, chúng ta sẽ nhận được lỗi biên dịch như sau:
 
-We might be tempted to try the same thing to fix the code in Listing 16-4 where
-the main thread called `drop` by using a `move` closure. However, this fix will
-not work because what Listing 16-4 is trying to do is disallowed for a
-different reason. If we added `move` to the closure, we would move `v` into the
-closure’s environment, and we could no longer call `drop` on it in the main
-thread. We would get this compiler error instead:
 
 ```console
 {{#include ../listings/ch16-fearless-concurrency/output-only-01-move-drop/output.txt}}
 ```
 
-Rust’s ownership rules have saved us again! We got an error from the code in
-Listing 16-3 because Rust was being conservative and only borrowing `v` for the
-thread, which meant the main thread could theoretically invalidate the spawned
-thread’s reference. By telling Rust to move ownership of `v` to the spawned
-thread, we’re guaranteeing Rust that the main thread won’t use `v` anymore. If
-we change Listing 16-4 in the same way, we’re then violating the ownership
-rules when we try to use `v` in the main thread. The `move` keyword overrides
-Rust’s conservative default of borrowing; it doesn’t let us violate the
-ownership rules.
+Các quy tắc sở hữu của Rust lại cứu chúng ta một lần nữa! Chúng ta nhận được lỗi từ mã trong Listing 16-3 vì Rust thận trọng và chỉ mượn `v` cho luồng, điều này có nghĩa là luồng chính về lý thuyết có thể làm cho tham chiếu trong luồng spawn trở nên không hợp lệ. Bằng cách bảo Rust chuyển quyền sở hữu `v` sang luồng spawn, chúng ta đảm bảo với Rust rằng luồng chính sẽ không sử dụng `v` nữa. Nếu chúng ta thay đổi Listing 16-4 theo cách tương tự, chúng ta sẽ vi phạm quy tắc sở hữu khi cố gắng sử dụng `v` trong luồng chính. Từ khóa `move` ghi đè mặc định thận trọng của Rust là mượn; nó không cho phép chúng ta vi phạm các quy tắc sở hữu.
 
-With a basic understanding of threads and the thread API, let’s look at what we
-can *do* with threads.
+Với hiểu biết cơ bản về luồng và API của luồng, hãy xem chúng ta có thể *làm gì* với các luồng.
 
 [capture]: ch13-01-closures.html#capturing-references-or-moving-ownership

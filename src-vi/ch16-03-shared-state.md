@@ -1,56 +1,58 @@
 ## Shared-State Concurrency
 
-Message passing is a fine way of handling concurrency, but it’s not the only
-one. Another method would be for multiple threads to access the same shared
-data. Consider this part of the slogan from the Go language documentation
-again: “do not communicate by sharing memory.”
+Concurrency dựa trên việc truyền thông điệp (message passing) là một cách tốt để
+xử lý đồng thời, nhưng đó không phải là cách duy nhất. Một phương pháp khác là
+cho nhiều thread cùng truy cập vào một vùng dữ liệu được chia sẻ. Hãy xem lại
+một phần trong khẩu hiệu của tài liệu ngôn ngữ Go: “do not communicate by sharing
+memory.”
 
-What would communicating by sharing memory look like? In addition, why would
-message-passing enthusiasts caution not to use memory sharing?
+Vậy việc giao tiếp bằng cách chia sẻ bộ nhớ sẽ trông như thế nào? Ngoài ra, tại
+sao những người ủng hộ message passing lại cảnh báo không nên sử dụng việc chia
+sẻ bộ nhớ?
 
-In a way, channels in any programming language are similar to single ownership,
-because once you transfer a value down a channel, you should no longer use that
-value. Shared memory concurrency is like multiple ownership: multiple threads
-can access the same memory location at the same time. As you saw in Chapter 15,
-where smart pointers made multiple ownership possible, multiple ownership can
-add complexity because these different owners need managing. Rust’s type system
-and ownership rules greatly assist in getting this management correct. For an
-example, let’s look at mutexes, one of the more common concurrency primitives
-for shared memory.
+Ở một khía cạnh nào đó, channel trong bất kỳ ngôn ngữ lập trình nào cũng tương tự
+như single ownership, bởi vì một khi bạn đã chuyển một giá trị qua channel, bạn
+không nên sử dụng lại giá trị đó nữa. Concurrency dựa trên bộ nhớ dùng chung
+(shared memory concurrency) thì giống với multiple ownership: nhiều thread có
+thể truy cập cùng một vị trí bộ nhớ tại cùng một thời điểm. Như bạn đã thấy trong
+Chương 15, nơi smart pointer cho phép multiple ownership, thì multiple ownership
+có thể làm tăng độ phức tạp vì các “chủ sở hữu” khác nhau này cần được quản lý.
+Hệ thống kiểu dữ liệu và các quy tắc ownership của Rust hỗ trợ rất nhiều trong
+việc quản lý này một cách chính xác. Để lấy ví dụ, chúng ta hãy cùng xem mutex,
+một trong những primitive đồng thời phổ biến nhất cho bộ nhớ dùng chung.
 
-### Using Mutexes to Allow Access to Data from One Thread at a Time
+### Sử Dụng Mutex Để Cho Phép Truy Cập Dữ Liệu Từ Một Thread Tại Một Thời Điểm
 
-*Mutex* is an abbreviation for *mutual exclusion*, as in, a mutex allows only
-one thread to access some data at any given time. To access the data in a
-mutex, a thread must first signal that it wants access by asking to acquire the
-mutex’s *lock*. The lock is a data structure that is part of the mutex that
-keeps track of who currently has exclusive access to the data. Therefore, the
-mutex is described as *guarding* the data it holds via the locking system.
+*Mutex* là từ viết tắt của *mutual exclusion* (loại trừ lẫn nhau), nghĩa là mutex
+chỉ cho phép **một thread** truy cập vào một phần dữ liệu tại bất kỳ thời điểm
+nào. Để truy cập dữ liệu bên trong mutex, một thread trước hết phải báo hiệu
+rằng nó muốn truy cập bằng cách yêu cầu chiếm giữ (*acquire*) *lock* của mutex.
+Lock là một cấu trúc dữ liệu thuộc về mutex, dùng để theo dõi thread nào hiện
+đang có quyền truy cập độc quyền vào dữ liệu. Vì vậy, mutex được mô tả là đang
+*canh giữ* (guarding) dữ liệu mà nó nắm giữ thông qua cơ chế khóa.
 
-Mutexes have a reputation for being difficult to use because you have to
-remember two rules:
+Mutex nổi tiếng là khó sử dụng vì bạn phải ghi nhớ hai quy tắc:
 
-* You must attempt to acquire the lock before using the data.
-* When you’re done with the data that the mutex guards, you must unlock the
-  data so other threads can acquire the lock.
+* Bạn phải cố gắng acquire lock trước khi sử dụng dữ liệu.
+* Khi đã sử dụng xong dữ liệu mà mutex đang canh giữ, bạn phải mở khóa (unlock)
+  dữ liệu đó để các thread khác có thể acquire lock.
 
-For a real-world metaphor for a mutex, imagine a panel discussion at a
-conference with only one microphone. Before a panelist can speak, they have to
-ask or signal that they want to use the microphone. When they get the
-microphone, they can talk for as long as they want to and then hand the
-microphone to the next panelist who requests to speak. If a panelist forgets to
-hand the microphone off when they’re finished with it, no one else is able to
-speak. If management of the shared microphone goes wrong, the panel won’t work
-as planned!
+Để lấy một phép ẩn dụ trong đời thực cho mutex, hãy tưởng tượng một buổi thảo
+luận tại hội nghị chỉ có một chiếc micro. Trước khi một diễn giả có thể phát
+biểu, họ phải xin hoặc ra hiệu rằng họ muốn sử dụng micro. Khi đã có micro, họ
+có thể nói bao lâu tùy thích, rồi chuyển micro cho diễn giả tiếp theo đang muốn
+phát biểu. Nếu một diễn giả quên không chuyển micro sau khi nói xong, sẽ không ai
+khác có thể nói được. Nếu việc quản lý chiếc micro dùng chung này xảy ra sai
+sót, buổi thảo luận sẽ không thể diễn ra như dự kiến!
 
-Management of mutexes can be incredibly tricky to get right, which is why so
-many people are enthusiastic about channels. However, thanks to Rust’s type
-system and ownership rules, you can’t get locking and unlocking wrong.
+Việc quản lý mutex có thể cực kỳ phức tạp để làm cho đúng, đó là lý do vì sao rất
+nhiều người hứng thú với channel. Tuy nhiên, nhờ hệ thống kiểu dữ liệu và các
+quy tắc ownership của Rust, bạn không thể khóa và mở khóa sai được.
 
-#### The API of `Mutex<T>`
+#### API của `Mutex<T>`
 
-As an example of how to use a mutex, let’s start by using a mutex in a
-single-threaded context, as shown in Listing 16-12:
+Để minh họa cách sử dụng mutex, chúng ta hãy bắt đầu bằng việc dùng mutex trong
+bối cảnh single-thread, như được minh họa trong Listing 16-12:
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -58,45 +60,46 @@ single-threaded context, as shown in Listing 16-12:
 {{#rustdoc_include ../listings/ch16-fearless-concurrency/listing-16-12/src/main.rs}}
 ```
 
-<span class="caption">Listing 16-12: Exploring the API of `Mutex<T>` in a
-single-threaded context for simplicity</span>
+<span class="caption">Listing 16-12: Khám phá API của `Mutex<T>` trong bối cảnh
+single-thread để đơn giản hóa</span>
 
-As with many types, we create a `Mutex<T>` using the associated function `new`.
-To access the data inside the mutex, we use the `lock` method to acquire the
-lock. This call will block the current thread so it can’t do any work until
-it’s our turn to have the lock.
+Cũng như nhiều kiểu dữ liệu khác, chúng ta tạo một `Mutex<T>` bằng cách sử dụng
+hàm liên kết (associated function) `new`. Để truy cập dữ liệu bên trong mutex,
+chúng ta dùng phương thức `lock` để acquire lock. Lời gọi này sẽ chặn (block)
+thread hiện tại, khiến nó không thể làm việc gì cho đến khi tới lượt nó nắm giữ
+lock.
 
-The call to `lock` would fail if another thread holding the lock panicked. In
-that case, no one would ever be able to get the lock, so we’ve chosen to
-`unwrap` and have this thread panic if we’re in that situation.
+Lời gọi `lock` sẽ thất bại nếu một thread khác đang giữ lock bị panic. Trong
+trường hợp đó, sẽ không ai có thể lấy được lock nữa, vì vậy chúng ta đã chọn
+cách gọi `unwrap` và để thread hiện tại panic nếu rơi vào tình huống này.
 
-After we’ve acquired the lock, we can treat the return value, named `num` in
-this case, as a mutable reference to the data inside. The type system ensures
-that we acquire a lock before using the value in `m`. The type of `m` is
-`Mutex<i32>`, not `i32`, so we *must* call `lock` to be able to use the `i32`
-value. We can’t forget; the type system won’t let us access the inner `i32`
-otherwise.
+Sau khi đã acquire được lock, chúng ta có thể coi giá trị trả về—trong trường
+hợp này được đặt tên là `num`—như một mutable reference tới dữ liệu bên trong.
+Hệ thống kiểu dữ liệu đảm bảo rằng chúng ta phải acquire lock trước khi sử dụng
+giá trị bên trong `m`. Kiểu của `m` là `Mutex<i32>`, chứ không phải `i32`, nên
+chúng ta *bắt buộc* phải gọi `lock` thì mới có thể sử dụng giá trị `i32`. Chúng
+ta không thể quên bước này; hệ thống kiểu dữ liệu sẽ không cho phép truy cập vào
+`i32` bên trong nếu không làm như vậy.
 
-As you might suspect, `Mutex<T>` is a smart pointer. More accurately, the call
-to `lock` *returns* a smart pointer called `MutexGuard`, wrapped in a
-`LockResult` that we handled with the call to `unwrap`. The `MutexGuard` smart
-pointer implements `Deref` to point at our inner data; the smart pointer also
-has a `Drop` implementation that releases the lock automatically when a
-`MutexGuard` goes out of scope, which happens at the end of the inner scope. As
-a result, we don’t risk forgetting to release the lock and blocking the mutex
-from being used by other threads, because the lock release happens
-automatically.
+Như bạn có thể đoán, `Mutex<T>` là một smart pointer. Chính xác hơn, lời gọi
+`lock` *trả về* một smart pointer có tên là `MutexGuard`, được bọc trong một
+`LockResult` mà chúng ta đã xử lý bằng cách gọi `unwrap`. Smart pointer
+`MutexGuard` triển khai trait `Deref` để trỏ tới dữ liệu bên trong; đồng thời nó
+cũng có một implementation của `Drop` để tự động giải phóng lock khi
+`MutexGuard` đi ra khỏi scope, điều này xảy ra ở cuối scope bên trong. Kết quả
+là chúng ta không có nguy cơ quên giải phóng lock và chặn mutex không cho các
+thread khác sử dụng, bởi vì việc mở khóa diễn ra một cách tự động.
 
-After dropping the lock, we can print the mutex value and see that we were able
-to change the inner `i32` to 6.
+Sau khi lock được drop, chúng ta có thể in giá trị của mutex ra và thấy rằng
+chúng ta đã thay đổi được giá trị `i32` bên trong thành 6.
 
-#### Sharing a `Mutex<T>` Between Multiple Threads
+#### Chia Sẻ `Mutex<T>` Giữa Nhiều Thread
 
-Now, let’s try to share a value between multiple threads using `Mutex<T>`.
-We’ll spin up 10 threads and have them each increment a counter value by 1, so
-the counter goes from 0 to 10. The next example in Listing 16-13 will have
-a compiler error, and we’ll use that error to learn more about using
-`Mutex<T>` and how Rust helps us use it correctly.
+Bây giờ, hãy thử chia sẻ một giá trị giữa nhiều thread bằng cách sử dụng
+`Mutex<T>`. Chúng ta sẽ tạo ra 10 thread và để mỗi thread tăng giá trị của một
+counter lên 1, để counter đi từ 0 lên 10. Ví dụ tiếp theo trong Listing 16-13
+sẽ gây ra một lỗi biên dịch, và chúng ta sẽ dùng lỗi đó để tìm hiểu thêm về cách
+sử dụng `Mutex<T>` cũng như cách Rust giúp chúng ta dùng nó một cách chính xác.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -104,39 +107,42 @@ a compiler error, and we’ll use that error to learn more about using
 {{#rustdoc_include ../listings/ch16-fearless-concurrency/listing-16-13/src/main.rs}}
 ```
 
-<span class="caption">Listing 16-13: Ten threads each increment a counter
-guarded by a `Mutex<T>`</span>
+<span class="caption">Listing 16-13: Mười thread, mỗi thread tăng một counter
+được canh giữ bởi `Mutex<T>`</span>
 
-We create a `counter` variable to hold an `i32` inside a `Mutex<T>`, as we did
-in Listing 16-12. Next, we create 10 threads by iterating over a range of
-numbers. We use `thread::spawn` and give all the threads the same closure: one
-that moves the counter into the thread, acquires a lock on the `Mutex<T>` by
-calling the `lock` method, and then adds 1 to the value in the mutex. When a
-thread finishes running its closure, `num` will go out of scope and release the
-lock so another thread can acquire it.
+Chúng ta tạo một biến `counter` để chứa một giá trị `i32` bên trong một
+`Mutex<T>`, giống như đã làm trong Listing 16-12. Tiếp theo, chúng ta tạo ra
+10 thread bằng cách lặp qua một khoảng số. Chúng ta sử dụng `thread::spawn` và
+truyền cho tất cả các thread cùng một closure: closure này move `counter` vào
+trong thread, acquire lock trên `Mutex<T>` bằng cách gọi phương thức `lock`,
+sau đó cộng thêm 1 vào giá trị bên trong mutex. Khi một thread chạy xong
+closure của nó, `num` sẽ đi ra khỏi scope và giải phóng lock để thread khác có
+thể acquire nó.
 
-In the main thread, we collect all the join handles. Then, as we did in Listing
-16-2, we call `join` on each handle to make sure all the threads finish. At
-that point, the main thread will acquire the lock and print the result of this
-program.
+Trong thread chính, chúng ta thu thập tất cả các join handle. Sau đó, giống như
+đã làm trong Listing 16-2, chúng ta gọi `join` trên từng handle để đảm bảo tất
+cả các thread đều kết thúc. Tại thời điểm đó, thread chính sẽ acquire lock và
+in ra kết quả của chương trình này.
 
-We hinted that this example wouldn’t compile. Now let’s find out why!
+Chúng ta đã gợi ý rằng ví dụ này sẽ không biên dịch được. Bây giờ hãy cùng tìm
+hiểu lý do vì sao!
 
 ```console
 {{#include ../listings/ch16-fearless-concurrency/listing-16-13/output.txt}}
 ```
 
-The error message states that the `counter` value was moved in the previous
-iteration of the loop. Rust is telling us that we can’t move the ownership
-of lock `counter` into multiple threads. Let’s fix the compiler error with a
-multiple-ownership method we discussed in Chapter 15.
+Thông báo lỗi cho biết rằng giá trị `counter` đã bị move ở lần lặp trước đó của
+vòng lặp. Rust đang nói với chúng ta rằng chúng ta không thể move quyền sở hữu
+của `counter` vào nhiều thread khác nhau. Hãy sửa lỗi biên dịch này bằng một
+phương pháp multiple ownership mà chúng ta đã thảo luận trong Chương 15.
 
-#### Multiple Ownership with Multiple Threads
+#### Multiple Ownership với Nhiều Thread
 
-In Chapter 15, we gave a value multiple owners by using the smart pointer
-`Rc<T>` to create a reference counted value. Let’s do the same here and see
-what happens. We’ll wrap the `Mutex<T>` in `Rc<T>` in Listing 16-14 and clone
-the `Rc<T>` before moving ownership to the thread.
+Trong Chương 15, chúng ta đã tạo cho một giá trị nhiều owner bằng cách sử dụng
+smart pointer `Rc<T>` để tạo ra một giá trị được đếm tham chiếu (reference
+counted). Hãy làm điều tương tự ở đây và xem điều gì sẽ xảy ra. Chúng ta sẽ bọc
+`Mutex<T>` bên trong `Rc<T>` trong Listing 16-14 và clone `Rc<T>` trước khi move
+quyền sở hữu vào thread.
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -144,52 +150,55 @@ the `Rc<T>` before moving ownership to the thread.
 {{#rustdoc_include ../listings/ch16-fearless-concurrency/listing-16-14/src/main.rs}}
 ```
 
-<span class="caption">Listing 16-14: Attempting to use `Rc<T>` to allow
-multiple threads to own the `Mutex<T>`</span>
+<span class="caption">Listing 16-14: Thử sử dụng `Rc<T>` để cho phép
+nhiều thread cùng sở hữu `Mutex<T>`</span>
 
-Once again, we compile and get... different errors! The compiler is teaching us
-a lot.
+Một lần nữa, chúng ta biên dịch và lại nhận được… những lỗi khác! Trình biên
+dịch đang dạy chúng ta rất nhiều điều.
 
 ```console
 {{#include ../listings/ch16-fearless-concurrency/listing-16-14/output.txt}}
 ```
 
-Wow, that error message is very wordy! Here’s the important part to focus on:
-`` `Rc<Mutex<i32>>` cannot be sent between threads safely ``. The compiler is
-also telling us the reason why: ``the trait `Send` is not implemented for
-`Rc<Mutex<i32>>` ``. We’ll talk about `Send` in the next section: it’s one of
-the traits that ensures the types we use with threads are meant for use in
-concurrent situations.
+Wow, thông báo lỗi này thật là dài dòng! Đây là phần quan trọng cần tập trung:
+`` `Rc<Mutex<i32>>` cannot be sent between threads safely ``. Trình biên dịch
+cũng cho chúng ta biết lý do vì sao: ``the trait `Send` is not implemented for
+`Rc<Mutex<i32>>` ``. Chúng ta sẽ nói về `Send` trong phần tiếp theo: đây là một
+trong những trait đảm bảo rằng các kiểu dữ liệu chúng ta dùng với thread là
+được thiết kế để sử dụng trong các tình huống đồng thời.
 
-Unfortunately, `Rc<T>` is not safe to share across threads. When `Rc<T>`
-manages the reference count, it adds to the count for each call to `clone` and
-subtracts from the count when each clone is dropped. But it doesn’t use any
-concurrency primitives to make sure that changes to the count can’t be
-interrupted by another thread. This could lead to wrong counts—subtle bugs that
-could in turn lead to memory leaks or a value being dropped before we’re done
-with it. What we need is a type exactly like `Rc<T>` but one that makes changes
-to the reference count in a thread-safe way.
+Đáng tiếc là `Rc<T>` không an toàn để chia sẻ giữa các thread. Khi `Rc<T>` quản
+lý bộ đếm tham chiếu (reference count), nó tăng bộ đếm mỗi khi `clone` được gọi
+và giảm bộ đếm khi mỗi bản clone bị drop. Tuy nhiên, nó không sử dụng bất kỳ
+primitive đồng thời nào để đảm bảo rằng các thay đổi đối với bộ đếm không bị
+ngắt quãng bởi thread khác. Điều này có thể dẫn đến bộ đếm sai—những lỗi tinh vi
+mà sau đó có thể gây ra rò rỉ bộ nhớ hoặc khiến một giá trị bị drop trước khi
+chúng ta dùng xong nó. Thứ chúng ta cần là một kiểu dữ liệu giống hệt `Rc<T>`
+nhưng thực hiện các thay đổi đối với bộ đếm tham chiếu theo cách an toàn với
+thread.
 
-#### Atomic Reference Counting with `Arc<T>`
+#### Đếm Tham Chiếu Nguyên Tử với `Arc<T>`
 
-Fortunately, `Arc<T>` *is* a type like `Rc<T>` that is safe to use in
-concurrent situations. The *a* stands for *atomic*, meaning it’s an *atomically
-reference counted* type. Atomics are an additional kind of concurrency
-primitive that we won’t cover in detail here: see the standard library
-documentation for [`std::sync::atomic`][atomic]<!-- ignore --> for more
-details. At this point, you just need to know that atomics work like primitive
-types but are safe to share across threads.
+May mắn thay, `Arc<T>` *là* một kiểu dữ liệu giống như `Rc<T>` nhưng an toàn để
+sử dụng trong các tình huống đồng thời. Chữ *a* là viết tắt của *atomic*, nghĩa
+là đây là một kiểu *được đếm tham chiếu một cách nguyên tử* (atomically
+reference counted). Atomics là một loại primitive đồng thời bổ sung mà chúng ta
+sẽ không đi sâu vào chi tiết ở đây: hãy xem tài liệu thư viện chuẩn cho
+[`std::sync::atomic`][atomic]<!-- ignore --> để biết thêm chi tiết. Ở thời điểm
+này, bạn chỉ cần biết rằng atomics hoạt động giống như các kiểu primitive
+thông thường nhưng an toàn để chia sẻ giữa các thread.
 
-You might then wonder why all primitive types aren’t atomic and why standard
-library types aren’t implemented to use `Arc<T>` by default. The reason is that
-thread safety comes with a performance penalty that you only want to pay when
-you really need to. If you’re just performing operations on values within a
-single thread, your code can run faster if it doesn’t have to enforce the
-guarantees atomics provide.
+Lúc này bạn có thể thắc mắc vì sao tất cả các kiểu primitive không phải đều là
+atomic, và vì sao các kiểu trong thư viện chuẩn không được triển khai để dùng
+`Arc<T>` theo mặc định. Lý do là vì tính an toàn với thread đi kèm với một chi
+phí hiệu năng, và bạn chỉ nên trả chi phí đó khi thực sự cần thiết. Nếu bạn chỉ
+thực hiện các thao tác trên giá trị trong phạm vi một thread duy nhất, chương
+trình của bạn có thể chạy nhanh hơn nếu không phải áp đặt các đảm bảo mà
+atomics cung cấp.
 
-Let’s return to our example: `Arc<T>` and `Rc<T>` have the same API, so we fix
-our program by changing the `use` line, the call to `new`, and the call to
-`clone`. The code in Listing 16-15 will finally compile and run:
+Hãy quay lại ví dụ của chúng ta: `Arc<T>` và `Rc<T>` có cùng API, vì vậy chúng ta
+sửa chương trình bằng cách thay đổi dòng `use`, lời gọi `new`, và lời gọi
+`clone`. Đoạn mã trong Listing 16-15 cuối cùng cũng sẽ biên dịch và chạy được:
 
 <span class="filename">Filename: src/main.rs</span>
 
@@ -197,53 +206,56 @@ our program by changing the `use` line, the call to `new`, and the call to
 {{#rustdoc_include ../listings/ch16-fearless-concurrency/listing-16-15/src/main.rs}}
 ```
 
-<span class="caption">Listing 16-15: Using an `Arc<T>` to wrap the `Mutex<T>`
-to be able to share ownership across multiple threads</span>
+<span class="caption">Listing 16-15: Sử dụng `Arc<T>` để bọc `Mutex<T>`
+nhằm có thể chia sẻ quyền sở hữu giữa nhiều thread</span>
 
-This code will print the following:
+Đoạn mã này sẽ in ra kết quả sau:
 
-<!-- Not extracting output because changes to this output aren't significant;
-the changes are likely to be due to the threads running differently rather than
-changes in the compiler -->
+<!-- Không trích xuất output vì những thay đổi trong output này không đáng kể;
+các thay đổi nhiều khả năng là do các thread chạy khác nhau, thay vì do
+những thay đổi trong trình biên dịch -->
 
 ```text
 Result: 10
 ```
 
-We did it! We counted from 0 to 10, which may not seem very impressive, but it
-did teach us a lot about `Mutex<T>` and thread safety. You could also use this
-program’s structure to do more complicated operations than just incrementing a
-counter. Using this strategy, you can divide a calculation into independent
-parts, split those parts across threads, and then use a `Mutex<T>` to have each
-thread update the final result with its part.
+Chúng ta đã làm được rồi! Chúng ta đã đếm từ 0 lên 10 — nghe có vẻ không mấy ấn
+tượng, nhưng nó đã dạy cho chúng ta rất nhiều điều về `Mutex<T>` và tính an toàn
+với thread. Bạn cũng có thể sử dụng cấu trúc của chương trình này để thực hiện
+những thao tác phức tạp hơn nhiều so với việc chỉ tăng một counter. Với chiến
+lược này, bạn có thể chia một phép tính thành các phần độc lập, phân chia các
+phần đó cho nhiều thread, và sau đó sử dụng `Mutex<T>` để mỗi thread cập nhật
+kết quả cuối cùng bằng phần việc của mình.
 
-Note that if you are doing simple numerical operations, there are types simpler
-than `Mutex<T>` types provided by the [`std::sync::atomic` module of the
-standard library][atomic]<!-- ignore -->. These types provide safe, concurrent,
-atomic access to primitive types. We chose to use `Mutex<T>` with a primitive
-type for this example so we could concentrate on how `Mutex<T>` works.
+Lưu ý rằng nếu bạn chỉ thực hiện các phép toán số học đơn giản, thì có những
+kiểu dữ liệu đơn giản hơn `Mutex<T>` được cung cấp bởi module
+[`std::sync::atomic` của thư viện chuẩn][atomic]<!-- ignore -->. Những kiểu dữ
+liệu này cung cấp khả năng truy cập đồng thời, an toàn và nguyên tử (atomic)
+đối với các kiểu primitive. Chúng tôi chọn sử dụng `Mutex<T>` với một kiểu
+primitive trong ví dụ này để có thể tập trung vào cách `Mutex<T>` hoạt động.
 
-### Similarities Between `RefCell<T>`/`Rc<T>` and `Mutex<T>`/`Arc<T>`
+### Sự Tương Đồng Giữa `RefCell<T>`/`Rc<T>` và `Mutex<T>`/`Arc<T>`
 
-You might have noticed that `counter` is immutable but we could get a mutable
-reference to the value inside it; this means `Mutex<T>` provides interior
-mutability, as the `Cell` family does. In the same way we used `RefCell<T>` in
-Chapter 15 to allow us to mutate contents inside an `Rc<T>`, we use `Mutex<T>`
-to mutate contents inside an `Arc<T>`.
+Bạn có thể đã nhận ra rằng `counter` là immutable nhưng chúng ta vẫn có thể lấy
+được một mutable reference tới giá trị bên trong nó; điều này có nghĩa là
+`Mutex<T>` cung cấp *interior mutability*, tương tự như họ kiểu `Cell`. Cũng
+giống như cách chúng ta đã dùng `RefCell<T>` trong Chương 15 để cho phép mutate
+nội dung bên trong một `Rc<T>`, thì ở đây chúng ta dùng `Mutex<T>` để mutate nội
+dung bên trong một `Arc<T>`.
 
-Another detail to note is that Rust can’t protect you from all kinds of logic
-errors when you use `Mutex<T>`. Recall in Chapter 15 that using `Rc<T>` came
-with the risk of creating reference cycles, where two `Rc<T>` values refer to
-each other, causing memory leaks. Similarly, `Mutex<T>` comes with the risk of
-creating *deadlocks*. These occur when an operation needs to lock two resources
-and two threads have each acquired one of the locks, causing them to wait for
-each other forever. If you’re interested in deadlocks, try creating a Rust
-program that has a deadlock; then research deadlock mitigation strategies for
-mutexes in any language and have a go at implementing them in Rust. The
-standard library API documentation for `Mutex<T>` and `MutexGuard` offers
-useful information.
+Một chi tiết khác cần lưu ý là Rust không thể bảo vệ bạn khỏi mọi loại lỗi logic
+khi bạn sử dụng `Mutex<T>`. Hãy nhớ lại trong Chương 15 rằng việc sử dụng
+`Rc<T>` đi kèm với rủi ro tạo ra các chu trình tham chiếu (reference cycles), khi
+hai giá trị `Rc<T>` tham chiếu lẫn nhau, dẫn đến rò rỉ bộ nhớ. Tương tự như vậy,
+`Mutex<T>` cũng đi kèm với rủi ro tạo ra *deadlock*. Deadlock xảy ra khi một thao
+tác cần khóa hai tài nguyên và hai thread mỗi bên đã chiếm giữ một lock, khiến
+chúng chờ nhau vô thời hạn. Nếu bạn quan tâm đến deadlock, hãy thử viết một
+chương trình Rust có deadlock; sau đó tìm hiểu các chiến lược giảm thiểu
+deadlock cho mutex trong bất kỳ ngôn ngữ nào và thử triển khai chúng bằng Rust.
+Tài liệu API của thư viện chuẩn cho `Mutex<T>` và `MutexGuard` cung cấp nhiều
+thông tin hữu ích.
 
-We’ll round out this chapter by talking about the `Send` and `Sync` traits and
-how we can use them with custom types.
+Chúng ta sẽ khép lại chương này bằng việc nói về các trait `Send` và `Sync`, và
+cách chúng ta có thể sử dụng chúng với các kiểu dữ liệu tự định nghĩa.
 
 [atomic]: ../std/sync/atomic/index.html

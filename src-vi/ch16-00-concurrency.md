@@ -1,49 +1,16 @@
-# Fearless Concurrency
+# Đồng Thời Không Sợ Hãi
 
-Handling concurrent programming safely and efficiently is another of Rust’s
-major goals. *Concurrent programming*, where different parts of a program
-execute independently, and *parallel programming*, where different parts of a
-program execute at the same time, are becoming increasingly important as more
-computers take advantage of their multiple processors. Historically,
-programming in these contexts has been difficult and error prone: Rust hopes to
-change that.
+Xử lý lập trình đồng thời một cách an toàn và hiệu quả là một trong những mục tiêu lớn của Rust. *Lập trình đồng thời* (concurrent programming), nơi các phần khác nhau của chương trình thực thi độc lập, và *lập trình song song* (parallel programming), nơi các phần khác nhau của chương trình thực thi cùng một lúc, đang trở nên ngày càng quan trọng khi nhiều máy tính tận dụng nhiều bộ xử lý của chúng. Trong lịch sử, lập trình trong những bối cảnh này rất khó khăn và dễ xảy ra lỗi: Rust hy vọng sẽ thay đổi điều đó.
 
-Initially, the Rust team thought that ensuring memory safety and preventing
-concurrency problems were two separate challenges to be solved with different
-methods. Over time, the team discovered that the ownership and type systems are
-a powerful set of tools to help manage memory safety *and* concurrency
-problems! By leveraging ownership and type checking, many concurrency errors
-are compile-time errors in Rust rather than runtime errors. Therefore, rather
-than making you spend lots of time trying to reproduce the exact circumstances
-under which a runtime concurrency bug occurs, incorrect code will refuse to
-compile and present an error explaining the problem. As a result, you can fix
-your code while you’re working on it rather than potentially after it has been
-shipped to production. We’ve nicknamed this aspect of Rust *fearless*
-*concurrency*. Fearless concurrency allows you to write code that is free of
-subtle bugs and is easy to refactor without introducing new bugs.
+Ban đầu, nhóm Rust nghĩ rằng đảm bảo an toàn bộ nhớ và ngăn ngừa các vấn đề đồng thời là hai thách thức riêng biệt cần được giải quyết bằng các phương pháp khác nhau. Theo thời gian, nhóm phát hiện rằng hệ thống ownership và type là một tập hợp công cụ mạnh mẽ giúp quản lý cả vấn đề an toàn bộ nhớ *và* đồng thời! Bằng cách tận dụng ownership và kiểm tra kiểu, nhiều lỗi đồng thời trở thành lỗi thời gian biên dịch trong Rust thay vì lỗi thời gian chạy. Do đó, thay vì bạn phải dành nhiều thời gian để tái hiện chính xác hoàn cảnh mà lỗi đồng thời xảy ra trong thời gian chạy, mã không đúng sẽ từ chối biên dịch và đưa ra thông báo lỗi giải thích vấn đề. Kết quả là bạn có thể sửa mã trong khi đang làm việc thay vì có thể sau khi nó đã được triển khai lên production. Chúng tôi đã đặt biệt danh cho khía cạnh này của Rust là *fearless concurrency* (đồng thời không sợ hãi). Đồng thời không sợ hãi cho phép bạn viết mã không có lỗi tinh vi và dễ dàng tái cấu trúc mà không gây ra lỗi mới.
 
-> Note: For simplicity’s sake, we’ll refer to many of the problems as
-> *concurrent* rather than being more precise by saying *concurrent and/or
-> parallel*. If this book were about concurrency and/or parallelism, we’d be
-> more specific. For this chapter, please mentally substitute *concurrent
-> and/or parallel* whenever we use *concurrent*.
+> Lưu ý: Vì đơn giản, chúng tôi sẽ gọi nhiều vấn đề là *concurrent* thay vì chính xác hơn bằng cách nói *concurrent và/hoặc parallel*. Nếu cuốn sách này về concurrency và/hoặc parallelism, chúng tôi sẽ cụ thể hơn. Trong chương này, hãy tạm thời thay thế *concurrent và/hoặc parallel* bất cứ khi nào chúng tôi dùng *concurrent*.
 
-Many languages are dogmatic about the solutions they offer for handling
-concurrent problems. For example, Erlang has elegant functionality for
-message-passing concurrency but has only obscure ways to share state between
-threads. Supporting only a subset of possible solutions is a reasonable
-strategy for higher-level languages, because a higher-level language promises
-benefits from giving up some control to gain abstractions. However, lower-level
-languages are expected to provide the solution with the best performance in any
-given situation and have fewer abstractions over the hardware. Therefore, Rust
-offers a variety of tools for modeling problems in whatever way is appropriate
-for your situation and requirements.
+Nhiều ngôn ngữ rất bảo thủ về các giải pháp mà chúng cung cấp để xử lý các vấn đề đồng thời. Ví dụ, Erlang có chức năng tinh tế cho đồng thời dựa trên truyền thông điệp nhưng chỉ có những cách mơ hồ để chia sẻ trạng thái giữa các luồng. Chỉ hỗ trợ một phần các giải pháp có thể là chiến lược hợp lý cho các ngôn ngữ cấp cao, vì ngôn ngữ cấp cao hứa hẹn lợi ích từ việc từ bỏ một số kiểm soát để có được các trừu tượng. Tuy nhiên, các ngôn ngữ cấp thấp được kỳ vọng cung cấp giải pháp có hiệu suất tốt nhất trong bất kỳ tình huống nào và có ít trừu tượng hơn trên phần cứng. Do đó, Rust cung cấp nhiều công cụ để mô hình hóa vấn đề theo bất kỳ cách nào phù hợp với tình huống và yêu cầu của bạn.
 
-Here are the topics we’ll cover in this chapter:
+Các chủ đề chúng ta sẽ đề cập trong chương này:
 
-* How to create threads to run multiple pieces of code at the same time
-* *Message-passing* concurrency, where channels send messages between threads
-* *Shared-state* concurrency, where multiple threads have access to some piece
-  of data
-* The `Sync` and `Send` traits, which extend Rust’s concurrency guarantees to
-  user-defined types as well as types provided by the standard library
+* Cách tạo các luồng để chạy nhiều đoạn mã cùng một lúc
+* Đồng thời dựa trên *truyền thông điệp* (message-passing concurrency), nơi các channel gửi thông điệp giữa các luồng
+* Đồng thời dựa trên *trạng thái chia sẻ* (shared-state concurrency), nơi nhiều luồng có quyền truy cập vào một mảnh dữ liệu
+* Các trait `Sync` và `Send`, mở rộng đảm bảo đồng thời của Rust cho các kiểu do người dùng định nghĩa cũng như các kiểu do thư viện chuẩn cung cấp
